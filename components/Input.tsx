@@ -9,7 +9,7 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 
 export const Input: React.FC<InputProps> = ({ label, id, unit, ...props }) => {
   return (
-    <div className="bg-white dark:bg-slate-600 p-3 rounded-lg shadow-md border border-slate-200 dark:border-slate-500 space-y-3">
+    <div className="h-full bg-white dark:bg-slate-600 p-3 rounded-lg shadow-md border border-slate-200 dark:border-slate-500 space-y-3">
       <label htmlFor={id} className="block text-base font-medium text-slate-700 dark:text-slate-300">
         {label}
       </label>
