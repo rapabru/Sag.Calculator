@@ -92,6 +92,9 @@ const App: React.FC = () => {
      if (isNaN(massVal) || massVal < 0) {
         errorMessages.push(t('results.error.massNegative'));
     }
+    if (isNaN(anchorHeightVal) || anchorHeightVal <= 0) { // Moved anchorHeight validation up
+        errorMessages.push(t('results.error.anchorHeightPositive'));
+    }
     if (isNaN(mainLineWeightVal) || mainLineWeightVal < 0) {
         errorMessages.push(t('results.error.mainLineWeightNegative'));
     }
@@ -100,9 +103,6 @@ const App: React.FC = () => {
     }
     if (isNaN(backupLineWeightVal) || backupLineWeightVal < 0) {
         errorMessages.push(t('results.error.backupLineWeightNegative'));
-    }
-    if (isNaN(anchorHeightVal) || anchorHeightVal <= 0) {
-        errorMessages.push(t('results.error.anchorHeightPositive'));
     }
     if (isNaN(elasticityVal) || elasticityVal < 0) {
         errorMessages.push(t('results.error.elasticityNegative'));
@@ -283,6 +283,17 @@ const App: React.FC = () => {
                 step="0.1"
                 min="0"
               />
+              <Input
+                id="anchorHeight"
+                label={t('input.anchorHeight.label')}
+                unit={t('input.anchorHeight.unit')}
+                value={anchorHeightM}
+                onChange={(e) => setAnchorHeightM(e.target.value)}
+                placeholder={t('input.anchorHeight.placeholder')}
+                type="number"
+                step="0.1"
+                min="0.01"
+              />
 
               <div className="col-span-1 sm:col-span-2 my-3">
                 <hr className="border-slate-300 dark:border-slate-600" />
@@ -322,17 +333,6 @@ const App: React.FC = () => {
                 min="0"
               />
               <Input
-                id="anchorHeight"
-                label={t('input.anchorHeight.label')}
-                unit={t('input.anchorHeight.unit')}
-                value={anchorHeightM}
-                onChange={(e) => setAnchorHeightM(e.target.value)}
-                placeholder={t('input.anchorHeight.placeholder')}
-                type="number"
-                step="0.1"
-                min="0.01"
-              />
-              <Input
                 id="tapeElasticity"
                 label={t('input.elasticity.label')}
                 unit={t('input.elasticity.unit')}
@@ -342,7 +342,6 @@ const App: React.FC = () => {
                 type="number"
                 step="0.5"
                 min="0"
-                className="sm:col-span-2"
               />
             </div>
             <Button onClick={handleSubmit} className="w-full !mt-8">
