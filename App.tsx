@@ -24,7 +24,6 @@ const App: React.FC = () => {
   const [mainLineWeightKgM, setMainLineWeightKgM] = useState<string>("0.065");
   const [backupLineLengthM, setBackupLineLengthM] = useState<string>("0");
   const [backupLineWeightKgM, setBackupLineWeightKgM] = useState<string>("0.055");
-  const [numberOfTapes, setNumberOfTapes] = useState<string>("0"); // New state for tapes
   const [anchorHeightM, setAnchorHeightM] = useState<string>("13");
   const [tapeElasticityPercent, setTapeElasticityPercent] = useState<string>("4");
 
@@ -80,7 +79,6 @@ const App: React.FC = () => {
     const mainLineWeightVal = parseFloat(mainLineWeightKgM);
     const backupLineLengthVal = parseFloat(backupLineLengthM);
     const backupLineWeightVal = parseFloat(backupLineWeightKgM);
-    const tapesVal = parseInt(numberOfTapes, 10); // Parse as integer
     const anchorHeightVal = parseFloat(anchorHeightM);
     const elasticityVal = parseFloat(tapeElasticityPercent);
 
@@ -103,9 +101,6 @@ const App: React.FC = () => {
     if (isNaN(backupLineWeightVal) || backupLineWeightVal < 0) {
         errorMessages.push(t('results.error.backupLineWeightNegative'));
     }
-    if (isNaN(tapesVal) || tapesVal < 0 || !Number.isInteger(parseFloat(numberOfTapes))) { // Check for integer and non-negative
-        errorMessages.push(t('results.error.tapesNegative'));
-    }
     if (isNaN(anchorHeightVal) || anchorHeightVal <= 0) {
         errorMessages.push(t('results.error.anchorHeightPositive'));
     }
@@ -124,12 +119,7 @@ const App: React.FC = () => {
     const mainLineEffectiveMass = (lengthVal > 0 && mainLineWeightVal > 0) ? (mainLineWeightVal * lengthVal) / 2 : 0;
     const backupLineEffectiveMass = (backupLineLengthVal > 0 && backupLineWeightVal > 0) ? (backupLineWeightVal * backupLineLengthVal) / 2 : 0;
     
-    let tapeWeightKg = 0;
-    if (backupLineLengthVal > 0 && tapesVal > 0) {
-        tapeWeightKg = tapesVal * 0.001; // Each tape is 1g = 0.001kg
-    }
-    
-    const totalEffectiveMassKg = massVal + mainLineEffectiveMass + backupLineEffectiveMass + tapeWeightKg;
+    const totalEffectiveMassKg = massVal + mainLineEffectiveMass + backupLineEffectiveMass;
 
     if (lengthVal === 0 && totalEffectiveMassKg > 0) {
         setSagResult(t('results.error.lengthZeroWithMass'));
@@ -332,16 +322,6 @@ const App: React.FC = () => {
                 min="0"
               />
               <Input
-                id="numberOfTapes"
-                label={t('input.tapes.label')}
-                value={numberOfTapes}
-                onChange={(e) => setNumberOfTapes(e.target.value)}
-                placeholder={t('input.tapes.placeholder')}
-                type="number"
-                step="1"
-                min="0"
-              />
-              <Input
                 id="anchorHeight"
                 label={t('input.anchorHeight.label')}
                 unit={t('input.anchorHeight.unit')}
@@ -362,6 +342,7 @@ const App: React.FC = () => {
                 type="number"
                 step="0.5"
                 min="0"
+                className="sm:col-span-2"
               />
             </div>
             <Button onClick={handleSubmit} className="w-full !mt-8">
