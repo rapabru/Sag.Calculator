@@ -108,6 +108,12 @@ const App: React.FC = () => {
         errorMessages.push(t('results.error.elasticityNegative'));
     }
 
+    // New validation: Backup line length must not be less than main line length, unless backup is 0.
+    if (backupLineLengthVal > 0 && lengthVal > 0 && backupLineLengthVal < lengthVal) {
+        errorMessages.push(t('results.error.backupShorterThanMain', { mainLength: lengthVal, backupLength: backupLineLengthVal }));
+    }
+
+
     if (errorMessages.length > 0) {
         setSagResult(`${t('results.error.genericInputErrorPrefix')} ${errorMessages.join(' ')}`);
         setVisualizerState(VisualizerState.ERROR_INPUT);
