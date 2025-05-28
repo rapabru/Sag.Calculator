@@ -160,10 +160,10 @@ export const SagVisualizer: React.FC<SagVisualizerProps> = ({ sagValue, lineLeng
         const ariaSagValue = sagValue !== undefined ? sagValue.toFixed(3) : 'N/A';
 
         return (
-          <svg viewBox={`0 0 ${svgWidth} ${svgHeight}`} className="w-full h-auto max-w-md aspect-[720/280]" aria-label={t('visualizer.ariaLabel')}>
+          <svg viewBox={`0 0 ${svgWidth} ${svgHeight}`} className="w-full h-auto max-w-xl aspect-[720/280]" aria-label={t('visualizer.ariaLabel')}> {/* max-w-md to max-w-xl */}
             {/* Ground Line */}
             <line x1="0" y1={groundLineY} x2={svgWidth} y2={groundLineY} strokeDasharray="5,5" className="stroke-slate-400 dark:stroke-slate-500" strokeWidth="1"/>
-            <text x={LEFT_PADDING / 2 - 25} y={groundLineY + 15} className="fill-slate-500 dark:fill-slate-400 text-xs" dominantBaseline="middle">{t('visualizer.groundLabel')}</text>
+            <text x={LEFT_PADDING / 2 - 25} y={groundLineY + 15} className="fill-slate-500 dark:fill-slate-400 text-sm" dominantBaseline="middle">{t('visualizer.groundLabel')}</text> {/* text-xs to text-sm */}
 
             {/* Posts */}
             {anchorHeight !== undefined && anchorHeight > 0 && actualVisualPostHeight > 0 && (
@@ -250,9 +250,9 @@ export const SagVisualizer: React.FC<SagVisualizerProps> = ({ sagValue, lineLeng
   };
   
   return (
-    <div className="w-full h-[310px] flex items-center justify-center bg-slate-100 dark:bg-slate-700/50 rounded-md p-2 border border-slate-200 dark:border-slate-600" role="figure" aria-labelledby="visualizer-title">
+    <> {/* Removed fixed height visualizer wrapper, parent in App.tsx now controls height */}
       <span id="visualizer-title" className="sr-only">{t('visualizer.figureLabel')}</span>
       {renderContent()}
-    </div>
+    </>
   );
 };

@@ -21,9 +21,9 @@ const App: React.FC = () => {
   const [tensionKN, setTensionKN] = useState<string>("3");
   const [lineLengthM, setLineLengthM] = useState<string>("70");
   const [personMassKG, setPersonMassKG] = useState<string>("70.0");
-  const [mainLineWeightKgM, setMainLineWeightKgM] = useState<string>("0.065");
+  const [mainLineWeightInput, setMainLineWeightInput] = useState<string>("65"); // Now in g/m
   const [backupLineLengthM, setBackupLineLengthM] = useState<string>("0");
-  const [backupLineWeightKgM, setBackupLineWeightKgM] = useState<string>("0.055");
+  const [backupLineWeightInput, setBackupLineWeightInput] = useState<string>("55"); // Now in g/m
   const [anchorHeightM, setAnchorHeightM] = useState<string>("13");
   const [tapeElasticityPercent, setTapeElasticityPercent] = useState<string>("4");
 
@@ -43,7 +43,7 @@ const App: React.FC = () => {
     const L_metros = lineLengthMeters;
 
     if (effectiveMassKg < 0) {
-       return t('results.error.massNegative');
+       return t('results.error.massNegative'); // Though effective mass includes line, this is generic
     }
      if (tensionKiloNewtons < 0) {
       return t('results.error.tensionNegative');
@@ -76,9 +76,9 @@ const App: React.FC = () => {
     const tensionVal = parseFloat(tensionKN);
     const lengthVal = parseFloat(lineLengthM);
     const massVal = parseFloat(personMassKG);
-    const mainLineWeightVal = parseFloat(mainLineWeightKgM);
+    const mainLineWeightGramsPerMeter = parseFloat(mainLineWeightInput); // Input is g/m
     const backupLineLengthVal = parseFloat(backupLineLengthM);
-    const backupLineWeightVal = parseFloat(backupLineWeightKgM);
+    const backupLineWeightGramsPerMeter = parseFloat(backupLineWeightInput); // Input is g/m
     const anchorHeightVal = parseFloat(anchorHeightM);
     const elasticityVal = parseFloat(tapeElasticityPercent);
 
@@ -92,16 +92,16 @@ const App: React.FC = () => {
      if (isNaN(massVal) || massVal < 0) {
         errorMessages.push(t('results.error.massNegative'));
     }
-    if (isNaN(anchorHeightVal) || anchorHeightVal <= 0) { // Moved anchorHeight validation up
+    if (isNaN(anchorHeightVal) || anchorHeightVal <= 0) {
         errorMessages.push(t('results.error.anchorHeightPositive'));
     }
-    if (isNaN(mainLineWeightVal) || mainLineWeightVal < 0) {
+    if (isNaN(mainLineWeightGramsPerMeter) || mainLineWeightGramsPerMeter < 0) {
         errorMessages.push(t('results.error.mainLineWeightNegative'));
     }
     if (isNaN(backupLineLengthVal) || backupLineLengthVal < 0) {
         errorMessages.push(t('results.error.backupLineLengthNegative'));
     }
-    if (isNaN(backupLineWeightVal) || backupLineWeightVal < 0) {
+    if (isNaN(backupLineWeightGramsPerMeter) || backupLineWeightGramsPerMeter < 0) {
         errorMessages.push(t('results.error.backupLineWeightNegative'));
     }
     if (isNaN(elasticityVal) || elasticityVal < 0) {
@@ -116,8 +116,12 @@ const App: React.FC = () => {
         return;
     }
 
-    const mainLineEffectiveMass = (lengthVal > 0 && mainLineWeightVal > 0) ? (mainLineWeightVal * lengthVal) / 2 : 0;
-    const backupLineEffectiveMass = (backupLineLengthVal > 0 && backupLineWeightVal > 0) ? (backupLineWeightVal * backupLineLengthVal) / 2 : 0;
+    // Convert g/m to kg/m for calculation
+    const mainLineWeightKgM = mainLineWeightGramsPerMeter / 1000;
+    const backupLineWeightKgM = backupLineWeightGramsPerMeter / 1000;
+
+    const mainLineEffectiveMass = (lengthVal > 0 && mainLineWeightKgM > 0) ? (mainLineWeightKgM * lengthVal) / 2 : 0;
+    const backupLineEffectiveMass = (backupLineLengthVal > 0 && backupLineWeightKgM > 0) ? (backupLineWeightKgM * backupLineLengthVal) / 2 : 0;
     
     const totalEffectiveMassKg = massVal + mainLineEffectiveMass + backupLineEffectiveMass;
 
@@ -303,11 +307,11 @@ const App: React.FC = () => {
                 id="mainLineWeight"
                 label={t('input.mainLineWeight.label')}
                 unit={t('input.mainLineWeight.unit')}
-                value={mainLineWeightKgM}
-                onChange={(e) => setMainLineWeightKgM(e.target.value)}
+                value={mainLineWeightInput}
+                onChange={(e) => setMainLineWeightInput(e.target.value)}
                 placeholder={t('input.mainLineWeight.placeholder')}
                 type="number"
-                step="0.001"
+                step="1" // Updated step for g/m
                 min="0"
               />
               <Input
@@ -325,11 +329,11 @@ const App: React.FC = () => {
                 id="backupLineWeight"
                 label={t('input.backupLineWeight.label')}
                 unit={t('input.backupLineWeight.unit')}
-                value={backupLineWeightKgM}
-                onChange={(e) => setBackupLineWeightKgM(e.target.value)}
+                value={backupLineWeightInput}
+                onChange={(e) => setBackupLineWeightInput(e.target.value)}
                 placeholder={t('input.backupLineWeight.placeholder')}
                 type="number"
-                step="0.001"
+                step="1" // Updated step for g/m
                 min="0"
               />
               <Input
@@ -355,12 +359,14 @@ const App: React.FC = () => {
             <div className="w-full min-h-[150px] flex items-center justify-center">
               {getResultDisplay()}
             </div>
-            <SagVisualizer
-              sagValue={visualizerInput?.sag}
-              lineLength={visualizerInput?.lineLength}
-              anchorHeight={visualizerInput?.anchorHeight}
-              state={visualizerState}
-            />
+            <div className="w-full h-[450px] flex items-center justify-center bg-slate-100 dark:bg-slate-700/50 rounded-md p-2 border border-slate-200 dark:border-slate-600" role="figure" aria-labelledby="visualizer-title">
+              <SagVisualizer
+                sagValue={visualizerInput?.sag}
+                lineLength={visualizerInput?.lineLength}
+                anchorHeight={visualizerInput?.anchorHeight}
+                state={visualizerState}
+              />
+            </div>
           </div>
         </div>
         <footer className="mt-10 text-center text-base text-slate-500 dark:text-slate-400">
