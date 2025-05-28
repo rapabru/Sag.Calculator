@@ -1,0 +1,6 @@
+{
+  "name": "Slackline SAG Calculator",
+  "description": "A web application that calculates slackline SAG (Static Sag) based on line tension, length, and person's mass. This app replicates the functionality of a Python script in an interactive web interface, providing visual feedback on the calculated sag.",
+  "requestFramePermissions": [],
+  "prompt": ""
+}
