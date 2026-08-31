@@ -21,6 +21,9 @@ import type { FallResult, RigInput } from './types';
  *   2. Caída libre. La persona cae hasta que el leash se estira. Recorre su
  *      propia altura sobre la cinta más el largo del leash:
  *        h_ff = leashLength + harnessHeight
+ *      `leashLength` es el largo ÚTIL, del anillo al arnés y con los nudos ya
+ *      hechos. La cuerda entera es bastante más larga (3–4 m en highline), pero
+ *      lo que gobierna la caída es la distancia que efectivamente queda.
  *
  *   3. Frenado. Para una fuerza F que el leash aplica sobre la cinta, la
  *      profundidad de la persona es

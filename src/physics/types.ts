@@ -26,7 +26,7 @@ export interface RigInput {
   /** Límite de elongación admisible que el usuario declara (%). */
   elongationLimitPct: number;
 
-  /** Largo del leash (m). */
+  /** Largo ÚTIL del leash (m): del anillo al arnés, con los nudos ya hechos. */
   leashLength: number;
   /** Elongación del leash en %, medida a `leashRefForceN`. */
   leashElongationPct: number;

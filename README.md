@@ -92,8 +92,18 @@ el rango donde de verdad ocurre una caída (2–7 kN):
 | Dyneema / amsteel | 1,5 % | 6 kN | 400 kN |
 
 La recta resultante queda más rígida que la cuerda real a carga baja, que es la
-dirección conservadora para la fuerza pico. El largo por defecto es **1,5 m**; como
-referencia, en highline se usan 3–4 m (12 pies nudo a nudo).
+dirección conservadora para la fuerza pico.
+
+El campo pide el **largo útil**: del anillo al arnés y con los nudos ya hechos. La
+cuerda entera mide bastante más (3–4 m en highline, 12 pies nudo a nudo) pero los
+nudos se la comen, y lo que gobierna la caída es la distancia que efectivamente
+queda: **1,5 m** por defecto. La distinción importa — entre 1,2 m y 2,2 m de largo
+útil, la altura libre al suelo en un midline de 70 m pasa de +1,21 m a −0,25 m.
+
+Detalle que sale del modelo: si el leash está doblado (dos hebras), la diferencia en
+el resultado es de 8 cm de profundidad y 0,03 kN de fuerza pico. Es despreciable
+porque **la cinta absorbe el 97 % del frenado**: se hunde 6,35 m mientras el leash
+estira 22 cm.
 
 Un resultado del modelo que vale la pena mirar: **la cinta absorbe mucha más energía
 que el leash**. En un vano de 70 m la cinta se estira más de un metro mientras el
