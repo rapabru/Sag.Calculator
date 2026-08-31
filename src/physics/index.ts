@@ -43,8 +43,7 @@ export const DEFAULT_INPUT: RigInput = {
   backupWeightGm: 55,
   webbingElongationPct: 4,
   elongationLimitPct: 8,
-  // Los leashes reales rondan los 12 pies nudo a nudo, no 2 m.
-  leashLength: 3.6,
+  leashLength: 1.5,
   leashElongationPct: 30,
   leashRefForceN: 6000,
 };

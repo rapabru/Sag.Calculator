@@ -106,7 +106,7 @@
   "field.personPos.centerBtn": "中央へ",
   "field.backupLength.auto": "ウェビングより 20 % 長い（自動）",
   "field.backupLength.relink": "自動",
-  "field.leashLength.hint": "実際のリーシュは約 3.6 m",
+  "field.leashLength.hint": "参考：ハイラインでは 3〜4 m",
   "chart.personClamped": "人物は縮尺外（小さすぎて描けません）",
   "res.fallClearance.sub": "足から地面まで",
   "res.leashStretch": "リーシュの伸び",

@@ -106,7 +106,7 @@
   "field.personPos.centerBtn": "mittig",
   "field.backupLength.auto": "20 % länger als das Band (automatisch)",
   "field.backupLength.relink": "auto",
-  "field.leashLength.hint": "echte Leashes messen rund 3,6 m",
+  "field.leashLength.hint": "Referenz: beim Highlinen sind 3–4 m üblich",
   "chart.personClamped": "Person nicht maßstäblich (zu klein zum Zeichnen)",
   "res.fallClearance.sub": "von den Füßen bis zum Boden",
   "res.leashStretch": "Leash gedehnt",

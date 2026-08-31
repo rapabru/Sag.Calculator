@@ -106,7 +106,7 @@
   "field.personPos.centerBtn": "centrer",
   "field.backupLength.auto": "20 % de plus que la sangle (automatique)",
   "field.backupLength.relink": "auto",
-  "field.leashLength.hint": "les longes réelles font environ 3,6 m",
+  "field.leashLength.hint": "référence : en highline on utilise 3–4 m",
   "chart.personClamped": "personne hors échelle (trop petite à dessiner)",
   "res.fallClearance.sub": "des pieds jusqu'au sol",
   "res.leashStretch": "Allongement de la longe",

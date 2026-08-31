@@ -106,7 +106,7 @@
   "field.personPos.centerBtn": "centrar",
   "field.backupLength.auto": "20 % mais que a fita (automático)",
   "field.backupLength.relink": "auto",
-  "field.leashLength.hint": "os leashes reais têm cerca de 3,6 m",
+  "field.leashLength.hint": "referência: em highline usam-se 3–4 m",
   "chart.personClamped": "pessoa fora de escala (pequena demais para desenhar)",
   "res.fallClearance.sub": "dos pés até o chão",
   "res.leashStretch": "Leash esticou",

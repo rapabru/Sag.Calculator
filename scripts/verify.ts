@@ -55,7 +55,7 @@ console.log('\n=== 3. El efecto que se pidio: corta+floja vs larga+tensa ===');
   check('la larga es mas plana que la corta', long.sagRatioPct < trick.sagRatioPct / 3, `${f(long.sagRatioPct, 1)} vs ${f(trick.sagRatioPct, 1)}`);
 }
 
-console.log('\n=== 4. Caida con leash (80 kg, leash 3.6 m, 70 m @ 3.5 kN) ===');
+console.log('\n=== 4. Caida con leash (80 kg, leash 1.5 m, 70 m @ 3.5 kN) ===');
 {
   const r = calculate(rig());
   const fl = r.fall;

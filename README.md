@@ -92,8 +92,8 @@ el rango donde de verdad ocurre una caída (2–7 kN):
 | Dyneema / amsteel | 1,5 % | 6 kN | 400 kN |
 
 La recta resultante queda más rígida que la cuerda real a carga baja, que es la
-dirección conservadora para la fuerza pico. El largo por defecto pasó a **3,6 m**,
-que es lo que se usa de verdad (12 pies nudo a nudo).
+dirección conservadora para la fuerza pico. El largo por defecto es **1,5 m**; como
+referencia, en highline se usan 3–4 m (12 pies nudo a nudo).
 
 Un resultado del modelo que vale la pena mirar: **la cinta absorbe mucha más energía
 que el leash**. En un vano de 70 m la cinta se estira más de un metro mientras el
