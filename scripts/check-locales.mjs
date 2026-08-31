@@ -17,11 +17,16 @@ for (const file of files) {
   const extra = Object.keys(data).filter((k) => !ref.includes(k));
   const empty = ref.filter((k) => k in data && String(data[k]).trim() === '');
   const mismatched = ref.filter((k) => holders(base[k]) !== holders(data[k]));
+  // En el deporte se dice SAG en todos los idiomas: las etiquetas de resultado
+  // no deben usar la palabra local.
+  const OLD_SAG = /flecha|flèche|durchhang|垂度|たわみ|провис|الترخّي|झोल/i;
+  const sagWord = ref.filter((k) => (k.startsWith('res.') || k === 'app.subtitle') && OLD_SAG.test(String(data[k] ?? '')));
   const problems = [
     missing.length && `faltan ${missing.length}: ${missing.slice(0, 4).join(', ')}`,
     extra.length && `sobran ${extra.length}: ${extra.slice(0, 4).join(', ')}`,
     empty.length && `vacías ${empty.length}`,
     mismatched.length && `placeholders: ${mismatched.slice(0, 4).join(', ')}`,
+    sagWord.length && `dice la palabra local en vez de SAG: ${sagWord.join(', ')}`,
   ].filter(Boolean);
   if (problems.length) bad++;
   console.log(`${problems.length ? 'FALLA' : 'OK   '} ${file.padEnd(12)} ${Object.keys(data).length} claves ${problems.join(' | ')}`);

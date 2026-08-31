@@ -232,6 +232,26 @@ body {
 .field-value input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 .field-value input[type='number'] { -moz-appearance: textfield; }
 
+.field-hint {
+  font-size: 10.5px;
+  color: var(--text-faint);
+  margin-top: 1px;
+}
+
+.mini-btn {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--text-dim);
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 3px 7px;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.mini-btn:hover { color: var(--webbing); border-color: var(--webbing); }
+
 .field-unit {
   color: var(--text-faint);
   font-size: 11px;
@@ -571,3 +591,83 @@ footer.credits a { color: var(--text-dim); text-decoration: none; border-bottom:
 footer.credits a:hover { color: var(--webbing); border-color: var(--webbing); }
 
 [dir='rtl'] .field-value input { text-align: left; }
+
+
+/* ---------- exportar ---------- */
+
+.export-wrap { position: relative; }
+
+.export-pop {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  z-index: 20;
+  min-width: 268px;
+  padding: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 9px;
+  box-shadow: var(--shadow);
+}
+
+.export-seg { display: flex; gap: 6px; margin-bottom: 10px; }
+.export-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.export-note {
+  margin: 9px 0 0;
+  font-size: 10.5px;
+  color: var(--text-faint);
+  line-height: 1.45;
+}
+
+/* ---------- impresión / guardar como PDF ----------
+   El navegador ofrece «Guardar como PDF» en su propio diálogo, tanto en
+   escritorio como en el compartir de iOS y Android. Alcanza con dejar la página
+   presentable: no hace falta cargar una librería de PDF. */
+
+@media print {
+  @page { margin: 12mm; }
+
+  :root {
+    --bg: #fff;
+    --surface: #fff;
+    --surface-2: #fff;
+    --surface-3: #eee;
+    --border: #ccc;
+    --border-strong: #999;
+    --text: #000;
+    --text-dim: #333;
+    --text-faint: #666;
+    --ground: #ddd;
+  }
+
+  body { background: #fff; }
+  .app { max-width: none; padding: 0; }
+
+  .no-print,
+  .topbar-tools,
+  .chart-toolbar,
+  details.notes,
+  input[type='range'] { display: none !important; }
+
+  /* Una sola columna: los parámetros como lista compacta debajo del gráfico. */
+  .layout { display: block; }
+  .panel {
+    box-shadow: none;
+    border-color: #ccc;
+    break-inside: avoid;
+    margin-bottom: 8px;
+  }
+  .tiles { border: 1px solid #ccc; }
+  .tile { break-inside: avoid; }
+  .field { margin-bottom: 4px; }
+  .field-value input {
+    border: none;
+    background: none;
+    padding: 0;
+    font-weight: 700;
+  }
+
+  /* En modo compacto sólo van el gráfico y los resultados. */
+  body.print-compact .panel-params { display: none !important; }
+  body.print-compact .banner.info { display: none !important; }
+}

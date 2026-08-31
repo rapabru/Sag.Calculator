@@ -1,4 +1,4 @@
-import { G, LEASH_REF_TENSION_N } from './constants';
+import { G, WAIST_RATIO } from './constants';
 import { prepareRig, type SolvedRig } from './staticSolver';
 import type { FallResult, RigInput } from './types';
 
@@ -15,6 +15,8 @@ import type { FallResult, RigInput } from './types';
  *      anillo del leash está sobre la cinta, a la profundidad S₁. El leash
  *      está flojo.
  *        z₀ = S₁ − harnessHeight
+ *      La altura del arnés no se pide: sale de la estatura, porque la cintura
+ *      está a ~0,58 de la altura de una persona.
  *
  *   2. Caída libre. La persona cae hasta que el leash se estira. Recorre su
  *      propia altura sobre la cinta más el largo del leash:
@@ -30,14 +32,26 @@ import type { FallResult, RigInput } from './types';
  *        m·g·(h_ff + z(F*) − z(0)) = U(F*),   U(F) = ∫₀^F F′ dz
  *      Raíz única: el lado izquierdo crece ~linealmente con F y U ~cuadrática.
  *
- *   5. Profundidad final de la persona bajo la línea de anclajes:
+ *   5. Profundidad final del ARNÉS bajo la línea de anclajes:
  *        z_max = S₁ + leashLength + (z(F*) − z(0))
+ *      Y lo que toca el suelo no es el arnés sino los pies, que cuelgan otros
+ *      0,58 × estatura por debajo:
+ *        punto_más_bajo_del_cuerpo = z_max + 0,58 · estatura
  *
  * SUPUESTOS (deliberadamente conservadores, es una cuenta de seguridad):
  * modelo cuasi-estático de energía. Ignora amortiguación, histéresis de la
  * cinta, deslizamiento del anillo, absorción del cuerpo y elasticidad de los
  * anclajes; y toma el rebote de la cinta como si no ayudara a frenar. Las
  * fuerzas pico reales suelen quedar 10–30 % por debajo.
+ *
+ * El leash se modela como resorte lineal. La cuerda real no lo es: es blanda a
+ * carga baja y se endurece al cargarla. Por eso su rigidez se calibra en el
+ * rango donde ocurre la caída (`leashRefForceN`, típicamente 6 kN) y no en el
+ * punto de ensayo de la norma, que usa 80 kg. La recta resultante queda más
+ * rígida que la cuerda real a carga baja, o sea del lado conservador.
+ *
+ * Contraste externo: Chocoslack mide 250–750 kgf (2,5–7,4 kN) en un leash de
+ * 2 m, y este modelo cae dentro de ese rango.
  */
 
 const GRID = 400;
@@ -46,14 +60,20 @@ export function solveFall(input: RigInput, rig: SolvedRig = prepareRig(input)): 
   const m = Math.max(input.personMassKg, 0.1);
   const W = m * G;
   const leashLength = Math.max(input.leashLength, 0);
-  const leashEA = LEASH_REF_TENSION_N / (Math.max(input.leashElongationPct, 0.05) / 100);
+  const leashEA = Math.max(input.leashRefForceN, 1) / (Math.max(input.leashElongationPct, 0.05) / 100);
+
+  // La cintura marca las dos distancias del cuerpo, y son la misma: lo que el
+  // arnés sobresale de la cinta estando parado, y lo que el cuerpo cuelga por
+  // debajo del arnés estando colgado.
+  const harnessHeight = WAIST_RATIO * Math.max(input.personHeight, 0.5);
+  const feetBelowHarness = harnessHeight;
 
   const standing = rig.stateFor(W);
   const S1 = standing.sagAtLoad;
-  const z0 = S1 - input.harnessHeight;
+  const z0 = S1 - harnessHeight;
 
   /** Caída libre hasta que el leash toma carga. */
-  const freeFall = leashLength + input.harnessHeight;
+  const freeFall = leashLength + harnessHeight;
 
   const leashStretch = (F: number) => (F * leashLength) / leashEA;
   const depthFor = (F: number) => rig.sagAtLoadFor(F) + leashLength + leashStretch(F);
@@ -99,6 +119,7 @@ export function solveFall(input: RigInput, rig: SolvedRig = prepareRig(input)): 
   const extension = leashStretch(peakForceN);
   const descentAfterEngage = dynamicSag + leashLength + extension - zAtRest;
   const personLowestDepth = S1 + leashLength + descentAfterEngage;
+  const lowestBodyPoint = personLowestDepth + feetBelowHarness;
 
   return {
     peakForceN,
@@ -109,7 +130,12 @@ export function solveFall(input: RigInput, rig: SolvedRig = prepareRig(input)): 
     extraSag: dynamicSag - S1,
     personLowestDepth,
     fallGroundClearance: input.anchorHeight - personLowestDepth,
-    hitsGround: personLowestDepth >= input.anchorHeight,
+    harnessHeight,
+    feetBelowHarness,
+    lowestBodyPoint,
+    bodyGroundClearance: input.anchorHeight - lowestBodyPoint,
+    // Lo que llega al suelo son los pies, no el punto del arnés.
+    hitsGround: lowestBodyPoint >= input.anchorHeight,
     totalDrop: personLowestDepth - z0,
     freeFallDistance: freeFall,
     fallFactor: leashLength > 0 ? freeFall / leashLength : 0,

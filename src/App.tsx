@@ -4,6 +4,7 @@ import {
   DISCIPLINE_PRESETS,
   G,
   LEASH_PRESETS,
+  WAIST_RATIO,
   WEBBING_PRESETS,
   calculate,
   type RigInput,
@@ -15,9 +16,12 @@ import { FallResults, StaticResults } from './components/ResultsPanel';
 import { PhysicsNotes } from './components/PhysicsNotes';
 import { LanguageSelector } from './components/LanguageSelector';
 import { ThemeToggle } from './components/ThemeToggle';
+import { ExportPanel } from './components/ExportPanel';
 import { IconAlert, IconInfo, IconPlay } from './components/Icons';
 
 const ANIMATION_MS = 1700;
+/** Por debajo de esto el resultado no cambió de verdad: no vale reanimar. */
+const REPLAY_THRESHOLD_M = 0.01;
 
 const App: React.FC = () => {
   const { t } = useTranslation();
@@ -25,18 +29,27 @@ const App: React.FC = () => {
   const [exaggeration, setExaggeration] = useState(1);
   const [showFall, setShowFall] = useState(true);
   const [animDepth, setAnimDepth] = useState<number | null>(null);
+  /** El backup sigue al vano (20 % más) hasta que se lo edita a mano. */
+  const [backupAuto, setBackupAuto] = useState(true);
+
   const rafRef = useRef<number | null>(null);
   const timerRef = useRef<number | null>(null);
+  const lastPlayedRef = useRef<number | null>(null);
+  const chartBoxRef = useRef<HTMLDivElement>(null);
 
   const set = useCallback(
     <K extends keyof RigInput>(key: K) =>
       (value: RigInput[K]) =>
-        setInput((prev) => ({ ...prev, [key]: value })),
-    [],
+        setInput((prev) => {
+          const next = { ...prev, [key]: value };
+          if (key === 'span' && backupAuto) next.backupLength = Number(((value as number) * 1.2).toFixed(1));
+          return next;
+        }),
+    [backupAuto],
   );
 
   // Recálculo en vivo: el solver completo tarda menos de 1 ms, así que no hace
-  // falta ningún botón "calcular" ni debounce.
+  // falta ningún botón «calcular» ni debounce.
   const result = useMemo(() => calculate(input), [input]);
 
   const stopAnimation = useCallback(() => {
@@ -55,6 +68,7 @@ const App: React.FC = () => {
     if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
     if (timerRef.current !== null) clearTimeout(timerRef.current);
     setShowFall(true);
+    lastPlayedRef.current = result.fall.personLowestDepth;
     const start = performance.now();
     const step = (now: number) => {
       const p = Math.min((now - start) / ANIMATION_MS, 1);
@@ -65,11 +79,46 @@ const App: React.FC = () => {
       if (p < 1) rafRef.current = requestAnimationFrame(step);
       else {
         rafRef.current = null;
-        timerRef.current = window.setTimeout(() => setAnimDepth(null), 700);
+        timerRef.current = window.setTimeout(() => setAnimDepth(null), 900);
       }
     };
     rafRef.current = requestAnimationFrame(step);
-  }, [result.fall.trajectory]);
+  }, [result.fall]);
+
+  /**
+   * Se llama al SOLTAR un control, no durante el arrastre. Y sólo reanima si el
+   * resultado cambió de verdad, para que ajustar un decimal no dispare la
+   * animación entera.
+   */
+  const playIfChanged = useCallback(() => {
+    if (!showFall) return;
+    const depth = result.fall.personLowestDepth;
+    if (lastPlayedRef.current !== null && Math.abs(depth - lastPlayedRef.current) < REPLAY_THRESHOLD_M) return;
+    playFall();
+  }, [showFall, result.fall.personLowestDepth, playFall]);
+
+  const applyPreset = useCallback(
+    (p: (typeof DISCIPLINE_PRESETS)[number]) => {
+      setInput((prev) => ({
+        ...prev,
+        span: p.span,
+        pretensionN: p.pretensionKN * 1000,
+        anchorHeight: p.anchorHeight,
+        backupLength: backupAuto ? Number((p.span * 1.2).toFixed(1)) : prev.backupLength,
+      }));
+      lastPlayedRef.current = null;
+    },
+    [backupAuto],
+  );
+
+  // La animación de un preset tiene que correr con el resultado YA recalculado.
+  const pendingPresetRef = useRef(false);
+  useEffect(() => {
+    if (pendingPresetRef.current) {
+      pendingPresetRef.current = false;
+      playIfChanged();
+    }
+  }, [playIfChanged]);
 
   const activePreset = DISCIPLINE_PRESETS.find(
     (p) =>
@@ -78,6 +127,8 @@ const App: React.FC = () => {
       p.anchorHeight === input.anchorHeight,
   );
 
+  const harnessHeight = WAIST_RATIO * input.personHeight;
+
   const banners = useMemo(() => {
     const list: Array<{ tone: 'danger' | 'warn' | 'info'; text: string }> = [];
     const f = result.fall;
@@ -85,7 +136,7 @@ const App: React.FC = () => {
     if (result.warnings.includes('fallGroundImpact'))
       list.push({
         tone: 'danger',
-        text: t('banner.fallImpact', { depth: Math.abs(f.fallGroundClearance).toFixed(2) }),
+        text: t('banner.fallImpact', { depth: Math.abs(f.bodyGroundClearance).toFixed(2) }),
       });
     if (result.warnings.includes('leashNotRelevant'))
       list.push({ tone: 'info', text: t('banner.leashNotRelevant') });
@@ -126,7 +177,7 @@ const App: React.FC = () => {
 
       <div className="layout">
         {/* ---------------- parámetros ---------------- */}
-        <div>
+        <div className="panel-params">
           <section className="panel">
             <div className="panel-head">
               <h2>{t('presets.label')}</h2>
@@ -138,14 +189,10 @@ const App: React.FC = () => {
                     key={p.id}
                     className="chip"
                     aria-pressed={activePreset?.id === p.id}
-                    onClick={() =>
-                      setInput((prev) => ({
-                        ...prev,
-                        span: p.span,
-                        pretensionN: p.pretensionKN * 1000,
-                        anchorHeight: p.anchorHeight,
-                      }))
-                    }
+                    onClick={() => {
+                      applyPreset(p);
+                      pendingPresetRef.current = true;
+                    }}
                   >
                     {t(`presets.${p.id}`)}
                   </button>
@@ -161,29 +208,47 @@ const App: React.FC = () => {
             <div className="panel-body">
               <ParamSlider
                 label={t('field.span')} symbol="L" unit="m"
-                value={input.span} min={3} max={500} step={1} decimals={0}
-                onChange={set('span')}
+                value={input.span} min={3} max={500} step={1} decimals={1}
+                onChange={set('span')} onCommit={playIfChanged}
               />
               <ParamSlider
                 label={t('field.pretension')} symbol="T₀" unit="kN"
                 value={input.pretensionN / 1000} min={0.2} max={25} step={0.1} decimals={2}
-                onChange={(v) => set('pretensionN')(v * 1000)}
+                onChange={(v) => set('pretensionN')(v * 1000)} onCommit={playIfChanged}
               />
               <ParamSlider
                 label={t('field.mass')} symbol="m" unit="kg"
-                value={input.personMassKg} min={20} max={150} step={1} decimals={0}
-                onChange={set('personMassKg')}
+                value={input.personMassKg} min={20} max={150} step={1} decimals={1}
+                onChange={set('personMassKg')} onCommit={playIfChanged}
+              />
+              <ParamSlider
+                label={t('field.personHeight')} symbol="h" unit="m"
+                value={input.personHeight} min={1.2} max={2.2} step={0.01} decimals={2}
+                hint={t('field.personHeight.hint', { harness: harnessHeight.toFixed(2) })}
+                onChange={set('personHeight')} onCommit={playIfChanged}
               />
               <ParamSlider
                 label={t('field.anchorHeight')} symbol="Hₐ" unit="m"
-                value={input.anchorHeight} min={0.5} max={300} step={0.5} decimals={1}
-                onChange={set('anchorHeight')}
+                value={input.anchorHeight} min={0.5} max={300} step={0.5} decimals={2}
+                onChange={set('anchorHeight')} onCommit={playIfChanged}
               />
               <ParamSlider
                 label={t('field.personPos')} symbol="a/L" unit="%"
-                value={input.personPos * 100} min={2} max={98} step={1} decimals={0}
+                value={input.personPos * 100} min={2} max={98} step={1} decimals={1}
                 hint={Math.abs(input.personPos - 0.5) < 0.005 ? t('field.personPos.center') : undefined}
-                onChange={(v) => set('personPos')(v / 100)}
+                action={
+                  <button
+                    type="button"
+                    className="mini-btn no-print"
+                    onClick={() => {
+                      set('personPos')(0.5);
+                      playIfChanged();
+                    }}
+                  >
+                    {t('field.personPos.centerBtn')}
+                  </button>
+                }
+                onChange={(v) => set('personPos')(v / 100)} onCommit={playIfChanged}
               />
             </div>
           </section>
@@ -208,12 +273,14 @@ const App: React.FC = () => {
                   }
                   onChange={(e) => {
                     const w = WEBBING_PRESETS.find((p) => p.id === e.target.value);
-                    if (w)
+                    if (w) {
                       setInput((prev) => ({
                         ...prev,
                         mainWeightGm: w.gramsPerMeter,
                         webbingElongationPct: w.elongationPct,
                       }));
+                      playIfChanged();
+                    }
                   }}
                 >
                   <option value="">—</option>
@@ -226,30 +293,54 @@ const App: React.FC = () => {
               </div>
               <ParamSlider
                 label={t('field.mainWeight')} unit="g/m"
-                value={input.mainWeightGm} min={0} max={200} step={1} decimals={0}
-                onChange={set('mainWeightGm')}
+                value={input.mainWeightGm} min={0} max={200} step={1} decimals={1}
+                onChange={set('mainWeightGm')} onCommit={playIfChanged}
               />
               <ParamSlider
                 label={t('field.elongation')} unit="%"
-                value={input.webbingElongationPct} min={0.5} max={20} step={0.1} decimals={1}
+                value={input.webbingElongationPct} min={0.5} max={20} step={0.1} decimals={2}
                 hint={t('field.elongation.hint')}
-                onChange={set('webbingElongationPct')}
+                onChange={set('webbingElongationPct')} onCommit={playIfChanged}
               />
               <ParamSlider
                 label={t('field.elongationLimit')} unit="%"
-                value={input.elongationLimitPct} min={1} max={30} step={0.5} decimals={1}
-                onChange={set('elongationLimitPct')}
+                value={input.elongationLimitPct} min={1} max={30} step={0.5} decimals={2}
+                onChange={set('elongationLimitPct')} onCommit={playIfChanged}
               />
               <ParamSlider
                 label={t('field.backupLength')} unit="m"
-                value={input.backupLength} min={0} max={520} step={1} decimals={0}
-                hint={input.backupLength === 0 ? t('field.backup.none') : undefined}
-                onChange={set('backupLength')}
+                value={input.backupLength} min={0} max={620} step={1} decimals={1}
+                hint={
+                  backupAuto
+                    ? t('field.backupLength.auto')
+                    : input.backupLength === 0
+                      ? t('field.backup.none')
+                      : undefined
+                }
+                action={
+                  !backupAuto ? (
+                    <button
+                      type="button"
+                      className="mini-btn no-print"
+                      onClick={() => {
+                        setBackupAuto(true);
+                        set('backupLength')(Number((input.span * 1.2).toFixed(1)));
+                      }}
+                    >
+                      {t('field.backupLength.relink')}
+                    </button>
+                  ) : undefined
+                }
+                onChange={(v) => {
+                  setBackupAuto(false);
+                  set('backupLength')(v);
+                }}
+                onCommit={playIfChanged}
               />
               <ParamSlider
                 label={t('field.backupWeight')} unit="g/m"
-                value={input.backupWeightGm} min={0} max={200} step={1} decimals={0}
-                onChange={set('backupWeightGm')}
+                value={input.backupWeightGm} min={0} max={200} step={1} decimals={1}
+                onChange={set('backupWeightGm')} onCommit={playIfChanged}
               />
             </div>
           </section>
@@ -266,36 +357,47 @@ const App: React.FC = () => {
                 <select
                   style={{ width: '100%' }}
                   value={
-                    LEASH_PRESETS.find((l) => l.elongationPct === input.leashElongationPct)?.id ?? ''
+                    LEASH_PRESETS.find(
+                      (l) =>
+                        l.elongationPct === input.leashElongationPct &&
+                        l.refForceN === input.leashRefForceN,
+                    )?.id ?? ''
                   }
                   onChange={(e) => {
                     const l = LEASH_PRESETS.find((p) => p.id === e.target.value);
-                    if (l) set('leashElongationPct')(l.elongationPct);
+                    if (l) {
+                      setInput((prev) => ({
+                        ...prev,
+                        leashElongationPct: l.elongationPct,
+                        leashRefForceN: l.refForceN,
+                      }));
+                      playIfChanged();
+                    }
                   }}
                 >
                   <option value="">—</option>
                   {LEASH_PRESETS.map((l) => (
                     <option key={l.id} value={l.id}>
-                      {l.label} · {l.elongationPct} %
+                      {l.label} · {l.elongationPct} % @ {(l.refForceN / 1000).toFixed(0)} kN
                     </option>
                   ))}
                 </select>
               </div>
               <ParamSlider
                 label={t('field.leashLength')} unit="m"
-                value={input.leashLength} min={0.5} max={8} step={0.1} decimals={1}
-                onChange={set('leashLength')}
+                value={input.leashLength} min={0.5} max={8} step={0.1} decimals={2}
+                hint={t('field.leashLength.hint')}
+                onChange={set('leashLength')} onCommit={playIfChanged}
               />
               <ParamSlider
                 label={t('field.leashElongation')} unit="%"
-                value={input.leashElongationPct} min={0.5} max={40} step={0.5} decimals={1}
-                hint={t('field.leashElongation.hint')}
-                onChange={set('leashElongationPct')}
-              />
-              <ParamSlider
-                label={t('field.harnessHeight')} unit="m"
-                value={input.harnessHeight} min={0} max={1.6} step={0.05} decimals={2}
-                onChange={set('harnessHeight')}
+                value={input.leashElongationPct} min={0.5} max={40} step={0.5} decimals={2}
+                hint={t('field.leashElongation.hint', {
+                  ref: (input.leashRefForceN / 1000).toFixed(0),
+                  cm: (result.fall.leashExtension * 100).toFixed(0),
+                  len: input.leashLength.toFixed(1),
+                })}
+                onChange={set('leashElongationPct')} onCommit={playIfChanged}
               />
             </div>
           </section>
@@ -313,7 +415,7 @@ const App: React.FC = () => {
               </span>
             </div>
             <div className="panel-body tight">
-              <div className="chart-wrap">
+              <div className="chart-wrap" ref={chartBoxRef}>
                 <SagChart
                   input={input}
                   result={result}
@@ -321,6 +423,7 @@ const App: React.FC = () => {
                   showFall={showFall}
                   animDepth={animDepth}
                   onPersonPosChange={set('personPos')}
+                  onPersonPosCommit={playIfChanged}
                 />
                 <div className="chart-toolbar">
                   <label className="toggle-row">
@@ -338,6 +441,12 @@ const App: React.FC = () => {
                     <IconPlay />
                     {animDepth === null ? t('chart.animate') : t('chart.replay')}
                   </button>
+                  <ExportPanel
+                    getChart={() => chartBoxRef.current?.querySelector('svg') ?? null}
+                    input={input}
+                    result={result}
+                    onDetailedChange={(d) => document.body.classList.toggle('print-compact', !d)}
+                  />
                   <div className="zoom">
                     <span style={{ whiteSpace: 'nowrap' }}>{t('chart.zoom')}</span>
                     <input

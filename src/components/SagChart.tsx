@@ -2,6 +2,7 @@ import React, { useCallback, useMemo, useRef } from 'react';
 import type { CalcResult, RigInput } from '../physics';
 import { useTranslation } from '../i18n/useTranslation';
 import { PAD_B, PAD_L, PAD_R, PAD_T, VB_W, computeChartGeometry } from './chartGeometry';
+import { PersonFigure } from './PersonFigure';
 
 /**
  * GRÁFICO A ESCALA REAL
@@ -10,7 +11,7 @@ import { PAD_B, PAD_L, PAD_R, PAD_T, VB_W, computeChartGeometry } from './chartG
  * se usa para el eje horizontal y para el vertical. Esa es toda la garantía de
  * que el dibujo sea 1:1: no hay dos escalas que puedan desincronizarse.
  *
- * Con eso, el efecto que se ve es el real: una línea corta y floja se dibuja
+ * Con eso, el efecto que se ve es el real: una cinta corta y floja se dibuja
  * como una V profunda y una larga y tensa como una casi-recta, porque lo que
  * cambia entre ellas es la proporción sag/largo.
  *
@@ -18,15 +19,18 @@ import { PAD_B, PAD_L, PAD_R, PAD_T, VB_W, computeChartGeometry } from './chartG
  * cerca un sag muy chico. Mientras vale 1, el dibujo no miente.
  */
 
+/** Debajo de esto la figura no se leería, así que se deja de respetar la escala. */
+const MIN_PERSON_PX = 14;
 
 interface Props {
   input: RigInput;
   result: CalcResult;
   exaggeration: number;
   showFall: boolean;
-  /** Profundidad animada de la persona (m); null = mostrar el punto más bajo. */
+  /** Profundidad animada del arnés (m); null = mostrar el punto más bajo. */
   animDepth: number | null;
   onPersonPosChange: (pos: number) => void;
+  onPersonPosCommit?: () => void;
 }
 
 type Pt = [number, number];
@@ -65,42 +69,6 @@ function fmt(v: number): string {
   return v.toFixed(0);
 }
 
-/** Monigote de tamaño fijo en píxeles, para que no se deforme con la escala. */
-const Person: React.FC<{ x: number; y: number; hanging?: boolean; color: string }> = ({
-  x,
-  y,
-  hanging,
-  color,
-}) => {
-  const h = 15;
-  return (
-    <g
-      stroke={color}
-      fill="none"
-      strokeWidth={1.7}
-      strokeLinecap="round"
-      transform={`translate(${x} ${y})`}
-      aria-hidden="true"
-    >
-      {hanging ? (
-        <>
-          <circle cx={0} cy={2} r={2.6} fill={color} stroke="none" />
-          <path d={`M0 ${4.6}V${h - 3}`} />
-          <path d={`M0 ${h - 3}l-3.4 5M0 ${h - 3}l3.4 5`} />
-          <path d={`M0 7l-4.5 -3M0 7l4.5 -3`} />
-        </>
-      ) : (
-        <>
-          <circle cx={0} cy={-h + 2.6} r={2.6} fill={color} stroke="none" />
-          <path d={`M0 ${-h + 5.2}V${-5}`} />
-          <path d={`M0 -5l-3.2 5M0 -5l3.2 5`} />
-          <path d={`M0 ${-h + 8}l-4.8 3.2M0 ${-h + 8}l4.8 3.2`} />
-        </>
-      )}
-    </g>
-  );
-};
-
 export const SagChart: React.FC<Props> = ({
   input,
   result,
@@ -108,6 +76,7 @@ export const SagChart: React.FC<Props> = ({
   showFall,
   animDepth,
   onPersonPosChange,
+  onPersonPosCommit,
 }) => {
   const { t } = useTranslation();
   const svgRef = useRef<SVGSVGElement>(null);
@@ -117,17 +86,31 @@ export const SagChart: React.FC<Props> = ({
   const fall = result.fall;
   const span = Math.max(input.span, 0.01);
   const personX = Math.min(Math.max(input.personPos, 0), 1) * span;
+  const animating = animDepth !== null;
 
   const geom = useMemo(
     () =>
       computeChartGeometry({
         span,
         staticDepth: stat.loaded.sagMax,
-        fallDepth: showFall ? fall.personLowestDepth : 0,
+        // Se encuadra hasta los PIES, no hasta el arnés, o el cuerpo queda cortado.
+        fallDepth: showFall ? fall.lowestBodyPoint : 0,
         groundDepth: input.anchorHeight,
+        // La persona parada sobresale de la cinta: en una línea poco hundida su
+        // cabeza queda por encima de la línea de anclajes.
+        topExtent: Math.max(0, input.personHeight * 1.05 - stat.loaded.sagAtLoad),
         exaggeration,
       }),
-    [span, stat.loaded.sagMax, showFall, fall.personLowestDepth, input.anchorHeight, exaggeration],
+    [
+      span,
+      stat.loaded.sagMax,
+      stat.loaded.sagAtLoad,
+      showFall,
+      fall.lowestBodyPoint,
+      input.anchorHeight,
+      input.personHeight,
+      exaggeration,
+    ],
   );
 
   const { px, py } = geom;
@@ -139,12 +122,9 @@ export const SagChart: React.FC<Props> = ({
     const peak = fall.peakLineState.profile;
     let mix = 1;
     if (animDepth !== null) {
-      const engage = stat.loaded.sagAtLoad - input.harnessHeight + fall.freeFallDistance;
-      if (animDepth <= engage) mix = 0;
-      else {
-        const denom = Math.max(fall.personLowestDepth - engage, 1e-6);
-        mix = Math.min(Math.max((animDepth - engage) / denom, 0), 1);
-      }
+      const engage = stat.loaded.sagAtLoad - fall.harnessHeight + fall.freeFallDistance;
+      const denom = Math.max(fall.personLowestDepth - engage, 1e-6);
+      mix = animDepth <= engage ? 0 : Math.min(Math.max((animDepth - engage) / denom, 0), 1);
     }
     const pts: Pt[] = [];
     for (let i = 0; i <= 140; i++) {
@@ -153,8 +133,8 @@ export const SagChart: React.FC<Props> = ({
       const b = sampleProfile(peak, x);
       pts.push([x, a + mix * (b - a)]);
     }
-    return { pts, mix };
-  }, [showFall, stat.empty.profile, stat.loaded.sagAtLoad, fall, animDepth, input.harnessHeight, span]);
+    return pts;
+  }, [showFall, stat.empty.profile, stat.loaded.sagAtLoad, fall, animDepth, span]);
 
   const toPath = useCallback(
     (pts: Pt[]) => pts.map(([x, d], i) => `${i ? 'L' : 'M'}${px(x).toFixed(2)} ${py(d).toFixed(2)}`).join(' '),
@@ -175,8 +155,16 @@ export const SagChart: React.FC<Props> = ({
     [geom, span, onPersonPosChange],
   );
 
-  const personDepth = animDepth ?? fall.personLowestDepth;
-  const lineSagNow = fallProfile ? sampleProfile(fallProfile.pts, personX) : 0;
+  // Vertical con exageración, horizontal sin ella: la figura se estira igual que
+  // el resto del eje pero no se ensancha.
+  const trueH = input.personHeight * geom.scale * exaggeration;
+  const personH = Math.max(trueH, MIN_PERSON_PX);
+  const personW = Math.max(input.personHeight * geom.scale, MIN_PERSON_PX);
+  const personClamped = trueH < MIN_PERSON_PX;
+
+  const harnessDepth = animDepth ?? fall.personLowestDepth;
+  const feetDepth = harnessDepth + fall.feetBelowHarness;
+  const lineSagNow = fallProfile ? sampleProfile(fallProfile, personX) : 0;
   const groundY = py(geom.groundDepth);
   const bottomY = py(geom.bottom);
   const postBottom = geom.showGround ? groundY : bottomY;
@@ -194,7 +182,10 @@ export const SagChart: React.FC<Props> = ({
         handlePointer(e);
       }}
       onPointerMove={(e) => dragging.current && handlePointer(e)}
-      onPointerUp={() => (dragging.current = false)}
+      onPointerUp={() => {
+        if (dragging.current) onPersonPosCommit?.();
+        dragging.current = false;
+      }}
       onPointerCancel={() => (dragging.current = false)}
     >
       {/* ---------- suelo ---------- */}
@@ -249,7 +240,7 @@ export const SagChart: React.FC<Props> = ({
         SAG (m)
       </text>
 
-      {/* ---------- eje horizontal: distancia ---------- */}
+      {/* ---------- eje horizontal ---------- */}
       {Array.from({ length: Math.floor(span / xStep) + 1 }, (_, i) => i * xStep).map((x) => (
         <g key={`x${x}`}>
           <line x1={px(x)} y1={bottomY} x2={px(x)} y2={bottomY + 5} stroke="var(--border-strong)" strokeWidth={0.9} />
@@ -270,7 +261,7 @@ export const SagChart: React.FC<Props> = ({
         </g>
       ))}
 
-      {/* ---------- cinta vacía ---------- */}
+      {/* ---------- cinta sin carga ---------- */}
       <path
         d={toPath(stat.empty.profile)}
         fill="none"
@@ -283,34 +274,45 @@ export const SagChart: React.FC<Props> = ({
       {/* ---------- caída ---------- */}
       {showFall && fallProfile && (
         <g>
-          <path d={toPath(fallProfile.pts)} fill="none" stroke="var(--danger)" strokeWidth={1.8} strokeDasharray="7 4" opacity={0.9} />
+          <path d={toPath(fallProfile)} fill="none" stroke="var(--danger)" strokeWidth={1.8} strokeDasharray="7 4" opacity={0.9} />
+          {/* El leash va del anillo sobre la cinta hasta el ARNÉS, o sea la cintura. */}
           <line
             x1={px(personX)}
             y1={py(lineSagNow)}
             x2={px(personX)}
-            y2={py(personDepth)}
+            y2={py(harnessDepth)}
             stroke="var(--danger)"
             strokeWidth={1.3}
           />
-          <Person x={px(personX)} y={py(personDepth)} hanging color="var(--danger)" />
+          <circle cx={px(personX)} cy={py(harnessDepth)} r={2.2} fill="var(--danger)" />
+          <PersonFigure
+            x={px(personX)}
+            y={py(harnessDepth)}
+            height={personH}
+            girth={personW}
+            pose="hanging"
+            color="var(--danger)"
+          />
+
+          {/* Punto máximo de la caída: hasta dónde llegan los pies. */}
           <line
             x1={px(0)}
-            y1={py(personDepth)}
+            y1={py(feetDepth)}
             x2={px(span)}
-            y2={py(personDepth)}
+            y2={py(feetDepth)}
             stroke="var(--danger)"
-            strokeWidth={0.8}
-            strokeDasharray="2 5"
-            opacity={0.55}
+            strokeWidth={animating ? 0.7 : 1.1}
+            strokeDasharray="3 4"
+            opacity={animating ? 0.4 : 0.85}
           />
           <text
-            x={px(personX) + 10}
-            y={py(personDepth) + 4}
+            x={px(personX) + personW * 0.34 + 6}
+            y={py(feetDepth) + 3.6}
             fontSize={11}
             fill="var(--danger)"
-            fontWeight={600}
+            fontWeight={650}
           >
-            −{personDepth.toFixed(2)} m
+            −{feetDepth.toFixed(2)} m
           </text>
         </g>
       )}
@@ -318,7 +320,6 @@ export const SagChart: React.FC<Props> = ({
       {/* ---------- cinta con la persona parada ---------- */}
       <path d={toPath(stat.loaded.profile)} fill="none" stroke="var(--webbing)" strokeWidth={2.6} strokeLinejoin="round" />
 
-      {/* cota del sag */}
       <line
         x1={px(personX)}
         y1={py(0)}
@@ -330,46 +331,58 @@ export const SagChart: React.FC<Props> = ({
         opacity={0.8}
       />
       <text
-        x={px(personX) - 8}
+        x={px(personX) - personW * 0.34 - 5}
         y={(py(0) + py(stat.loaded.sagAtLoad)) / 2 + 3.5}
         fontSize={11}
         textAnchor="end"
         fill="var(--webbing)"
         fontWeight={600}
       >
-        S {stat.loaded.sagAtLoad.toFixed(2)} m
+        SAG {stat.loaded.sagAtLoad.toFixed(2)} m
       </text>
 
-      {/* altura libre bajo la cinta */}
       {geom.showGround && stat.groundClearance > 0 && (
         <>
           <line
-            x1={px(span * 0.78)}
+            x1={px(span * 0.8)}
             y1={py(stat.loaded.sagMax)}
-            x2={px(span * 0.78)}
+            x2={px(span * 0.8)}
             y2={groundY}
             stroke="var(--safe)"
             strokeWidth={0.9}
             strokeDasharray="2 3"
           />
           <text
-            x={px(span * 0.78) + 7}
+            x={px(span * 0.8) + 7}
             y={(py(stat.loaded.sagMax) + groundY) / 2 + 3.5}
             fontSize={10.5}
             fill="var(--safe)"
             fontWeight={600}
           >
-            C {stat.groundClearance.toFixed(2)} m
+            {stat.groundClearance.toFixed(2)} m
           </text>
         </>
       )}
 
-      <Person x={px(personX)} y={py(stat.loaded.sagAtLoad)} color="var(--text)" />
+      <PersonFigure
+        x={px(personX)}
+        y={py(stat.loaded.sagAtLoad)}
+        height={personH}
+        girth={personW}
+        pose="standing"
+        color="var(--text)"
+        faded={animating}
+      />
 
-      {/* ángulo en el anclaje */}
       <text x={px(0) + 9} y={py(0) - 7} fontSize={10.5} fill="var(--accent)" fontWeight={600}>
         θ {((stat.loaded.thetaAnchor * 180) / Math.PI).toFixed(1)}°
       </text>
+
+      {personClamped && (
+        <text x={VB_W - PAD_R} y={PAD_T - 10} fontSize={9} textAnchor="end" fill="var(--text-faint)">
+          {t('chart.personClamped')}
+        </text>
+      )}
     </svg>
   );
 };

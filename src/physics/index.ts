@@ -32,16 +32,19 @@ export function calculate(input: RigInput): CalcResult {
 /** Valores por defecto: el escenario "midline" del proyecto original. */
 export const DEFAULT_INPUT: RigInput = {
   span: 70,
-  pretensionN: 3000,
+  pretensionN: 3500,
   personMassKg: 80,
+  personHeight: 1.67,
   personPos: 0.5,
   anchorHeight: 13,
   mainWeightGm: 65,
-  backupLength: 0,
+  // El backup va con holgura, más largo que la principal: 20 % por defecto.
+  backupLength: 70 * 1.2,
   backupWeightGm: 55,
   webbingElongationPct: 4,
   elongationLimitPct: 8,
-  leashLength: 2,
-  leashElongationPct: 3,
-  harnessHeight: 1,
+  // Los leashes reales rondan los 12 pies nudo a nudo, no 2 m.
+  leashLength: 3.6,
+  leashElongationPct: 30,
+  leashRefForceN: 6000,
 };

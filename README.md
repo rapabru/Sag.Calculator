@@ -76,6 +76,44 @@ La longitud de arco tiene forma cerrada (la pendiente es lineal por tramos, así
 cálculo completo tarda menos de 1 ms y se puede recalcular en cada movimiento de un
 slider, sin botón «calcular» ni debounce.
 
+## Segunda tanda — cuerpo, leash y terminología
+
+**El % del leash ahora dice a qué carga está medido.** Antes decía «% a 5 kN» con
+números tomados de otras referencias. Las normas miden a cargas bajísimas: EN 892
+mide la cuerda dinámica **con 80 kg** (≤10 %) y EN 1891 la semiestática **entre 50 y
+150 kg** (≤5 %). Cada preset lleva ahora su propia carga de referencia, calibrada en
+el rango donde de verdad ocurre una caída (2–7 kN):
+
+| leash | elongación | a carga | EA |
+|---|---|---|---|
+| Cuerda dinámica (EN 892, 9,5–10 mm) | 30 % | 6 kN | 20 kN |
+| Leash clásico (dinámica en tubular) | 24 % | 6 kN | 25 kN |
+| Cuerda semiestática (EN 1891) | 8 % | 6 kN | 75 kN |
+| Dyneema / amsteel | 1,5 % | 6 kN | 400 kN |
+
+La recta resultante queda más rígida que la cuerda real a carga baja, que es la
+dirección conservadora para la fuerza pico. El largo por defecto pasó a **3,6 m**,
+que es lo que se usa de verdad (12 pies nudo a nudo).
+
+Un resultado del modelo que vale la pena mirar: **la cinta absorbe mucha más energía
+que el leash**. En un vano de 70 m la cinta se estira más de un metro mientras el
+leash da unos 30 cm, así que el material del leash cambia la fuerza pico bastante
+menos de lo que se suele creer. En cintas cortas la proporción se invierte.
+
+**Ahora se pide la estatura, y de ahí sale el cuerpo.** La cintura está a 0,58 de la
+altura, y ese único número da las dos distancias que hacían falta: cuánto sobresale
+el arnés sobre la cinta estando parado (0,97 m para 1,67 m de estatura, que valida el
+1,0 que antes estaba fijo) y cuánto cuelgan las piernas por debajo del arnés. **La
+altura libre principal se mide hasta los pies**, no hasta el arnés, porque los pies
+son lo que llega al suelo.
+
+**Terminología:** se dice CINTA y se dice SAG, en los diez idiomas. Hay un chequeo
+automático que falla si alguna etiqueta de resultado vuelve a la palabra local.
+
+**Exportar:** JPG, PNG y PDF, en versión compacta o ampliada, y compartir directo en
+el celular. Sin dependencias nuevas: el SVG se rasteriza en un canvas y el PDF sale
+del diálogo de impresión del navegador.
+
 ## Créditos
 
 Desarrollado por [Bruno Rapa](https://github.com/rapabru)

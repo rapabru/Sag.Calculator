@@ -1,4 +1,4 @@
-import { calculate, solveStatic, DEFAULT_INPUT, DISCIPLINE_PRESETS, G } from '../src/physics/index';
+import { calculate, solveStatic, DEFAULT_INPUT, DISCIPLINE_PRESETS, LEASH_PRESETS, WAIST_RATIO, G } from '../src/physics/index';
 import type { RigInput } from '../src/physics/types';
 
 const f = (n: number, d = 2) => n.toFixed(d);
@@ -7,13 +7,18 @@ const fail: string[] = [];
 const check = (name: string, ok: boolean, detail: string) =>
   (ok ? pass : fail).push(`${ok ? 'OK  ' : 'FALLA'} ${name} :: ${detail}`);
 
-const rig = (o: Partial<RigInput> = {}): RigInput => ({ ...DEFAULT_INPUT, ...o });
+// El backup sigue al vano (20 % más) igual que en la app, salvo que el caso lo fije.
+const rig = (o: Partial<RigInput> = {}): RigInput => {
+  const merged = { ...DEFAULT_INPUT, ...o };
+  if (o.span !== undefined && o.backupLength === undefined) merged.backupLength = o.span * 1.2;
+  return merged;
+};
 
 console.log('=== 1. Contraste con la formula vieja (70 m, 3 kN, 80 kg) ===');
 {
   const W = 80 * G, T = 3000, L = 70;
   const old = (W * L) / (2 * Math.sqrt(4 * T * T - W * W));
-  const r = calculate(rig());
+  const r = calculate(rig({ pretensionN: 3000 }));
   console.log(`  formula vieja (T fija 3 kN) : ${f(old, 3)} m`);
   console.log(`  solver nuevo (T sube)       : ${f(r.static.loaded.sagMax, 3)} m`);
   console.log(`  tension final               : ${f(r.static.loaded.H / 1000, 2)} kN (pretension 3.00)`);
@@ -50,7 +55,7 @@ console.log('\n=== 3. El efecto que se pidio: corta+floja vs larga+tensa ===');
   check('la larga es mas plana que la corta', long.sagRatioPct < trick.sagRatioPct / 3, `${f(long.sagRatioPct, 1)} vs ${f(trick.sagRatioPct, 1)}`);
 }
 
-console.log('\n=== 4. Caida con leash (80 kg, leash 2 m, 70 m @ 3 kN) ===');
+console.log('\n=== 4. Caida con leash (80 kg, leash 3.6 m, 70 m @ 3.5 kN) ===');
 {
   const r = calculate(rig());
   const fl = r.fall;
@@ -64,7 +69,7 @@ console.log('\n=== 4. Caida con leash (80 kg, leash 2 m, 70 m @ 3 kN) ===');
   console.log(`  tension pico en el anclaje  : ${f(fl.peakAnchorTensionN / 1000, 2)} kN`);
   console.log(`  elongacion dinamica         : ${f(fl.dynamicStrain * 100, 2)} %`);
   check('fuerza pico en rango real 2-8 kN', fl.peakForceN > 2000 && fl.peakForceN < 8000, `${f(fl.peakForceN / 1000, 2)} kN`);
-  check('cae mas abajo que el sag estatico', fl.personLowestDepth > r.static.loaded.sagMax, `${f(fl.personLowestDepth, 2)} > ${f(r.static.loaded.sagMax, 2)}`);
+  check('cae mas abajo que el sag estatico', fl.lowestBodyPoint > r.static.loaded.sagMax, `${f(fl.lowestBodyPoint, 2)} > ${f(r.static.loaded.sagMax, 2)}`);
   check('la cinta se hunde mas en la caida', fl.extraSag > 0, `+${f(fl.extraSag, 2)} m`);
   check('trayectoria monotona', fl.trajectory.every((v, i, arr) => i === 0 || v >= arr[i - 1] - 1e-6), 'ok');
   check('trayectoria termina en el punto mas bajo', Math.abs(fl.trajectory[fl.trajectory.length - 1] - fl.personLowestDepth) < 1e-6, 'ok');
@@ -83,7 +88,7 @@ console.log('\n=== 5. Sin "SAG infinito": pretension muy baja ===');
 console.log('\n=== 6. Impacto contra el suelo (anclajes bajos) ===');
 {
   const r = calculate(rig({ anchorHeight: 6 }));
-  console.log(`  anclajes 6 m -> persona llega a ${f(r.fall.personLowestDepth, 2)} m, libre ${f(r.fall.fallGroundClearance, 2)} m`);
+  console.log(`  anclajes 6 m -> pies llegan a ${f(r.fall.lowestBodyPoint, 2)} m, libre ${f(r.fall.bodyGroundClearance, 2)} m`);
   check('detecta el impacto', r.fall.hitsGround && r.warnings.includes('fallGroundImpact'), r.warnings.join(','));
 }
 
@@ -186,9 +191,10 @@ console.log('\n=== 13. Barrido de edge cases (todo el rango de los sliders) ==='
   const masses = [20, 80, 150];
   const elongs = [0.5, 4, 20];
   const leashes = [0.5, 2, 8];
-  const leashElongs = [0.5, 10, 40];
+  const leashElongs = [1.5, 8, 30];
+  const heights = [1.4, 1.67, 2.05];
   const positions = [0.02, 0.5, 0.98];
-  const heights = [0.5, 13, 300];
+  const anchors = [0.5, 13, 300];
   for (const span of spans)
     for (const pretensionN of tensions)
       for (const personMassKg of masses)
@@ -196,9 +202,10 @@ console.log('\n=== 13. Barrido de edge cases (todo el rango de los sliders) ==='
           for (const leashLength of leashes)
             for (const leashElongationPct of leashElongs)
               for (const personPos of positions)
-                for (const anchorHeight of heights) {
+                for (const anchorHeight of anchors)
+                  for (const personHeight of heights) {
                   n++;
-                  const r = calculate(rig({ span, pretensionN, personMassKg, webbingElongationPct, leashLength, leashElongationPct, personPos, anchorHeight }));
+                  const r = calculate(rig({ span, pretensionN, personMassKg, webbingElongationPct, leashLength, leashElongationPct, personPos, anchorHeight, personHeight }));
                   const nums: Array<[string, number]> = [
                     ['sag', r.static.loaded.sagMax],
                     ['H', r.static.loaded.H],
@@ -208,12 +215,16 @@ console.log('\n=== 13. Barrido de edge cases (todo el rango de los sliders) ==='
                     ['lowest', r.fall.personLowestDepth],
                     ['drop', r.fall.totalDrop],
                     ['dynSag', r.fall.dynamicSag],
+                    ['pies', r.fall.lowestBodyPoint],
                   ];
                   for (const [label, v] of nums) {
                     if (!Number.isFinite(v)) { bad++; problems.push(`${label} no finito en span=${span} T=${pretensionN} m=${personMassKg} e=${webbingElongationPct}`); break; }
                   }
                   if (r.static.loaded.sagMax < 0 || r.fall.peakForceN < 0 || r.fall.totalDrop < 0) {
                     bad++; problems.push(`negativo en span=${span} T=${pretensionN} m=${personMassKg}`);
+                  }
+                  if (r.fall.lowestBodyPoint <= r.fall.personLowestDepth) {
+                    bad++; problems.push(`los pies no quedan bajo el arnes en h=${personHeight}`);
                   }
                   if (r.fall.personLowestDepth < r.static.loaded.sagAtLoad - 1e-6) {
                     bad++; problems.push(`caida por encima del sag estatico en span=${span} T=${pretensionN} m=${personMassKg} pos=${personPos}`);
@@ -227,7 +238,7 @@ console.log('\n=== 13. Barrido de edge cases (todo el rango de los sliders) ==='
                   if (r.fall.dynamicSag < r.static.loaded.sagAtLoad - 1e-6) {
                     bad++; problems.push(`sag dinamico menor al estatico en span=${span} T=${pretensionN} m=${personMassKg}`);
                   }
-                  const g = computeChartGeometry({ span, staticDepth: r.static.loaded.sagMax, fallDepth: r.fall.personLowestDepth, groundDepth: anchorHeight, exaggeration: 1 });
+                  const g = computeChartGeometry({ span, staticDepth: r.static.loaded.sagMax, fallDepth: r.fall.lowestBodyPoint, groundDepth: anchorHeight, topExtent: personHeight, exaggeration: 1 });
                   if (!Number.isFinite(g.scale) || g.scale <= 0 || !Number.isFinite(g.vbH) || g.vbH <= 0) {
                     bad++; problems.push(`geometria invalida en span=${span} h=${anchorHeight}`);
                   }
@@ -271,6 +282,58 @@ console.log('\n=== 15. Regla del leash: por debajo de leash+2 m no alarma ===');
   check2('en longline de 8 m si avisa del impacto',
     alto.warnings.includes('fallGroundImpact') && !alto.warnings.includes('leashNotRelevant'), alto.warnings.join(','));
   check2('en highline no hay ningun aviso', holgado.warnings.length === 0, holgado.warnings.join(',') || '(limpio)');
+}
+
+console.log('\n=== 16. Leash: los presets son coherentes con las normas ===');
+{
+  for (const l of LEASH_PRESETS) {
+    const EA = l.refForceN / (l.elongationPct / 100);
+    const at80 = (785 / EA) * 100;
+    const at150 = (1471 / EA) * 100;
+    console.log(`  ${l.id.padEnd(11)} EA ${f(EA / 1000, 0).padStart(4)} kN | ${f(at80, 1)} % con 80 kg | ${f(at150, 1)} % con 150 kg`);
+    if (l.id === 'dynamic')
+      check2('la dinamica respeta EN 892 (<=10 % con 80 kg)', at80 <= 10, `${f(at80, 1)} %`);
+    if (l.id === 'semistatic')
+      check2('la semiestatica respeta EN 1891 (<=5 % con 150 kg)', at150 <= 5, `${f(at150, 1)} %`);
+  }
+}
+
+console.log('\n=== 17. Fuerza pico contra la medicion real (Chocoslack: 2.5-7.4 kN en leash de 2 m) ===');
+{
+  for (const l of LEASH_PRESETS) {
+    const r = calculate(rig({ leashLength: 2, leashElongationPct: l.elongationPct, leashRefForceN: l.refForceN }));
+    const kN = r.fall.peakForceN / 1000;
+    console.log(`  ${l.id.padEnd(11)} Fpico ${f(kN, 2)} kN (${f(r.fall.peakForceBodyWeights, 1)}x peso)`);
+    check2(`${l.id} dentro del rango medido`, kN >= 2.5 && kN <= 7.4, `${f(kN, 2)} kN`);
+  }
+}
+
+console.log('\n=== 18. El cuerpo de la persona ===');
+{
+  const r = calculate(rig());
+  console.log(`  estatura ${DEFAULT_INPUT.personHeight} m -> arnes ${f(r.fall.harnessHeight, 2)} m sobre la cinta, pies ${f(r.fall.feetBelowHarness, 2)} m bajo el arnes`);
+  console.log(`  arnes llega a ${f(r.fall.personLowestDepth, 2)} m | PIES llegan a ${f(r.fall.lowestBodyPoint, 2)} m`);
+  check2('el arnes sale de la estatura', Math.abs(r.fall.harnessHeight - WAIST_RATIO * DEFAULT_INPUT.personHeight) < 1e-9, `${f(r.fall.harnessHeight, 3)} m`);
+  check2('los pies quedan por debajo del arnes', r.fall.lowestBodyPoint > r.fall.personLowestDepth, `${f(r.fall.lowestBodyPoint, 2)} > ${f(r.fall.personLowestDepth, 2)}`);
+  check2('la altura libre a los pies es menor que al arnes', r.fall.bodyGroundClearance < r.fall.fallGroundClearance, `${f(r.fall.bodyGroundClearance, 2)} < ${f(r.fall.fallGroundClearance, 2)}`);
+  const bajo = calculate(rig({ personHeight: 1.5 }));
+  const alto = calculate(rig({ personHeight: 2.0 }));
+  check2('mas alto llega mas abajo', alto.fall.lowestBodyPoint > bajo.fall.lowestBodyPoint,
+    `${f(alto.fall.lowestBodyPoint, 2)} > ${f(bajo.fall.lowestBodyPoint, 2)}`);
+}
+
+console.log('\n=== 19. El encuadre llega a los pies y a la cabeza ===');
+{
+  const r = calculate(rig());
+  const g = computeChartGeometry({
+    span: DEFAULT_INPUT.span, staticDepth: r.static.loaded.sagMax,
+    fallDepth: r.fall.lowestBodyPoint, groundDepth: DEFAULT_INPUT.anchorHeight,
+    topExtent: DEFAULT_INPUT.personHeight, exaggeration: 1,
+  });
+  check2('los pies entran en el cuadro', g.bottom >= r.fall.lowestBodyPoint, `${f(g.bottom, 2)} >= ${f(r.fall.lowestBodyPoint, 2)}`);
+  check2('la cabeza de la persona parada entra', g.py(-DEFAULT_INPUT.personHeight + r.static.loaded.sagAtLoad) >= 0,
+    `y=${f(g.py(-DEFAULT_INPUT.personHeight + r.static.loaded.sagAtLoad), 1)} px`);
+  check2('la escala sigue siendo 1:1', Math.abs((g.py(4) - g.py(3)) - (g.px(4) - g.px(3))) < 1e-9, 'exacta');
 }
 
 console.log('\n' + '='.repeat(60));
