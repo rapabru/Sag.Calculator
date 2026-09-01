@@ -11,33 +11,30 @@ interface Props {
   /** Punto de apoyo en px: los pies si está parada, el arnés si cuelga. */
   x: number;
   y: number;
-  /** Altura de la figura en px, ya con la exageración vertical aplicada. */
-  height: number;
-  /** Referencia horizontal en px, SIN exagerar. */
-  girth: number;
+  /** Tamaño de la figura en px. Nunca lleva la exageración vertical aplicada. */
+  size: number;
   pose: 'standing' | 'hanging';
   color: string;
   faded?: boolean;
 }
 
 /**
- * La figura se dibuja a escala real: con la exageración vertical en ×1 mide
- * exactamente la estatura de la persona en el mismo px/metro que el resto del
- * gráfico, así la altura libre a los pies se ve además de leerse.
+ * Se dibuja a escala real: con la exageración vertical en ×1 mide exactamente la
+ * estatura de la persona en el mismo px/metro que el resto del gráfico.
  *
- * Vertical y horizontal se pasan por separado a propósito. Cuando se exagera el
- * eje vertical, la figura se estira igual que todo lo demás pero no se ensancha:
- * queda alta y flaca, que es justamente la señal de que el eje está estirado.
+ * La exageración vertical NO se le aplica: una persona estirada al doble de su
+ * altura queda grotesca y no aporta nada. Se mantiene proporcionada y quien
+ * exagera el eje ve el aviso en el cartel de escala.
  */
-export const PersonFigure: React.FC<Props> = ({ x, y, height: h, girth: w, pose, color, faded }) => {
+export const PersonFigure: React.FC<Props> = ({ x, y, size: h, pose, color, faded }) => {
   const common = {
     stroke: color,
     fill: 'none',
-    strokeWidth: Math.max(w * 0.028, 1.1),
+    strokeWidth: Math.max(h * 0.028, 1.1),
     strokeLinecap: 'round' as const,
     strokeLinejoin: 'round' as const,
   };
-  const headR = Math.max(w * 0.085, 1.6);
+  const headR = Math.max(h * 0.085, 1.6);
 
   if (pose === 'standing') {
     // Origen en los pies, sobre la cinta. Brazos arriba: es lo que hace
@@ -46,10 +43,10 @@ export const PersonFigure: React.FC<Props> = ({ x, y, height: h, girth: w, pose,
       <g transform={`translate(${x} ${y})`} opacity={faded ? 0.3 : 1} aria-hidden="true">
         <circle cx={0} cy={-0.905 * h} r={headR} fill={color} stroke="none" />
         <path {...common} d={`M0 ${-0.82 * h}V${-WAIST_FRACTION * h}`} />
-        <path {...common} d={`M0 ${-WAIST_FRACTION * h}l${-0.075 * w} ${0.30 * h}L${-0.055 * w} 0`} />
-        <path {...common} d={`M0 ${-WAIST_FRACTION * h}l${0.075 * w} ${0.30 * h}L${0.055 * w} 0`} />
-        <path {...common} d={`M0 ${-0.80 * h}L${-0.20 * w} ${-0.88 * h}L${-0.30 * w} ${-1.01 * h}`} />
-        <path {...common} d={`M0 ${-0.80 * h}L${0.20 * w} ${-0.88 * h}L${0.30 * w} ${-1.01 * h}`} />
+        <path {...common} d={`M0 ${-WAIST_FRACTION * h}l${-0.075 * h} ${0.30 * h}L${-0.055 * h} 0`} />
+        <path {...common} d={`M0 ${-WAIST_FRACTION * h}l${0.075 * h} ${0.30 * h}L${0.055 * h} 0`} />
+        <path {...common} d={`M0 ${-0.80 * h}L${-0.20 * h} ${-0.88 * h}L${-0.30 * h} ${-1.01 * h}`} />
+        <path {...common} d={`M0 ${-0.80 * h}L${0.20 * h} ${-0.88 * h}L${0.30 * h} ${-1.01 * h}`} />
       </g>
     );
   }
@@ -60,10 +57,10 @@ export const PersonFigure: React.FC<Props> = ({ x, y, height: h, girth: w, pose,
     <g transform={`translate(${x} ${y})`} opacity={faded ? 0.3 : 1} aria-hidden="true">
       <circle cx={0} cy={-0.345 * h} r={headR} fill={color} stroke="none" />
       <path {...common} d={`M0 ${-0.26 * h}V0`} />
-      <path {...common} d={`M0 ${-0.24 * h}L${-0.16 * w} ${-0.10 * h}L${-0.20 * w} ${0.05 * h}`} />
-      <path {...common} d={`M0 ${-0.24 * h}L${0.16 * w} ${-0.10 * h}L${0.20 * w} ${0.05 * h}`} />
-      <path {...common} d={`M0 0l${-0.07 * w} ${0.30 * h}L${-0.075 * w} ${WAIST_FRACTION * h}`} />
-      <path {...common} d={`M0 0l${0.07 * w} ${0.30 * h}L${0.075 * w} ${WAIST_FRACTION * h}`} />
+      <path {...common} d={`M0 ${-0.24 * h}L${-0.16 * h} ${-0.10 * h}L${-0.20 * h} ${0.05 * h}`} />
+      <path {...common} d={`M0 ${-0.24 * h}L${0.16 * h} ${-0.10 * h}L${0.20 * h} ${0.05 * h}`} />
+      <path {...common} d={`M0 0l${-0.07 * h} ${0.30 * h}L${-0.075 * h} ${WAIST_FRACTION * h}`} />
+      <path {...common} d={`M0 0l${0.07 * h} ${0.30 * h}L${0.075 * h} ${WAIST_FRACTION * h}`} />
     </g>
   );
 };

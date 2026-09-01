@@ -78,37 +78,16 @@ slider, sin botón «calcular» ni debounce.
 
 ## Segunda tanda — cuerpo, leash y terminología
 
-**El % del leash ahora dice a qué carga está medido.** Antes decía «% a 5 kN» con
-números tomados de otras referencias. Las normas miden a cargas bajísimas: EN 892
-mide la cuerda dinámica **con 80 kg** (≤10 %) y EN 1891 la semiestática **entre 50 y
-150 kg** (≤5 %). Cada preset lleva ahora su propia carga de referencia, calibrada en
-el rango donde de verdad ocurre una caída (2–7 kN):
+**El leash se toma como inextensible.** Una cuerda dinámica sí estira —1,5 m a
+2,9 kN dan unos 22 cm— pero toda la absorción relevante la hace la cinta: se hunde
+varios metros contra esos centímetros, o sea el **97 % del recorrido de frenado**.
+Ignorar el estiramiento sube la fuerza pico alrededor de un 3 %, así que el
+resultado queda del lado conservador. El campo pide el **largo útil**: del anillo al
+arnés y con los nudos ya hechos, 1,5 m por defecto (la cuerda entera mide 3–4 m en
+highline, pero los nudos se la comen).
 
-| leash | elongación | a carga | EA |
-|---|---|---|---|
-| Cuerda dinámica (EN 892, 9,5–10 mm) | 30 % | 6 kN | 20 kN |
-| Leash clásico (dinámica en tubular) | 24 % | 6 kN | 25 kN |
-| Cuerda semiestática (EN 1891) | 8 % | 6 kN | 75 kN |
-| Dyneema / amsteel | 1,5 % | 6 kN | 400 kN |
-
-La recta resultante queda más rígida que la cuerda real a carga baja, que es la
-dirección conservadora para la fuerza pico.
-
-El campo pide el **largo útil**: del anillo al arnés y con los nudos ya hechos. La
-cuerda entera mide bastante más (3–4 m en highline, 12 pies nudo a nudo) pero los
-nudos se la comen, y lo que gobierna la caída es la distancia que efectivamente
-queda: **1,5 m** por defecto. La distinción importa — entre 1,2 m y 2,2 m de largo
-útil, la altura libre al suelo en un midline de 70 m pasa de +1,21 m a −0,25 m.
-
-Detalle que sale del modelo: si el leash está doblado (dos hebras), la diferencia en
-el resultado es de 8 cm de profundidad y 0,03 kN de fuerza pico. Es despreciable
-porque **la cinta absorbe el 97 % del frenado**: se hunde 6,35 m mientras el leash
-estira 22 cm.
-
-Un resultado del modelo que vale la pena mirar: **la cinta absorbe mucha más energía
-que el leash**. En un vano de 70 m la cinta se estira más de un metro mientras el
-leash da unos 30 cm, así que el material del leash cambia la fuerza pico bastante
-menos de lo que se suele creer. En cintas cortas la proporción se invierte.
+La distinción importa: entre 1,2 m y 2,2 m de largo útil, la altura libre al suelo en
+un midline de 70 m pasa de +1,21 m a −0,25 m.
 
 **Ahora se pide la estatura, y de ahí sale el cuerpo.** La cintura está a 0,58 de la
 altura, y ese único número da las dos distancias que hacían falta: cuánto sobresale
@@ -120,9 +99,22 @@ son lo que llega al suelo.
 **Terminología:** se dice CINTA y se dice SAG, en los diez idiomas. Hay un chequeo
 automático que falla si alguna etiqueta de resultado vuelve a la palabra local.
 
-**Exportar:** JPG, PNG y PDF, en versión compacta o ampliada, y compartir directo en
-el celular. Sin dependencias nuevas: el SVG se rasteriza en un canvas y el PDF sale
-del diálogo de impresión del navegador.
+**Presets propios:** se puede guardar la configuración completa y la cinta actual con
+un nombre, y volver a ellas con un toque. Viven en `localStorage`; el formato lleva
+`id` y `savedAt` para poder sincronizarlos cuando entre el login con cuenta.
+
+**Guía de bienvenida:** un recorrido de cinco pasos que va señalando el gráfico, los
+escenarios, el panel de caída y la exportación. Aparece la primera vez, se cierra
+tocando afuera, y se vuelve a abrir desde el botón «?» de la barra.
+
+**Exportar:** JPG, PNG y PDF, con o sin los datos completos, con o sin el gráfico, y
+compartir directo en el celular. Sin dependencias nuevas: el SVG se rasteriza en un
+canvas y el PDF sale del diálogo de impresión del navegador.
+
+**El gráfico arranca con el eje vertical exagerado ×1,5**, porque a escala exacta el
+sag suele ser tan chico frente al vano que cuesta leerlo. El cartel dice «no es
+escala real» hasta que lo bajás a ×1. La figura de la persona nunca se estira con la
+exageración: sólo se estiran los ejes.
 
 ## Créditos
 

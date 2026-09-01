@@ -1,4 +1,4 @@
-import { calculate, solveStatic, DEFAULT_INPUT, DISCIPLINE_PRESETS, LEASH_PRESETS, WAIST_RATIO, G } from '../src/physics/index';
+import { calculate, solveStatic, DEFAULT_INPUT, DISCIPLINE_PRESETS, WAIST_RATIO, G } from '../src/physics/index';
 import type { RigInput } from '../src/physics/types';
 
 const f = (n: number, d = 2) => n.toFixed(d);
@@ -191,7 +191,6 @@ console.log('\n=== 13. Barrido de edge cases (todo el rango de los sliders) ==='
   const masses = [20, 80, 150];
   const elongs = [0.5, 4, 20];
   const leashes = [0.5, 2, 8];
-  const leashElongs = [1.5, 8, 30];
   const heights = [1.4, 1.67, 2.05];
   const positions = [0.02, 0.5, 0.98];
   const anchors = [0.5, 13, 300];
@@ -199,13 +198,12 @@ console.log('\n=== 13. Barrido de edge cases (todo el rango de los sliders) ==='
     for (const pretensionN of tensions)
       for (const personMassKg of masses)
         for (const webbingElongationPct of elongs)
-          for (const leashLength of leashes)
-            for (const leashElongationPct of leashElongs)
+            for (const leashLength of leashes)
               for (const personPos of positions)
                 for (const anchorHeight of anchors)
                   for (const personHeight of heights) {
                   n++;
-                  const r = calculate(rig({ span, pretensionN, personMassKg, webbingElongationPct, leashLength, leashElongationPct, personPos, anchorHeight, personHeight }));
+                  const r = calculate(rig({ span, pretensionN, personMassKg, webbingElongationPct, leashLength, personPos, anchorHeight, personHeight }));
                   const nums: Array<[string, number]> = [
                     ['sag', r.static.loaded.sagMax],
                     ['H', r.static.loaded.H],
@@ -284,28 +282,19 @@ console.log('\n=== 15. Regla del leash: por debajo de leash+2 m no alarma ===');
   check2('en highline no hay ningun aviso', holgado.warnings.length === 0, holgado.warnings.join(',') || '(limpio)');
 }
 
-console.log('\n=== 16. Leash: los presets son coherentes con las normas ===');
+console.log('\n=== 16-17. Fuerza pico contra la medicion real (Chocoslack: 2.5-7.4 kN en leash de 2 m) ===');
 {
-  for (const l of LEASH_PRESETS) {
-    const EA = l.refForceN / (l.elongationPct / 100);
-    const at80 = (785 / EA) * 100;
-    const at150 = (1471 / EA) * 100;
-    console.log(`  ${l.id.padEnd(11)} EA ${f(EA / 1000, 0).padStart(4)} kN | ${f(at80, 1)} % con 80 kg | ${f(at150, 1)} % con 150 kg`);
-    if (l.id === 'dynamic')
-      check2('la dinamica respeta EN 892 (<=10 % con 80 kg)', at80 <= 10, `${f(at80, 1)} %`);
-    if (l.id === 'semistatic')
-      check2('la semiestatica respeta EN 1891 (<=5 % con 150 kg)', at150 <= 5, `${f(at150, 1)} %`);
-  }
-}
+  const r = calculate(rig({ leashLength: 2 }));
+  const kN = r.fall.peakForceN / 1000;
+  console.log(`  leash 2 m, 80 kg, 70 m @ 3.5 kN -> Fpico ${f(kN, 2)} kN (${f(r.fall.peakForceBodyWeights, 1)}x peso)`);
+  check2('dentro del rango medido', kN >= 2.5 && kN <= 7.4, `${f(kN, 2)} kN`);
 
-console.log('\n=== 17. Fuerza pico contra la medicion real (Chocoslack: 2.5-7.4 kN en leash de 2 m) ===');
-{
-  for (const l of LEASH_PRESETS) {
-    const r = calculate(rig({ leashLength: 2, leashElongationPct: l.elongationPct, leashRefForceN: l.refForceN }));
-    const kN = r.fall.peakForceN / 1000;
-    console.log(`  ${l.id.padEnd(11)} Fpico ${f(kN, 2)} kN (${f(r.fall.peakForceBodyWeights, 1)}x peso)`);
-    check2(`${l.id} dentro del rango medido`, kN >= 2.5 && kN <= 7.4, `${f(kN, 2)} kN`);
-  }
+  // El leash rigido no puede dar MENOS fuerza que uno elastico: si diera menos,
+  // el modelo estaria del lado optimista, que es el que no queremos.
+  console.log('  (leash inextensible: toda la absorcion la hace la cinta)');
+  const estiraCinta = r.fall.dynamicSag - r.static.loaded.sagAtLoad;
+  console.log(`  la cinta se hunde ${f(estiraCinta, 2)} m de mas durante la caida`);
+  check2('la cinta es la que absorbe', estiraCinta > 1, `${f(estiraCinta, 2)} m`);
 }
 
 console.log('\n=== 18. El cuerpo de la persona ===');

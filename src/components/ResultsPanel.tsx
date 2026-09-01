@@ -107,12 +107,6 @@ export const FallResults: React.FC<{ input: RigInput; result: CalcResult }> = ({
         sub={t('res.freeFall.sub', { ff: f.fallFactor.toFixed(2) })}
       />
       <ResultTile
-        label={t('res.leashStretch')}
-        value={(f.leashExtension * 100).toFixed(0)}
-        unit="cm"
-        sub={t('res.leashStretch.sub', { len: input.leashLength.toFixed(1) })}
-      />
-      <ResultTile
         tone={f.overElongated ? 'danger' : 'plain'}
         label={t('res.strain')}
         value={(f.dynamicStrain * 100).toFixed(2)}

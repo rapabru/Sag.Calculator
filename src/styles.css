@@ -610,7 +610,17 @@ footer.credits a:hover { color: var(--webbing); border-color: var(--webbing); }
   box-shadow: var(--shadow);
 }
 
-.export-seg { display: flex; gap: 6px; margin-bottom: 10px; }
+.export-group { margin-bottom: 10px; }
+.export-label {
+  display: block;
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  font-weight: 650;
+  margin-bottom: 5px;
+}
+.export-seg { display: flex; gap: 6px; }
 .export-actions { display: flex; flex-wrap: wrap; gap: 6px; }
 .export-note {
   margin: 9px 0 0;
@@ -670,4 +680,77 @@ footer.credits a:hover { color: var(--webbing); border-color: var(--webbing); }
   /* En modo compacto sólo van el gráfico y los resultados. */
   body.print-compact .panel-params { display: none !important; }
   body.print-compact .banner.info { display: none !important; }
+}
+
+
+.field-note {
+  margin: 2px 0 0;
+  font-size: 10.5px;
+  line-height: 1.45;
+  color: var(--text-faint);
+}
+
+/* ---------- presets guardados ---------- */
+
+.chip-saved { display: inline-flex; align-items: stretch; }
+.chip-saved .chip { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+
+.chip-x {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-left: none;
+  border-radius: 0 999px 999px 0;
+  color: var(--text-faint);
+  padding: 5px 9px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  line-height: 1.1;
+}
+.chip-x:hover { color: var(--danger); border-color: var(--danger); }
+
+/* ---------- recorrido guiado ---------- */
+
+.guide-root { position: fixed; inset: 0; z-index: 100; }
+
+/* Capa que recibe el toque fuera de la tarjeta para cerrar. */
+.guide-catcher { position: absolute; inset: 0; }
+
+/* El foco: un recuadro con una sombra enorme alrededor que oscurece el resto. */
+.guide-spot {
+  position: absolute;
+  border-radius: 10px;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.68);
+  border: 2px solid var(--webbing);
+  pointer-events: none;
+  transition: top 0.22s ease, left 0.22s ease, width 0.22s ease, height 0.22s ease;
+}
+
+.guide-catcher--dim { background: rgba(0, 0, 0, 0.68); }
+
+.guide-card {
+  position: absolute;
+  width: min(330px, calc(100vw - 24px));
+  padding: 15px 16px 13px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 11px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+.guide-card h3 { margin: 0 0 6px; font-size: 14.5px; color: var(--text); }
+.guide-card p { margin: 0; font-size: 12.5px; line-height: 1.55; color: var(--text-dim); }
+
+.guide-step {
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--webbing);
+  margin-bottom: 5px;
+}
+
+.guide-actions { display: flex; align-items: center; gap: 6px; margin-top: 13px; }
+
+@media print {
+  .guide-root { display: none !important; }
+  body.print-nochart .chart-wrap { display: none !important; }
 }

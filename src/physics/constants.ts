@@ -50,29 +50,3 @@ export const WEBBING_PRESETS: WebbingPreset[] = [
   { id: 'dyneema', label: 'Dyneema / híbrida',    gramsPerMeter: 58, elongationPct: 1.2 },
 ];
 
-export interface LeashPreset {
-  id: string;
-  label: string;
-  /** % de elongación medido a `refForceN`. */
-  elongationPct: number;
-  /** La carga a la que ESE porcentaje está medido (N). Sin este dato el % no
-   *  significa nada: las normas miden a cargas bajísimas y la cuerda no es lineal. */
-  refForceN: number;
-}
-
-/**
- * Calibrados en el rango donde de verdad ocurre una caída de leash (2–7 kN), no
- * en el punto de ensayo de la norma.
- *
- * Contraste contra las normas en sus propios puntos de medición:
- *   · dinámica  EA 20 kN -> 3,9 % con 80 kg   (EN 892 admite hasta 10 %)
- *   · semiestática EA 75 kN -> 2,0 % con 150 kg (EN 1891 admite hasta 5 %)
- * O sea, la recta queda MÁS RÍGIDA que la cuerda real a carga baja, que es la
- * dirección conservadora para la fuerza pico.
- */
-export const LEASH_PRESETS: LeashPreset[] = [
-  { id: 'dynamic',    label: 'Cuerda dinámica (EN 892, 9,5–10 mm)', elongationPct: 30,  refForceN: 6000 },
-  { id: 'classic',    label: 'Leash clásico (dinámica en tubular)', elongationPct: 24,  refForceN: 6000 },
-  { id: 'semistatic', label: 'Cuerda semiestática (EN 1891)',       elongationPct: 8,   refForceN: 6000 },
-  { id: 'dyneema',    label: 'Dyneema / amsteel',                   elongationPct: 1.5, refForceN: 6000 },
-];

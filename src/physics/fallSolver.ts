@@ -47,11 +47,11 @@ import type { FallResult, RigInput } from './types';
  * anclajes; y toma el rebote de la cinta como si no ayudara a frenar. Las
  * fuerzas pico reales suelen quedar 10–30 % por debajo.
  *
- * El leash se modela como resorte lineal. La cuerda real no lo es: es blanda a
- * carga baja y se endurece al cargarla. Por eso su rigidez se calibra en el
- * rango donde ocurre la caída (`leashRefForceN`, típicamente 6 kN) y no en el
- * punto de ensayo de la norma, que usa 80 kg. La recta resultante queda más
- * rígida que la cuerda real a carga baja, o sea del lado conservador.
+ * El leash se toma como INEXTENSIBLE. Una cuerda dinámica de verdad estira —a
+ * 1,5 m y 2,9 kN son unos 22 cm— pero toda la absorción relevante la hace la
+ * cinta: se hunde varios metros contra esos centímetros, o sea el 97 % del
+ * recorrido de frenado. Ignorar el estiramiento del leash sube la fuerza pico
+ * alrededor de un 3 %, así que el resultado queda del lado conservador.
  *
  * Contraste externo: Chocoslack mide 250–750 kgf (2,5–7,4 kN) en un leash de
  * 2 m, y este modelo cae dentro de ese rango.
@@ -63,7 +63,6 @@ export function solveFall(input: RigInput, rig: SolvedRig = prepareRig(input)): 
   const m = Math.max(input.personMassKg, 0.1);
   const W = m * G;
   const leashLength = Math.max(input.leashLength, 0);
-  const leashEA = Math.max(input.leashRefForceN, 1) / (Math.max(input.leashElongationPct, 0.05) / 100);
 
   // La cintura marca las dos distancias del cuerpo, y son la misma: lo que el
   // arnés sobresale de la cinta estando parado, y lo que el cuerpo cuelga por
@@ -78,8 +77,8 @@ export function solveFall(input: RigInput, rig: SolvedRig = prepareRig(input)): 
   /** Caída libre hasta que el leash toma carga. */
   const freeFall = leashLength + harnessHeight;
 
-  const leashStretch = (F: number) => (F * leashLength) / leashEA;
-  const depthFor = (F: number) => rig.sagAtLoadFor(F) + leashLength + leashStretch(F);
+  // El leash se toma como inextensible: toda la absorción la hace la cinta.
+  const depthFor = (F: number) => rig.sagAtLoadFor(F) + leashLength;
 
   const zAtRest = depthFor(0);
 
@@ -119,8 +118,7 @@ export function solveFall(input: RigInput, rig: SolvedRig = prepareRig(input)): 
 
   const peakLineState = rig.stateFor(peakForceN);
   const dynamicSag = peakLineState.sagAtLoad;
-  const extension = leashStretch(peakForceN);
-  const descentAfterEngage = dynamicSag + leashLength + extension - zAtRest;
+  const descentAfterEngage = dynamicSag + leashLength - zAtRest;
   const personLowestDepth = S1 + leashLength + descentAfterEngage;
   const lowestBodyPoint = personLowestDepth + feetBelowHarness;
 
@@ -142,7 +140,6 @@ export function solveFall(input: RigInput, rig: SolvedRig = prepareRig(input)): 
     totalDrop: personLowestDepth - z0,
     freeFallDistance: freeFall,
     fallFactor: leashLength > 0 ? freeFall / leashLength : 0,
-    leashExtension: extension,
     dynamicStrain: peakLineState.strain,
     overElongated: peakLineState.strain * 100 > input.elongationLimitPct,
     peakLineState,

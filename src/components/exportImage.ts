@@ -31,6 +31,7 @@ const esc = (s: string) =>
 
 export interface ExportOptions {
   detailed: boolean;
+  includeChart: boolean;
   input: RigInput;
   result: CalcResult;
   t: (key: string, r?: Record<string, string | number>) => string;
@@ -52,8 +53,7 @@ function detailRows(o: ExportOptions): Array<[string, string]> {
     [t('field.anchorHeight'), `${i.anchorHeight} m`],
     [t('field.mainWeight'), `${i.mainWeightGm} g/m`],
     [t('field.elongation'), `${i.webbingElongationPct} % @ 10 kN`],
-    [t('field.leashLength'), `${i.leashLength.toFixed(1)} m`],
-    [t('field.leashElongation'), `${i.leashElongationPct} % @ ${(i.leashRefForceN / 1000).toFixed(0)} kN`],
+    [t('field.leashLength'), `${i.leashLength.toFixed(2)} m`],
     ['—', '—'],
     [t('res.sag'), `${r.static.loaded.sagMax.toFixed(2)} m`],
     [t('res.ratio'), `${r.static.sagRatioPct.toFixed(1)} %`],
@@ -69,11 +69,12 @@ function detailRows(o: ExportOptions): Array<[string, string]> {
   ];
 }
 
-/** Compone el SVG final: cabecera, el gráfico tal cual, y los datos si se piden. */
-export function buildExportSvg(chart: SVGSVGElement, o: ExportOptions): string {
+/** Compone el SVG final: cabecera, el gráfico si se pide, y los datos si se piden. */
+export function buildExportSvg(chart: SVGSVGElement | null, o: ExportOptions): string {
   const colors = palette();
-  const vb = (chart.getAttribute('viewBox') ?? '0 0 1000 400').split(/\s+/).map(Number);
-  const chartH = vb[3];
+  const withChart = o.includeChart && !!chart;
+  const vb = (chart?.getAttribute('viewBox') ?? '0 0 1000 400').split(/\s+/).map(Number);
+  const chartH = withChart ? vb[3] : 0;
 
   const headerH = 54;
   const rows = o.detailed ? detailRows(o) : [];
@@ -84,7 +85,7 @@ export function buildExportSvg(chart: SVGSVGElement, o: ExportOptions): string {
   const footerH = o.detailed ? 46 : 26;
   const H = headerH + chartH + dataH + footerH;
 
-  const inner = resolveVars(chart.innerHTML, colors);
+  const inner = withChart && chart ? resolveVars(chart.innerHTML, colors) : '';
   const date = new Date().toLocaleDateString();
 
   let body = '';
@@ -110,7 +111,7 @@ export function buildExportSvg(chart: SVGSVGElement, o: ExportOptions): string {
 <text x="54" y="45" font-size="10.5" fill="${colors['text-dim']}">${esc(o.title)}</text>
 <text x="${W - 54}" y="30" font-size="10.5" text-anchor="end" fill="${colors['text-faint']}">${esc(date)}</text>
 <line x1="0" y1="${headerH - 8}" x2="${W}" y2="${headerH - 8}" stroke="${colors.border}" stroke-width="1"/>
-<g transform="translate(0 ${headerH})">${inner}</g>
+${withChart ? `<g transform="translate(0 ${headerH})">${inner}</g>` : ''}
 ${body}
 <text x="${W - 54}" y="${H - 10}" font-size="9" text-anchor="end" fill="${colors['text-faint']}">sag calculator</text>
 </svg>`;

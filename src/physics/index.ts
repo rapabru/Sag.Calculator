@@ -43,7 +43,6 @@ export const DEFAULT_INPUT: RigInput = {
   backupWeightGm: 55,
   webbingElongationPct: 4,
   elongationLimitPct: 8,
+  // Largo útil, del anillo al arnés y con los nudos ya hechos.
   leashLength: 1.5,
-  leashElongationPct: 30,
-  leashRefForceN: 6000,
 };

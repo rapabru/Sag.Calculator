@@ -115,10 +115,15 @@ export const SagChart: React.FC<Props> = ({
 
   const { px, py } = geom;
 
-  /** Perfil de la cinta durante la animación, mezclando vacía y pico. */
+  /**
+   * Perfil de la cinta durante la caída. Arranca desde la cinta CARGADA —la
+   * naranja, con la persona parada— y va hasta el pico. Físicamente la cinta
+   * rebota hacia arriba al soltarte, pero mostrar ese rebote hace perder de
+   * vista lo que importa, que es cuánto más se hunde respecto de donde estabas.
+   */
   const fallProfile = useMemo(() => {
     if (!showFall) return null;
-    const empty = stat.empty.profile;
+    const from = stat.loaded.profile;
     const peak = fall.peakLineState.profile;
     let mix = 1;
     if (animDepth !== null) {
@@ -129,12 +134,12 @@ export const SagChart: React.FC<Props> = ({
     const pts: Pt[] = [];
     for (let i = 0; i <= 140; i++) {
       const x = (i / 140) * span;
-      const a = sampleProfile(empty, x);
+      const a = sampleProfile(from, x);
       const b = sampleProfile(peak, x);
       pts.push([x, a + mix * (b - a)]);
     }
     return pts;
-  }, [showFall, stat.empty.profile, stat.loaded.sagAtLoad, fall, animDepth, span]);
+  }, [showFall, stat.loaded.profile, stat.loaded.sagAtLoad, fall, animDepth, span]);
 
   const toPath = useCallback(
     (pts: Pt[]) => pts.map(([x, d], i) => `${i ? 'L' : 'M'}${px(x).toFixed(2)} ${py(d).toFixed(2)}`).join(' '),
@@ -155,11 +160,9 @@ export const SagChart: React.FC<Props> = ({
     [geom, span, onPersonPosChange],
   );
 
-  // Vertical con exageración, horizontal sin ella: la figura se estira igual que
-  // el resto del eje pero no se ensancha.
-  const trueH = input.personHeight * geom.scale * exaggeration;
-  const personH = Math.max(trueH, MIN_PERSON_PX);
-  const personW = Math.max(input.personHeight * geom.scale, MIN_PERSON_PX);
+  // La exageración vertical no toca a la persona: sólo estira los ejes.
+  const trueH = input.personHeight * geom.scale;
+  const personSize = Math.max(trueH, MIN_PERSON_PX);
   const personClamped = trueH < MIN_PERSON_PX;
 
   const harnessDepth = animDepth ?? fall.personLowestDepth;
@@ -288,8 +291,7 @@ export const SagChart: React.FC<Props> = ({
           <PersonFigure
             x={px(personX)}
             y={py(harnessDepth)}
-            height={personH}
-            girth={personW}
+            size={personSize}
             pose="hanging"
             color="var(--danger)"
           />
@@ -306,7 +308,7 @@ export const SagChart: React.FC<Props> = ({
             opacity={animating ? 0.4 : 0.85}
           />
           <text
-            x={px(personX) + personW * 0.34 + 6}
+            x={px(personX) + personSize * 0.34 + 6}
             y={py(feetDepth) + 3.6}
             fontSize={11}
             fill="var(--danger)"
@@ -331,7 +333,7 @@ export const SagChart: React.FC<Props> = ({
         opacity={0.8}
       />
       <text
-        x={px(personX) - personW * 0.34 - 5}
+        x={px(personX) - personSize * 0.34 - 5}
         y={(py(0) + py(stat.loaded.sagAtLoad)) / 2 + 3.5}
         fontSize={11}
         textAnchor="end"
@@ -367,8 +369,7 @@ export const SagChart: React.FC<Props> = ({
       <PersonFigure
         x={px(personX)}
         y={py(stat.loaded.sagAtLoad)}
-        height={personH}
-        girth={personW}
+        size={personSize}
         pose="standing"
         color="var(--text)"
         faded={animating}

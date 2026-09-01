@@ -28,10 +28,6 @@ export interface RigInput {
 
   /** Largo ÚTIL del leash (m): del anillo al arnés, con los nudos ya hechos. */
   leashLength: number;
-  /** Elongación del leash en %, medida a `leashRefForceN`. */
-  leashElongationPct: number;
-  /** Carga a la que está medida esa elongación (N). */
-  leashRefForceN: number;
 }
 
 /** Estado de la línea para una carga puntual dada. */
@@ -107,8 +103,6 @@ export interface FallResult {
   bodyGroundClearance: number;
   /** Fall factor clásico: caída libre / largo del leash. */
   fallFactor: number;
-  /** Estiramiento del leash en el pico (m). */
-  leashExtension: number;
   /** Elongación dinámica de la cinta (fracción). */
   dynamicStrain: number;
   /** true si la elongación dinámica supera el límite declarado. */

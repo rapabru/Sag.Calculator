@@ -3,12 +3,22 @@ import {
   DEFAULT_INPUT,
   DISCIPLINE_PRESETS,
   G,
-  LEASH_PRESETS,
   WAIST_RATIO,
   WEBBING_PRESETS,
   calculate,
   type RigInput,
 } from './physics';
+import {
+  deleteRig,
+  deleteWebbing,
+  loadRigs,
+  loadWebbings,
+  saveRig,
+  saveWebbing,
+  type SavedRig,
+  type SavedWebbing,
+} from './presets/storage';
+import { GuideTour, hasSeenGuide } from './components/GuideTour';
 import { useTranslation } from './i18n/useTranslation';
 import { ParamSlider } from './components/ParamSlider';
 import { SagChart } from './components/SagChart';
@@ -17,7 +27,7 @@ import { PhysicsNotes } from './components/PhysicsNotes';
 import { LanguageSelector } from './components/LanguageSelector';
 import { ThemeToggle } from './components/ThemeToggle';
 import { ExportPanel } from './components/ExportPanel';
-import { IconAlert, IconInfo, IconPlay } from './components/Icons';
+import { IconAlert, IconInfo, IconPlay, IconHelp } from './components/Icons';
 
 const ANIMATION_MS = 1700;
 /** Por debajo de esto el resultado no cambió de verdad: no vale reanimar. */
@@ -26,11 +36,16 @@ const REPLAY_THRESHOLD_M = 0.01;
 const App: React.FC = () => {
   const { t } = useTranslation();
   const [input, setInput] = useState<RigInput>(DEFAULT_INPUT);
-  const [exaggeration, setExaggeration] = useState(1);
+  // Arranca en ×1,5: el sag suele ser tan chico frente al vano que a escala
+  // exacta cuesta leerlo. El cartel avisa que NO es escala real hasta bajarlo a ×1.
+  const [exaggeration, setExaggeration] = useState(1.5);
   const [showFall, setShowFall] = useState(true);
   const [animDepth, setAnimDepth] = useState<number | null>(null);
   /** El backup sigue al vano (20 % más) hasta que se lo edita a mano. */
   const [backupAuto, setBackupAuto] = useState(true);
+  const [savedRigs, setSavedRigs] = useState<SavedRig[]>(() => loadRigs());
+  const [savedWebbings, setSavedWebbings] = useState<SavedWebbing[]>(() => loadWebbings());
+  const [guideOpen, setGuideOpen] = useState(() => !hasSeenGuide());
 
   const rafRef = useRef<number | null>(null);
   const timerRef = useRef<number | null>(null);
@@ -161,6 +176,7 @@ const App: React.FC = () => {
 
   return (
     <div className="app">
+      {guideOpen && <GuideTour onClose={() => setGuideOpen(false)} />}
       <header className="topbar">
         <div className="brand">
           <h1>
@@ -171,6 +187,14 @@ const App: React.FC = () => {
         <div className="topbar-spacer" />
         <div className="topbar-tools">
           <LanguageSelector />
+          <button
+            className="icon-btn no-print"
+            title={t('guide.reopen')}
+            aria-label={t('guide.reopen')}
+            onClick={() => setGuideOpen(true)}
+          >
+            <IconHelp />
+          </button>
           <ThemeToggle title={t('theme.toggle')} />
         </div>
       </header>
@@ -178,7 +202,7 @@ const App: React.FC = () => {
       <div className="layout">
         {/* ---------------- parámetros ---------------- */}
         <div className="panel-params">
-          <section className="panel">
+          <section className="panel" data-tour="presets">
             <div className="panel-head">
               <h2>{t('presets.label')}</h2>
             </div>
@@ -198,6 +222,44 @@ const App: React.FC = () => {
                   </button>
                 ))}
               </div>
+
+              {savedRigs.length > 0 && (
+                <div className="chips" style={{ marginTop: 8 }}>
+                  {savedRigs.map((r) => (
+                    <span key={r.id} className="chip-saved">
+                      <button
+                        className="chip"
+                        onClick={() => {
+                          setInput(r.input);
+                          setBackupAuto(false);
+                          lastPlayedRef.current = null;
+                          pendingPresetRef.current = true;
+                        }}
+                      >
+                        {r.name}
+                      </button>
+                      <button
+                        className="chip-x no-print"
+                        aria-label={t('presets.delete', { name: r.name })}
+                        onClick={() => setSavedRigs(deleteRig(r.id))}
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              <button
+                className="btn no-print"
+                style={{ marginTop: 10, width: '100%' }}
+                onClick={() => {
+                  const name = window.prompt(t('presets.savePrompt'), t('presets.defaultName', { span: input.span }));
+                  if (name) setSavedRigs(saveRig(name, input));
+                }}
+              >
+                {t('presets.save')}
+              </button>
             </div>
           </section>
 
@@ -269,10 +331,18 @@ const App: React.FC = () => {
                       (w) =>
                         w.gramsPerMeter === input.mainWeightGm &&
                         w.elongationPct === input.webbingElongationPct,
-                    )?.id ?? ''
+                    )?.id ??
+                    (savedWebbings.find(
+                      (w) =>
+                        w.gramsPerMeter === input.mainWeightGm &&
+                        w.elongationPct === input.webbingElongationPct,
+                    )?.id.replace(/^/, 'saved:') ?? '')
                   }
                   onChange={(e) => {
-                    const w = WEBBING_PRESETS.find((p) => p.id === e.target.value);
+                    const v = e.target.value;
+                    const w = v.startsWith('saved:')
+                      ? savedWebbings.find((x) => x.id === v.slice(6))
+                      : WEBBING_PRESETS.find((p) => p.id === v);
                     if (w) {
                       setInput((prev) => ({
                         ...prev,
@@ -289,7 +359,41 @@ const App: React.FC = () => {
                       {w.label} · {w.gramsPerMeter} g/m · {w.elongationPct} %
                     </option>
                   ))}
+                  {savedWebbings.length > 0 && (
+                    <optgroup label={t('presets.mine')}>
+                      {savedWebbings.map((w) => (
+                        <option key={w.id} value={`saved:${w.id}`}>
+                          {w.name} · {w.gramsPerMeter} g/m · {w.elongationPct} %
+                        </option>
+                      ))}
+                    </optgroup>
+                  )}
                 </select>
+                <div className="chips" style={{ marginTop: 8 }}>
+                  <button
+                    className="chip no-print"
+                    onClick={() => {
+                      const name = window.prompt(
+                        t('presets.saveWebbingPrompt'),
+                        `${input.mainWeightGm} g/m · ${input.webbingElongationPct} %`,
+                      );
+                      if (name)
+                        setSavedWebbings(saveWebbing(name, input.mainWeightGm, input.webbingElongationPct));
+                    }}
+                  >
+                    {t('presets.saveWebbing')}
+                  </button>
+                  {savedWebbings.map((w) => (
+                    <button
+                      key={w.id}
+                      className="chip-x no-print"
+                      aria-label={t('presets.delete', { name: w.name })}
+                      onClick={() => setSavedWebbings(deleteWebbing(w.id))}
+                    >
+                      {w.name} ×
+                    </button>
+                  ))}
+                </div>
               </div>
               <ParamSlider
                 label={t('field.mainWeight')} unit="g/m"
@@ -350,55 +454,13 @@ const App: React.FC = () => {
               <h2>{t('group.fall')}</h2>
             </div>
             <div className="panel-body">
-              <div className="field">
-                <div className="field-top">
-                  <span className="field-label">{t('field.leashPreset')}</span>
-                </div>
-                <select
-                  style={{ width: '100%' }}
-                  value={
-                    LEASH_PRESETS.find(
-                      (l) =>
-                        l.elongationPct === input.leashElongationPct &&
-                        l.refForceN === input.leashRefForceN,
-                    )?.id ?? ''
-                  }
-                  onChange={(e) => {
-                    const l = LEASH_PRESETS.find((p) => p.id === e.target.value);
-                    if (l) {
-                      setInput((prev) => ({
-                        ...prev,
-                        leashElongationPct: l.elongationPct,
-                        leashRefForceN: l.refForceN,
-                      }));
-                      playIfChanged();
-                    }
-                  }}
-                >
-                  <option value="">—</option>
-                  {LEASH_PRESETS.map((l) => (
-                    <option key={l.id} value={l.id}>
-                      {l.label} · {l.elongationPct} % @ {(l.refForceN / 1000).toFixed(0)} kN
-                    </option>
-                  ))}
-                </select>
-              </div>
               <ParamSlider
                 label={t('field.leashLength')} unit="m"
                 value={input.leashLength} min={0.5} max={8} step={0.1} decimals={2}
                 hint={t('field.leashLength.hint')}
                 onChange={set('leashLength')} onCommit={playIfChanged}
               />
-              <ParamSlider
-                label={t('field.leashElongation')} unit="%"
-                value={input.leashElongationPct} min={0.5} max={40} step={0.5} decimals={2}
-                hint={t('field.leashElongation.hint', {
-                  ref: (input.leashRefForceN / 1000).toFixed(0),
-                  cm: (result.fall.leashExtension * 100).toFixed(0),
-                  len: input.leashLength.toFixed(1),
-                })}
-                onChange={set('leashElongationPct')} onCommit={playIfChanged}
-              />
+              <p className="field-note">{t('field.leashRigid')}</p>
             </div>
           </section>
         </div>
@@ -415,7 +477,7 @@ const App: React.FC = () => {
               </span>
             </div>
             <div className="panel-body tight">
-              <div className="chart-wrap" ref={chartBoxRef}>
+              <div className="chart-wrap" ref={chartBoxRef} data-tour="chart">
                 <SagChart
                   input={input}
                   result={result}
@@ -441,12 +503,17 @@ const App: React.FC = () => {
                     <IconPlay />
                     {animDepth === null ? t('chart.animate') : t('chart.replay')}
                   </button>
-                  <ExportPanel
-                    getChart={() => chartBoxRef.current?.querySelector('svg') ?? null}
-                    input={input}
-                    result={result}
-                    onDetailedChange={(d) => document.body.classList.toggle('print-compact', !d)}
-                  />
+                  <span data-tour="export">
+                    <ExportPanel
+                      getChart={() => chartBoxRef.current?.querySelector('svg') ?? null}
+                      input={input}
+                      result={result}
+                      onModeChange={({ detailed, includeChart }) => {
+                        document.body.classList.toggle('print-compact', !detailed);
+                        document.body.classList.toggle('print-nochart', !includeChart);
+                      }}
+                    />
+                  </span>
                   <div className="zoom">
                     <span style={{ whiteSpace: 'nowrap' }}>{t('chart.zoom')}</span>
                     <input
@@ -492,7 +559,7 @@ const App: React.FC = () => {
             </div>
           </section>
 
-          <section className="panel">
+          <section className="panel" data-tour="fall">
             <div className="panel-head">
               <h2>{t('results.fall')}</h2>
             </div>

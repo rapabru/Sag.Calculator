@@ -6,6 +6,7 @@
 import React from 'react';
 import { renderToString } from 'react-dom/server';
 import App from '../src/App';
+import { GuideTour } from '../src/components/GuideTour';
 import { LanguageProvider } from '../src/i18n/LanguageContext';
 import { calculate, DEFAULT_INPUT } from '../src/physics';
 import { TOKENS, resolveVars } from '../src/components/exportImage';
@@ -57,7 +58,7 @@ check('el gráfico tiene viewBox', /viewBox="0 0 1000 \d/.test(html));
 check('sin claves de traducción sin resolver', !/>[a-z]+\.[a-z][a-zA-Z.]+</.test(html));
 check('sin placeholders sin sustituir', !/\{(depth|limit|strain|load|pre|extra|g|ff|factor|gravity)\}/.test(html));
 check('sin "undefined" ni "NaN" en la salida', !html.includes('undefined') && !html.includes('NaN'));
-check('badge de escala real presente', html.includes('escala real 1:1'));
+check('el cartel avisa que la exageración no es escala real', html.includes('no es escala real'));
 check('crédito conservado', html.includes('Bruno Rapa') && html.includes('brunorapavisuales'));
 check('aviso del modelo presente', html.includes('cuasi-estático'));
 check('terminología: dice CINTA, no «línea»', html.includes('Perfil de la cinta') && !/Perfil de la línea/.test(html));
@@ -65,7 +66,31 @@ check('terminología: dice SAG, no «flecha»', !/[Ff]lecha/.test(html));
 check('botón de centrar presente', html.includes('centrar'));
 check('botón de exportar presente', html.includes('Exportar'));
 check('altura de la persona presente', html.includes('Altura de la persona'));
+check('sin control de elasticidad del leash', !html.includes('Elongación del leash'));
+check('se explica que el leash es inextensible', html.includes('inextensible'));
+check('botón de guardar configuración', html.includes('Guardar configuración actual'));
+check('botón de guardar cinta', html.includes('Guardar esta cinta'));
+check('opción de exportar sin gráfico presente en el DOM tras abrir', html.includes('Exportar'));
 check('el arnés derivado aparece', html.includes('0.97') || html.includes('0,97'));
+
+// --- la guia no aparece en el render normal (localStorage la marca como vista),
+// --- asi que se renderiza aparte para comprobar que no explota.
+{
+  try {
+    const guide = renderToString(
+      React.createElement(LanguageProvider, null, React.createElement(GuideTour, { onClose: () => undefined })),
+    );
+    check('la guía renderiza', guide.length > 200, `${guide.length} bytes`);
+    // React separa los nodos de texto con comentarios en SSR: "1<!-- --> / <!-- -->5".
+    const plano = guide.replace(/<!--[\s\S]*?-->/g, '');
+    check('la guía arranca en el paso 1', plano.includes('1 / 5'), plano.match(/\d+ \/ \d+/)?.[0] ?? 'no encontrado');
+    check('la guía tiene botón de saltear', guide.includes('Saltear'));
+    check('la guía explica la escala', /escala/i.test(guide) || guide.includes('SAG'));
+    check('sin claves de traducción sin resolver en la guía', !/guide\.[a-z0-9.]+/i.test(guide));
+  } catch (e) {
+    check('la guía renderiza', false, String(e).slice(0, 160));
+  }
+}
 
 // --- exportar: el fallo clasico es que el SVG serializado conserve las
 // --- variables CSS y la imagen salga en negro. Se prueba sobre el markup real.

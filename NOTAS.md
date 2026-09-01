@@ -71,6 +71,21 @@ Antes era una entrada suelta con 1,0 m fijo. Ahora sale de la estatura (0,58 × 
 se muestra como pista debajo del control, y es un control menos en el celular. Si alguna
 vez necesitás forzarlo (arnés de pecho, amarre distinto), hay que volver a exponerlo.
 
+## 10. Saqué la elasticidad del leash, pero el leash sí estira
+
+Lo pediste y lo hice, con una salvedad que conviene tener anotada: una cuerda
+dinámica de 1,5 m estira unos **22 cm a 2,9 kN**, y todas las fuentes de highline
+insisten en que el leash tiene que ser dinámico justamente por eso. Lo que sí es
+cierto es que **el efecto en el resultado es marginal**, porque la cinta hace el 97 %
+del frenado. Modelarlo como rígido sube la fuerza pico un 3 % y baja la profundidad
+unos centímetros, o sea que el resultado queda del lado seguro. Si algún día querés
+recuperarlo, era un solo campo y el modelo lo soportaba.
+
+## 11. La exageración vertical arranca en ×1,5
+
+Ya no es escala real por defecto. El cartel lo dice explícitamente y basta con bajar
+el slider a ×1 para que el dibujo vuelva a ser exacto. La persona no se estira nunca.
+
 ## 6. Qué falta decidir
 
 - **Dónde vive esto.** Está en `~/Desktop/sag calculator` como proyecto nuevo, sin
