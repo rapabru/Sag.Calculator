@@ -16,6 +16,10 @@ export interface DisciplinePreset {
   span: number;          // m
   pretensionKN: number;  // kN
   anchorHeight: number;  // m
+  /** Si la disciplina se camina amarrado. Trickline y longline no. */
+  usesLeash: boolean;
+  /** Si el rig lleva línea de backup. */
+  usesBackup: boolean;
 }
 
 /**
@@ -27,13 +31,24 @@ export interface DisciplinePreset {
  * Los nombres son disciplinas, no una escala creciente de largo: el longline es
  * una cinta de plaza anclada a árboles de unos 2,5 m, y puede ser más corta que
  * un midline.
+ *
+ * Trickline y longline se caminan sin amarrarse y sin backup, así que en esos
+ * dos no tiene sentido ni el cálculo de caída ni el peso de la línea de backup.
+ *
+ * La trickline va tensada durísimo porque es la modalidad de saltos: en reposo
+ * suele estar entre 8 y 11 kN, y durante los saltos los picos sobre anclajes y
+ * herrajes llegan con facilidad a 12–15 kN, con registros de hasta 16 kN en
+ * caídas secas de atletas pesados.
  */
 export const DISCIPLINE_PRESETS: DisciplinePreset[] = [
-  { id: 'trickline', span: 20,  pretensionKN: 4.0, anchorHeight: 1.2 },
-  { id: 'midline',   span: 70,  pretensionKN: 3.5, anchorHeight: 13 },
-  { id: 'longline',  span: 60,  pretensionKN: 5.0, anchorHeight: 2.5 },
-  { id: 'highline',  span: 100, pretensionKN: 4.0, anchorHeight: 60 },
+  { id: 'trickline', span: 20,  pretensionKN: 10.0, anchorHeight: 1.2, usesLeash: false, usesBackup: false },
+  { id: 'midline',   span: 70,  pretensionKN: 3.5,  anchorHeight: 13,  usesLeash: true,  usesBackup: true },
+  { id: 'longline',  span: 50,  pretensionKN: 1.8,  anchorHeight: 2.5, usesLeash: false, usesBackup: false },
+  { id: 'highline',  span: 100, pretensionKN: 4.0,  anchorHeight: 60,  usesLeash: true,  usesBackup: true },
 ];
+
+/** Picos medidos sobre los anclajes durante saltos de trickline (kN). */
+export const TRICKLINE_JUMP_PEAK_KN = { typical: [12, 15] as const, extreme: 16 };
 
 export interface WebbingPreset {
   id: string;

@@ -192,18 +192,20 @@ console.log('\n=== 13. Barrido de edge cases (todo el rango de los sliders) ==='
   const elongs = [0.5, 4, 20];
   const leashes = [0.5, 2, 8];
   const heights = [1.4, 1.67, 2.05];
+  const leashModes = [true, false];
   const positions = [0.02, 0.5, 0.98];
   const anchors = [0.5, 13, 300];
   for (const span of spans)
     for (const pretensionN of tensions)
       for (const personMassKg of masses)
         for (const webbingElongationPct of elongs)
-            for (const leashLength of leashes)
+            for (const usesLeash of leashModes)
+              for (const leashLength of leashes)
               for (const personPos of positions)
                 for (const anchorHeight of anchors)
                   for (const personHeight of heights) {
                   n++;
-                  const r = calculate(rig({ span, pretensionN, personMassKg, webbingElongationPct, leashLength, personPos, anchorHeight, personHeight }));
+                  const r = calculate(rig({ span, pretensionN, personMassKg, webbingElongationPct, leashLength, personPos, anchorHeight, personHeight, usesLeash }));
                   const nums: Array<[string, number]> = [
                     ['sag', r.static.loaded.sagMax],
                     ['H', r.static.loaded.H],
@@ -253,7 +255,10 @@ console.log('\n=== 13. Barrido de edge cases (todo el rango de los sliders) ==='
 console.log('\n=== 14. Los cuatro escenarios dan resultados realistas ===');
 {
   for (const p of DISCIPLINE_PRESETS) {
-    const r = calculate(rig({ span: p.span, pretensionN: p.pretensionKN * 1000, anchorHeight: p.anchorHeight }));
+    const r = calculate(rig({
+      span: p.span, pretensionN: p.pretensionKN * 1000, anchorHeight: p.anchorHeight,
+      usesLeash: p.usesLeash, backupLength: p.usesBackup ? p.span * 1.2 : 0,
+    }));
     const ok =
       r.static.loaded.sagMax > 0 &&
       r.fall.peakForceBodyWeights > 1.5 && r.fall.peakForceBodyWeights < 12 &&
@@ -267,19 +272,22 @@ console.log('\n=== 14. Los cuatro escenarios dan resultados realistas ===');
   check2('el estado inicial coincide con un escenario', !!opening, opening?.id ?? 'ninguno');
 }
 
-console.log('\n=== 15. Regla del leash: por debajo de leash+2 m no alarma ===');
+console.log('\n=== 15. Leash por disciplina ===');
 {
-  const bajo = calculate(rig({ span: 20, pretensionN: 4000, anchorHeight: 1 }));
-  const alto = calculate(rig({ span: 200, pretensionN: 14000, anchorHeight: 8 }));
-  const holgado = calculate(rig({ span: 100, pretensionN: 10000, anchorHeight: 60 }));
-  console.log(`  trickline (1 m)  -> ${bajo.warnings.join(', ') || '(limpio)'}`);
-  console.log(`  longline  (8 m)  -> ${alto.warnings.join(', ') || '(limpio)'}`);
-  console.log(`  highline  (60 m) -> ${holgado.warnings.join(', ') || '(limpio)'}`);
-  check2('en trickline informa en vez de alarmar',
-    bajo.warnings.includes('leashNotRelevant') && !bajo.warnings.includes('fallGroundImpact'), bajo.warnings.join(','));
-  check2('en longline de 8 m si avisa del impacto',
-    alto.warnings.includes('fallGroundImpact') && !alto.warnings.includes('leashNotRelevant'), alto.warnings.join(','));
-  check2('en highline no hay ningun aviso', holgado.warnings.length === 0, holgado.warnings.join(',') || '(limpio)');
+  for (const p of DISCIPLINE_PRESETS) {
+    const r = calculate(rig({
+      span: p.span, pretensionN: p.pretensionKN * 1000, anchorHeight: p.anchorHeight,
+      usesLeash: p.usesLeash, backupLength: p.usesBackup ? p.span * 1.2 : 0,
+    }));
+    console.log(`  ${p.id.padEnd(10)} leash ${p.usesLeash ? 'si' : 'no '} · backup ${p.usesBackup ? 'si' : 'no '} -> ${r.warnings.join(', ') || '(limpio)'}`);
+    if (!p.usesLeash) {
+      check2(`${p.id} sin leash no avisa de impacto`, !r.warnings.includes('fallGroundImpact'), r.warnings.join(',') || '(limpio)');
+      check2(`${p.id} sin backup no avisa de backup corto`, !r.warnings.includes('backupShorterThanMain'), r.warnings.join(',') || '(limpio)');
+    }
+  }
+  // Con leash activado a poca altura el aviso SI tiene que salir: lo pediste vos.
+  const forzado = calculate(rig({ span: 20, pretensionN: 10000, anchorHeight: 1.2, usesLeash: true, backupLength: 0 }));
+  check2('si activás el leash en una trickline, avisa igual', forzado.warnings.includes('fallGroundImpact'), forzado.warnings.join(','));
 }
 
 console.log('\n=== 16-17. Fuerza pico contra la medicion real (Chocoslack: 2.5-7.4 kN en leash de 2 m) ===');

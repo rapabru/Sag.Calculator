@@ -52,6 +52,8 @@ html = renderToString(React.createElement(LanguageProvider, null, React.createEl
 const r = calculate(DEFAULT_INPUT);
 check('el SAG estático llega a la pantalla', html.includes(r.static.loaded.sagMax.toFixed(2)), r.static.loaded.sagMax.toFixed(2));
 check('el punto más bajo de la caída llega a la pantalla', html.includes(r.fall.lowestBodyPoint.toFixed(2)), r.fall.lowestBodyPoint.toFixed(2));
+check('las etiquetas de escenario traen el vano del dato', html.includes('Longline') && html.includes('50') && !html.includes('Longline 200'));
+check('hay interruptor de leash', html.includes('Se camina amarrado'));
 check('la fuerza pico llega a la pantalla', html.includes((r.fall.peakForceN / 1000).toFixed(2)), (r.fall.peakForceN / 1000).toFixed(2));
 check('se dibuja el perfil de la cinta (path SVG)', (html.match(/<path/g) ?? []).length >= 3, `${(html.match(/<path/g) ?? []).length} paths`);
 check('el gráfico tiene viewBox', /viewBox="0 0 1000 \d/.test(html));

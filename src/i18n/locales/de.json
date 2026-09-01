@@ -4,10 +4,10 @@
   "theme.toggle": "Design wechseln",
   "lang.label": "Sprache",
   "presets.label": "Szenario",
-  "presets.trickline": "Trickline 20 m",
-  "presets.midline": "Midline 70 m",
-  "presets.highline": "Highline 100 m",
-  "presets.longline": "Longline 200 m",
+  "presets.trickline": "Trickline",
+  "presets.midline": "Midline",
+  "presets.highline": "Highline",
+  "presets.longline": "Longline",
   "group.line": "Band",
   "group.webbing": "Band und Backup",
   "group.fall": "Leash-Sturz",
@@ -71,7 +71,6 @@
   "banner.overElongation": "<b>Dehnung über der angegebenen Grenze.</b> Das Band dehnt sich um {strain} % gegenüber einer Grenze von {limit} %.",
   "banner.highAnchorLoad": "<b>Hohe Ankerlast.</b> Der Sturz erreicht Spitzen von {load} kN. Prüfe, ob das gesamte System dafür ausgelegt ist.",
   "banner.backupShorter": "<b>Das Backup ist kürzer als das Hauptband.</b> In einem realen Rig läuft das Backup mit Schlappseil, länger als das Hauptband. So wie eingegeben wird sein Gewicht nur anteilig gezählt.",
-  "banner.leashNotRelevant": "<b>Auf dieser Höhe wird kein Leash benutzt.</b> Die Anker liegen niedriger als die Leash-Länge plus zwei Meter, das Sturzergebnis ist daher nur ein Anhaltspunkt: von so einer Line steigt man ab, man hängt nicht.",
   "banner.model": "Quasistatisches Energiemodell. Es ignoriert Dämpfung, Bandhysterese, Rutschen des Rings, die vom Körper aufgenommene Energie und die Elastizität der Anker, und nimmt an, dass der Rückprall des Bandes nicht beim Bremsen hilft. Reale Spitzenkräfte liegen meist 10–30 % darunter. Mit Reserve verwenden, nicht als Bemessungswert.",
   "notes.title": "Warum diese Zahlen — die Physik dahinter",
   "notes.h1": "Der statische SAG",
@@ -142,5 +141,8 @@
   "guide.s4.title": "Der Leash-Sturz",
   "guide.s4.body": "Die Zahl, auf die es ankommt: wie weit deine Füße reichen und wie viel Boden bleibt. Dazu die Spitzenkraft auf Körper und Anker. Eine bewusst konservative Schätzung — mit Reserve verwenden.",
   "guide.s5.title": "Mitnehmen",
-  "guide.s5.body": "Export als JPG, PNG oder PDF, mit oder ohne die vollständigen Daten, mit oder ohne Diagramm. Am Handy direkt teilbar."
+  "guide.s5.body": "Export als JPG, PNG oder PDF, mit oder ohne die vollständigen Daten, mit oder ohne Diagramm. Am Handy direkt teilbar.",
+  "field.usesLeash": "Mit Leash gegangen",
+  "field.noLeash": "Ohne Leash gibt es keinen Sturz zu berechnen. Trickline und Longline geht man ungesichert: man steigt ab oder springt, man hängt nicht.",
+  "banner.tricklineJumps": "<b>Trickline: die Sprungdisziplin.</b> Wird sehr hart gespannt — 8 bis 11 kN in Ruhe. Bei Sprüngen erreichen die Spitzen an Ankern und Hardware leicht {low}–{high} kN, mit Messungen bis {extreme} kN bei harten Landungen schwerer Athleten. Diese Spitzen stecken nicht in dieser Rechnung, die statisch ist."
 }

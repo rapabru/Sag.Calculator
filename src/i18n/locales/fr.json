@@ -4,10 +4,10 @@
   "theme.toggle": "Changer de thème",
   "lang.label": "Langue",
   "presets.label": "Scénario",
-  "presets.trickline": "Trickline 20 m",
-  "presets.midline": "Midline 70 m",
-  "presets.highline": "Highline 100 m",
-  "presets.longline": "Longline 200 m",
+  "presets.trickline": "Trickline",
+  "presets.midline": "Midline",
+  "presets.highline": "Highline",
+  "presets.longline": "Longline",
   "group.line": "Sangle",
   "group.webbing": "Sangle et backup",
   "group.fall": "Chute sur longe",
@@ -71,7 +71,6 @@
   "banner.overElongation": "<b>Allongement au-dessus de la limite déclarée.</b> La sangle s'allonge de {strain} % contre une limite de {limit} %.",
   "banner.highAnchorLoad": "<b>Charge élevée sur les ancrages.</b> La pointe de la chute atteint {load} kN. Vérifiez que tout le système est dimensionné pour cela.",
   "banner.backupShorter": "<b>Le backup est plus court que la sangle principale.</b> Sur un rig réel le backup est monté avec du mou, plus long que la principale. En l'état, son poids n'est compté qu'au prorata.",
-  "banner.leashNotRelevant": "<b>On n'utilise pas de longe à cette hauteur.</b> Les ancrages sont plus bas que la longueur de la longe plus deux mètres, le résultat de chute n'est donc qu'indicatif : sur une telle ligne on descend en marchant, pas suspendu.",
   "banner.model": "Modèle énergétique quasi-statique. Il ignore l'amortissement, l'hystérésis de la sangle, le glissement de l'anneau, l'énergie absorbée par le corps et l'élasticité des ancrages, et suppose que le rebond de la sangle n'aide pas à freiner. Les forces de pointe réelles restent en général 10–30 % en dessous. À utiliser avec marge, pas comme valeur de dimensionnement.",
   "notes.title": "Pourquoi ces chiffres — la physique derrière",
   "notes.h1": "Le SAG statique",
@@ -142,5 +141,8 @@
   "guide.s4.title": "La chute sur longe",
   "guide.s4.body": "Le chiffre qui compte : jusqu'où descendent vos pieds et combien de sol il reste. Ainsi que la force de pointe sur votre corps et sur les ancrages. C'est une estimation prudente — gardez de la marge.",
   "guide.s5.title": "Emportez-le",
-  "guide.s5.body": "Exportez en JPG, PNG ou PDF, avec ou sans les données complètes, avec ou sans le graphique. Sur téléphone vous pouvez le partager directement."
+  "guide.s5.body": "Exportez en JPG, PNG ou PDF, avec ou sans les données complètes, avec ou sans le graphique. Sur téléphone vous pouvez le partager directement.",
+  "field.usesLeash": "Marché avec longe",
+  "field.noLeash": "Sans longe il n'y a pas de chute à calculer. Les tricklines et longlines se marchent sans être attaché : on descend ou on saute, on ne reste pas suspendu.",
+  "banner.tricklineJumps": "<b>Trickline : la discipline des sauts.</b> Montée sous très forte tension — 8 à 11 kN au repos. Pendant les sauts, les pics sur les ancrages et la quincaillerie atteignent facilement {low}–{high} kN, avec des relevés jusqu'à {extreme} kN lors de réceptions sèches d'athlètes lourds. Ces pics ne sont pas dans ce calcul, qui est statique."
 }

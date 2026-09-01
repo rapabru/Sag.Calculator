@@ -38,10 +38,20 @@ lee como «V» o como «recta» es la proporción sag/largo:
 
 | escenario | SAG | sag/largo | θ |
 |---|---|---|---|
-| trickline 20 m @ 4 kN | 0,82 m | 4,1 % | 4,7° |
-| midline 70 m @ 3 kN | 3,38 m | 4,8 % | 5,7° |
-| highline 100 m @ 10 kN | 2,00 m | 2,0 % | 2,4° |
-| longline 200 m @ 14 kN | 3,00 m | 1,5 % | 1,8° |
+| trickline 20 m @ 10 kN | 0,39 m | 1,9 % | 2,2° |
+| longline 50 m @ 1,8 kN | 2,89 m | 5,8 % | 6,7° |
+| midline 70 m @ 3,5 kN | 3,19 m | 4,6 % | 5,5° |
+| highline 100 m @ 4 kN | 4,30 m | 4,3 % | 5,3° |
+
+Los nombres son disciplinas, no una escala de largo. **Trickline y longline se
+caminan sueltos**, sin leash ni backup, así que en esos dos la app oculta el cálculo
+de caída: no hay nada que colgar. La trickline va tensadísima porque es la modalidad
+de saltos —8 a 11 kN en reposo, con picos de 12 a 16 kN sobre los anclajes durante
+las caídas, que este cálculo estático no cubre.
+
+Las etiquetas de los escenarios sacan el vano del propio dato en vez de tenerlo
+escrito en la traducción, para que no puedan quedar desfasadas cuando cambia un
+preset.
 
 **Caída con leash (función nueva).** De pie, el arnés está sobre la cinta y el leash
 flojo; al caerte recorrés en caída libre tu altura sobre la cinta más el largo del

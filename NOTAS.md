@@ -41,21 +41,22 @@ encabezado de `src/physics/fallSolver.ts` y en el aviso de la UI.
 Mantuve exactamente los 10 del proyecto original, hindi incluido. En un momento
 había puesto italiano en su lugar; lo revertí para no perder usuarios.
 
-## 7. El longline quedó en 5 kN (resuelto)
+## 7. El longline de 50 m a 1,8 kN toca el suelo por 39 cm
 
-Con los 2 kN originales, 60 m y anclajes a 2,5 m, el solver daba **3,42 m de SAG**:
-la cinta quedaba 92 cm por debajo del piso en el medio, o sea el centro no se podía
-caminar. Barriendo la tensión, el umbral estaba en 5 kN:
+Con los valores que diste —50 m, 1,8 kN de pretensión, anclajes a 2,5 m— y 80 kg
+encima, el solver da **2,89 m de SAG**: el medio de la cinta queda **39 cm por debajo
+del piso**. La tensión sube sola de 1,8 a 3,3 kN al pisar, y aun así no alcanza.
 
 | tensión | SAG | libre |
 |---|---|---|
-| 2,0 kN | 3,42 m | −0,92 m |
-| 3,0 kN | 2,94 m | −0,44 m |
-| 4,0 kN | 2,52 m | −0,02 m |
-| **5,0 kN** | **2,18 m** | **+0,32 m** |
+| 1,8 kN | 2,89 m | −0,39 m |
+| 2,5 kN | 2,60 m | −0,10 m |
+| 3,0 kN | 2,40 m | +0,10 m |
 
-El preset quedó en **5 kN**, que es el valor con el que esa cinta de plaza se camina
-entera. El aviso de contacto con el suelo desapareció.
+O sea que hacen falta unos **3 kN** para despegar del piso con anclajes a 2,5 m. El
+preset quedó con tus 1,8 kN y la app lo avisa en rojo, que es información verdadera:
+en una cinta de plaza floja de 50 m efectivamente se roza el piso en el medio. Si la
+tuya se camina entera, o está más tensa que 1,8 kN o los anclajes están más altos.
 
 ## 8. Pista de tensión mínima — no la hice
 

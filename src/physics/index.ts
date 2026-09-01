@@ -12,19 +12,13 @@ export function calculate(input: RigInput): CalcResult {
   const stat = solveStatic(input, rig);
   const fall = solveFall(input, rig);
 
-  // Por debajo de esta altura no existe una configuración con leash que tenga
-  // sentido (en una trickline nadie se amarra), así que el impacto contra el
-  // suelo es cierto pero trivial: se informa en vez de alarmar.
-  const leashRelevant = input.anchorHeight >= input.leashLength + 2;
-
   const warnings: string[] = [];
-  if (!leashRelevant) warnings.push('leashNotRelevant');
   if (input.backupLength > 0 && input.backupLength < input.span) warnings.push('backupShorterThanMain');
   if (stat.overElongated) warnings.push('staticOverElongation');
-  if (fall.overElongated) warnings.push('dynamicOverElongation');
+  if (fall.overElongated && input.usesLeash) warnings.push('dynamicOverElongation');
   if (stat.groundClearance <= 0) warnings.push('staticGroundContact');
-  if (fall.hitsGround && leashRelevant) warnings.push('fallGroundImpact');
-  if (fall.peakAnchorTensionN > 25_000) warnings.push('highAnchorLoad');
+  if (fall.hitsGround && input.usesLeash) warnings.push('fallGroundImpact');
+  if (input.usesLeash && fall.peakAnchorTensionN > 25_000) warnings.push('highAnchorLoad');
 
   return { static: stat, fall, warnings };
 }
@@ -43,6 +37,7 @@ export const DEFAULT_INPUT: RigInput = {
   backupWeightGm: 55,
   webbingElongationPct: 4,
   elongationLimitPct: 8,
+  usesLeash: true,
   // Largo útil, del anillo al arnés y con los nudos ya hechos.
   leashLength: 1.5,
 };

@@ -26,6 +26,11 @@ export interface RigInput {
   /** Límite de elongación admisible que el usuario declara (%). */
   elongationLimitPct: number;
 
+  /**
+   * Si se camina amarrado. En trickline y longline no se usa leash, así que el
+   * cálculo de caída no aplica.
+   */
+  usesLeash: boolean;
   /** Largo ÚTIL del leash (m): del anillo al arnés, con los nudos ya hechos. */
   leashLength: number;
 }

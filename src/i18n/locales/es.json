@@ -4,10 +4,10 @@
   "theme.toggle": "Cambiar tema",
   "lang.label": "Idioma",
   "presets.label": "Escenario",
-  "presets.trickline": "Trickline 20 m",
-  "presets.midline": "Midline 70 m",
-  "presets.highline": "Highline 100 m",
-  "presets.longline": "Longline 200 m",
+  "presets.trickline": "Trickline",
+  "presets.midline": "Midline",
+  "presets.highline": "Highline",
+  "presets.longline": "Longline",
   "group.line": "Cinta",
   "group.webbing": "Cinta y backup",
   "group.fall": "Caída con leash",
@@ -71,7 +71,6 @@
   "banner.overElongation": "<b>Elongación por encima del límite declarado.</b> La cinta se estira {strain} % contra un límite de {limit} %.",
   "banner.highAnchorLoad": "<b>Carga alta en los anclajes.</b> El pico de la caída llega a {load} kN. Revisá que todo el sistema esté dimensionado para eso.",
   "banner.backupShorter": "<b>El backup es más corto que la cinta principal.</b> En un rig real el backup va con holgura, más largo que la principal. Como está, su peso se suma sólo en proporción.",
-  "banner.leashNotRelevant": "<b>A esta altura no se usa leash.</b> Los anclajes están más bajos que el largo del leash más dos metros, así que el resultado de caída es orientativo: en una cinta así uno se baja caminando, no colgado.",
   "banner.model": "Modelo cuasi-estático de energía. Ignora amortiguación, histéresis de la cinta, deslizamiento del anillo, absorción del cuerpo y elasticidad de los anclajes, y toma el rebote de la cinta como si no ayudara a frenar. Las fuerzas pico reales suelen quedar 10–30 % por debajo. Usalo con margen, no como número de diseño.",
   "notes.title": "Por qué da esto — la física detrás",
   "notes.h1": "El SAG estático",
@@ -142,5 +141,8 @@
   "guide.s4.title": "La caída con leash",
   "guide.s4.body": "El dato que importa: hasta dónde llegan tus pies y cuánto suelo te queda. También la fuerza pico sobre tu cuerpo y sobre los anclajes. Es una estimación conservadora, usala con margen.",
   "guide.s5.title": "Llevátelo",
-  "guide.s5.body": "Exportá a JPG, PNG o PDF, con o sin los datos completos, con o sin el gráfico. Desde el celular podés compartirlo directo."
+  "guide.s5.body": "Exportá a JPG, PNG o PDF, con o sin los datos completos, con o sin el gráfico. Desde el celular podés compartirlo directo.",
+  "field.usesLeash": "Se camina amarrado (leash)",
+  "field.noLeash": "Sin leash no hay caída que calcular. En trickline y longline se camina suelto: te bajás caminando o saltás, no quedás colgado.",
+  "banner.tricklineJumps": "<b>Trickline: la modalidad de saltos.</b> Va montada bajo tensiones muy altas — entre 8 y 11 kN en reposo. Durante los saltos los picos sobre anclajes y herrajes llegan con facilidad a {low}–{high} kN, con registros de hasta {extreme} kN en caídas secas de atletas pesados. Esos picos no están en este cálculo, que es estático."
 }

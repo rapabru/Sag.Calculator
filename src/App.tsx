@@ -19,6 +19,7 @@ import {
   type SavedWebbing,
 } from './presets/storage';
 import { GuideTour, hasSeenGuide } from './components/GuideTour';
+import { TRICKLINE_JUMP_PEAK_KN } from './physics';
 import { useTranslation } from './i18n/useTranslation';
 import { ParamSlider } from './components/ParamSlider';
 import { SagChart } from './components/SagChart';
@@ -106,11 +107,11 @@ const App: React.FC = () => {
    * animación entera.
    */
   const playIfChanged = useCallback(() => {
-    if (!showFall) return;
+    if (!input.usesLeash || !showFall) return;
     const depth = result.fall.personLowestDepth;
     if (lastPlayedRef.current !== null && Math.abs(depth - lastPlayedRef.current) < REPLAY_THRESHOLD_M) return;
     playFall();
-  }, [showFall, result.fall.personLowestDepth, playFall]);
+  }, [input.usesLeash, showFall, result.fall.personLowestDepth, playFall]);
 
   const applyPreset = useCallback(
     (p: (typeof DISCIPLINE_PRESETS)[number]) => {
@@ -119,11 +120,14 @@ const App: React.FC = () => {
         span: p.span,
         pretensionN: p.pretensionKN * 1000,
         anchorHeight: p.anchorHeight,
-        backupLength: backupAuto ? Number((p.span * 1.2).toFixed(1)) : prev.backupLength,
+        usesLeash: p.usesLeash,
+        // Trickline y longline se montan sin backup.
+        backupLength: p.usesBackup ? Number((p.span * 1.2).toFixed(1)) : 0,
       }));
+      setBackupAuto(p.usesBackup);
       lastPlayedRef.current = null;
     },
-    [backupAuto],
+    [],
   );
 
   // La animación de un preset tiene que correr con el resultado YA recalculado.
@@ -143,6 +147,8 @@ const App: React.FC = () => {
   );
 
   const harnessHeight = WAIST_RATIO * input.personHeight;
+  /** Sin leash no hay caída que mostrar ni que animar. */
+  const fallVisible = input.usesLeash && showFall;
 
   const banners = useMemo(() => {
     const list: Array<{ tone: 'danger' | 'warn' | 'info'; text: string }> = [];
@@ -153,8 +159,6 @@ const App: React.FC = () => {
         tone: 'danger',
         text: t('banner.fallImpact', { depth: Math.abs(f.bodyGroundClearance).toFixed(2) }),
       });
-    if (result.warnings.includes('leashNotRelevant'))
-      list.push({ tone: 'info', text: t('banner.leashNotRelevant') });
     if (s.groundClearance <= 0) list.push({ tone: 'danger', text: t('banner.staticGround') });
     if (s.overElongated || f.overElongated)
       list.push({
@@ -171,8 +175,17 @@ const App: React.FC = () => {
       });
     if (result.warnings.includes('backupShorterThanMain'))
       list.push({ tone: 'warn', text: t('banner.backupShorter') });
+    if (activePreset?.id === 'trickline')
+      list.push({
+        tone: 'info',
+        text: t('banner.tricklineJumps', {
+          low: TRICKLINE_JUMP_PEAK_KN.typical[0],
+          high: TRICKLINE_JUMP_PEAK_KN.typical[1],
+          extreme: TRICKLINE_JUMP_PEAK_KN.extreme,
+        }),
+      });
     return list;
-  }, [result, t, input.elongationLimitPct]);
+  }, [result, t, input.elongationLimitPct, activePreset]);
 
   return (
     <div className="app">
@@ -218,7 +231,7 @@ const App: React.FC = () => {
                       pendingPresetRef.current = true;
                     }}
                   >
-                    {t(`presets.${p.id}`)}
+                    {t(`presets.${p.id}`)} {p.span} m
                   </button>
                 ))}
               </div>
@@ -454,13 +467,31 @@ const App: React.FC = () => {
               <h2>{t('group.fall')}</h2>
             </div>
             <div className="panel-body">
-              <ParamSlider
-                label={t('field.leashLength')} unit="m"
-                value={input.leashLength} min={0.5} max={8} step={0.1} decimals={2}
-                hint={t('field.leashLength.hint')}
-                onChange={set('leashLength')} onCommit={playIfChanged}
-              />
-              <p className="field-note">{t('field.leashRigid')}</p>
+              <label className="toggle-row" style={{ marginBottom: input.usesLeash ? 12 : 0 }}>
+                <input
+                  type="checkbox"
+                  checked={input.usesLeash}
+                  onChange={(e) => {
+                    set('usesLeash')(e.target.checked);
+                    if (!e.target.checked) stopAnimation();
+                  }}
+                />
+                {t('field.usesLeash')}
+              </label>
+
+              {input.usesLeash ? (
+                <>
+                  <ParamSlider
+                    label={t('field.leashLength')} unit="m"
+                    value={input.leashLength} min={0.5} max={8} step={0.1} decimals={2}
+                    hint={t('field.leashLength.hint')}
+                    onChange={set('leashLength')} onCommit={playIfChanged}
+                  />
+                  <p className="field-note">{t('field.leashRigid')}</p>
+                </>
+              ) : (
+                <p className="field-note" style={{ marginTop: 8 }}>{t('field.noLeash')}</p>
+              )}
             </div>
           </section>
         </div>
@@ -482,27 +513,31 @@ const App: React.FC = () => {
                   input={input}
                   result={result}
                   exaggeration={exaggeration}
-                  showFall={showFall}
+                  showFall={fallVisible}
                   animDepth={animDepth}
                   onPersonPosChange={set('personPos')}
                   onPersonPosCommit={playIfChanged}
                 />
                 <div className="chart-toolbar">
-                  <label className="toggle-row">
-                    <input
-                      type="checkbox"
-                      checked={showFall}
-                      onChange={(e) => {
-                        setShowFall(e.target.checked);
-                        if (!e.target.checked) stopAnimation();
-                      }}
-                    />
-                    {t('chart.showFall')}
-                  </label>
-                  <button className="btn primary" onClick={playFall}>
-                    <IconPlay />
-                    {animDepth === null ? t('chart.animate') : t('chart.replay')}
-                  </button>
+                  {input.usesLeash && (
+                    <>
+                      <label className="toggle-row">
+                        <input
+                          type="checkbox"
+                          checked={showFall}
+                          onChange={(e) => {
+                            setShowFall(e.target.checked);
+                            if (!e.target.checked) stopAnimation();
+                          }}
+                        />
+                        {t('chart.showFall')}
+                      </label>
+                      <button className="btn primary" onClick={playFall}>
+                        <IconPlay />
+                        {animDepth === null ? t('chart.animate') : t('chart.replay')}
+                      </button>
+                    </>
+                  )}
                   <span data-tour="export">
                     <ExportPanel
                       getChart={() => chartBoxRef.current?.querySelector('svg') ?? null}
@@ -533,7 +568,7 @@ const App: React.FC = () => {
               <div className="legend" style={{ marginTop: 10 }}>
                 <span><i style={{ borderColor: 'var(--text-faint)', borderTopStyle: 'dashed' }} />{t('chart.legend.empty')}</span>
                 <span><i style={{ borderColor: 'var(--webbing)', borderTopWidth: 3 }} />{t('chart.legend.static')}</span>
-                {showFall && <span><i style={{ borderColor: 'var(--danger)', borderTopStyle: 'dashed' }} />{t('chart.legend.fall')}</span>}
+                {fallVisible && <span><i style={{ borderColor: 'var(--danger)', borderTopStyle: 'dashed' }} />{t('chart.legend.fall')}</span>}
                 <span style={{ marginLeft: 'auto', color: 'var(--text-faint)' }}>{t('chart.drag')}</span>
               </div>
             </div>
@@ -559,18 +594,20 @@ const App: React.FC = () => {
             </div>
           </section>
 
-          <section className="panel" data-tour="fall">
-            <div className="panel-head">
-              <h2>{t('results.fall')}</h2>
-            </div>
-            <div className="panel-body tight">
-              <FallResults input={input} result={result} />
-              <div className="banner info" style={{ marginTop: 12, marginBottom: 0 }}>
-                <IconInfo />
-                <span>{t('banner.model')}</span>
+          {input.usesLeash && (
+            <section className="panel" data-tour="fall">
+              <div className="panel-head">
+                <h2>{t('results.fall')}</h2>
               </div>
-            </div>
-          </section>
+              <div className="panel-body tight">
+                <FallResults input={input} result={result} />
+                <div className="banner info" style={{ marginTop: 12, marginBottom: 0 }}>
+                  <IconInfo />
+                  <span>{t('banner.model')}</span>
+                </div>
+              </div>
+            </section>
+          )}
 
           <PhysicsNotes />
         </div>
