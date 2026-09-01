@@ -155,5 +155,8 @@
   "auth.signIn": "Se connecter avec Google",
   "auth.signOut": "Se déconnecter",
   "guide.s6.title": "Historique",
-  "guide.s6.body": "Chaque configuration essayée est notée, sans répéter celles qui ne changent rien. Touchez-en une pour y revenir. Connectez-vous avec Google et l'historique vous suit d'un appareil à l'autre."
+  "guide.s6.body": "Chaque configuration essayée est notée, sans répéter celles qui ne changent rien. Touchez-en une pour y revenir. Connectez-vous avec Google et l'historique vous suit d'un appareil à l'autre.",
+  "font.decrease": "Réduire le texte",
+  "font.increase": "Agrandir le texte",
+  "chart.trueScaleBtn": "Échelle réelle"
 }

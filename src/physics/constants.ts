@@ -20,6 +20,9 @@ export interface DisciplinePreset {
   usesLeash: boolean;
   /** Si el rig lleva línea de backup. */
   usesBackup: boolean;
+  /** Overrides opcionales; si faltan, el preset no toca ese campo. */
+  personHeight?: number; // m
+  leashLength?: number;  // m
 }
 
 /**
@@ -42,7 +45,7 @@ export interface DisciplinePreset {
  */
 export const DISCIPLINE_PRESETS: DisciplinePreset[] = [
   { id: 'trickline', span: 20,  pretensionKN: 10.0, anchorHeight: 1.2, usesLeash: false, usesBackup: false },
-  { id: 'midline',   span: 70,  pretensionKN: 3.5,  anchorHeight: 13,  usesLeash: true,  usesBackup: true },
+  { id: 'midline',   span: 74,  pretensionKN: 5.0,  anchorHeight: 14,  usesLeash: true,  usesBackup: true, personHeight: 1.7, leashLength: 1.0 },
   { id: 'longline',  span: 50,  pretensionKN: 2.3,  anchorHeight: 3.0, usesLeash: false, usesBackup: false },
   { id: 'highline',  span: 100, pretensionKN: 4.0,  anchorHeight: 60,  usesLeash: true,  usesBackup: true },
 ];

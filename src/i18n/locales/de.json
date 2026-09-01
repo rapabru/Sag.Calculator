@@ -155,5 +155,8 @@
   "auth.signIn": "Mit Google anmelden",
   "auth.signOut": "Abmelden",
   "guide.s6.title": "Verlauf",
-  "guide.s6.body": "Jedes ausprobierte Setup wird notiert, ohne die zu wiederholen, die nichts ändern. Tippe eines an, um dorthin zurückzukehren. Mit Google-Anmeldung folgt dir der Verlauf über Geräte hinweg."
+  "guide.s6.body": "Jedes ausprobierte Setup wird notiert, ohne die zu wiederholen, die nichts ändern. Tippe eines an, um dorthin zurückzukehren. Mit Google-Anmeldung folgt dir der Verlauf über Geräte hinweg.",
+  "font.decrease": "Text verkleinern",
+  "font.increase": "Text vergrößern",
+  "chart.trueScaleBtn": "Reale Skala"
 }

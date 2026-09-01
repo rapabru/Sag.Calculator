@@ -155,5 +155,8 @@
   "auth.signIn": "Sign in with Google",
   "auth.signOut": "Sign out",
   "guide.s6.title": "History",
-  "guide.s6.body": "Every setup you try is recorded, skipping the ones that do not change anything. Tap one to go back to it. Sign in with Google and the history follows you across devices."
+  "guide.s6.body": "Every setup you try is recorded, skipping the ones that do not change anything. Tap one to go back to it. Sign in with Google and the history follows you across devices.",
+  "font.decrease": "Shrink text",
+  "font.increase": "Enlarge text",
+  "chart.trueScaleBtn": "True scale"
 }

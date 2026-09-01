@@ -39,6 +39,7 @@ import { FallResults, StaticResults } from './components/ResultsPanel';
 import { PhysicsNotes } from './components/PhysicsNotes';
 import { LanguageSelector } from './components/LanguageSelector';
 import { ThemeToggle } from './components/ThemeToggle';
+import { FontScaleControl } from './components/FontScaleControl';
 import { ExportPanel } from './components/ExportPanel';
 import { IconAlert, IconInfo, IconPlay, IconHelp } from './components/Icons';
 
@@ -158,6 +159,8 @@ const App: React.FC = () => {
         usesLeash: p.usesLeash,
         // Trickline y longline se montan sin backup.
         backupLength: p.usesBackup ? Number((p.span * 1.2).toFixed(1)) : 0,
+        ...(p.personHeight !== undefined ? { personHeight: p.personHeight } : {}),
+        ...(p.leashLength !== undefined ? { leashLength: p.leashLength } : {}),
       }));
       setBackupAuto(p.usesBackup);
       lastPlayedRef.current = null;
@@ -245,6 +248,7 @@ const App: React.FC = () => {
             }}
           />
           <AccountButton auth={auth} />
+          <FontScaleControl decLabel={t('font.decrease')} incLabel={t('font.increase')} />
           <LanguageSelector />
           <button
             className="icon-btn no-print"
@@ -613,6 +617,13 @@ const App: React.FC = () => {
                     />
                     <span className="mono" style={{ width: 30 }}>×{exaggeration.toFixed(1)}</span>
                   </div>
+                  <button
+                    className={`mini-btn${exaggeration === 1 ? ' is-active' : ''}`}
+                    disabled={exaggeration === 1}
+                    onClick={() => setExaggeration(1)}
+                  >
+                    {t('chart.trueScaleBtn')}
+                  </button>
                 </div>
               </div>
               <div className="legend" style={{ marginTop: 10 }}>

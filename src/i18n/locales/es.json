@@ -155,5 +155,8 @@
   "auth.signIn": "Entrar con Google",
   "auth.signOut": "Salir",
   "guide.s6.title": "Historial",
-  "guide.s6.body": "Cada configuración que probás queda anotada, sin repetir las que no cambian. Tocá una para volver a ella. Si entrás con tu cuenta de Google, el historial te sigue entre dispositivos."
+  "guide.s6.body": "Cada configuración que probás queda anotada, sin repetir las que no cambian. Tocá una para volver a ella. Si entrás con tu cuenta de Google, el historial te sigue entre dispositivos.",
+  "font.decrease": "Achicar texto",
+  "font.increase": "Agrandar texto",
+  "chart.trueScaleBtn": "Escala real"
 }
