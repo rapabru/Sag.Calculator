@@ -25,6 +25,12 @@ export interface GeometryParams {
   fallDepth: number;
   /** Altura de los anclajes = profundidad del suelo (m). */
   groundDepth: number;
+  /**
+   * Cuánto tiene que verse POR ENCIMA de la línea de anclajes (m). La persona
+   * parada sobresale de la cinta, y en una línea poco hundida su cabeza queda
+   * por arriba de los anclajes: sin esto se dibuja fuera del cuadro.
+   */
+  topExtent?: number;
   exaggeration: number;
 }
 
@@ -59,7 +65,7 @@ export function computeChartGeometry(p: GeometryParams): ChartGeometry {
   // hacerla ilegible. En ese caso se marca aparte, fuera del encuadre.
   const showGround = p.groundDepth <= deepest * 1.9 + 1.5;
   const bottom = (showGround ? Math.max(p.groundDepth, deepest) : deepest) * 1.06 + deepest * 0.04;
-  const headroom = Math.max(bottom * 0.08, 0.12);
+  const headroom = Math.max(p.topExtent ?? 0, bottom * 0.08, 0.12);
 
   const cyTop = -headroom * exaggeration;
   const cyRange = Math.max(bottom * exaggeration - cyTop, 1e-6);

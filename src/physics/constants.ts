@@ -4,14 +4,22 @@ export const G = 9.80665;
 /** Tensión de referencia a la que se especifica la elasticidad de la cinta (N). */
 export const WEBBING_REF_TENSION_N = 10_000;
 
-/** Tensión de referencia a la que se especifica la elasticidad del leash (N). */
-export const LEASH_REF_TENSION_N = 5_000;
+/**
+ * Altura de la cintura como fracción de la estatura. Sirve para dos cosas a la
+ * vez: cuánto sobresale el arnés por encima de la cinta estando parado, y cuánto
+ * cuelga el cuerpo por debajo del arnés estando colgado.
+ */
+export const WAIST_RATIO = 0.58;
 
 export interface DisciplinePreset {
   id: string;
   span: number;          // m
   pretensionKN: number;  // kN
   anchorHeight: number;  // m
+  /** Si la disciplina se camina amarrado. Trickline y longline no. */
+  usesLeash: boolean;
+  /** Si el rig lleva línea de backup. */
+  usesBackup: boolean;
 }
 
 /**
@@ -19,12 +27,28 @@ export interface DisciplinePreset {
  * el sag absoluto cambia poco entre ellos, pero la relación sag/largo —
  * que es lo que el ojo lee como "V" o como "recta" — cambia casi 10x.
  */
+/**
+ * Los nombres son disciplinas, no una escala creciente de largo: el longline es
+ * una cinta de plaza anclada a árboles de unos 2,5 m, y puede ser más corta que
+ * un midline.
+ *
+ * Trickline y longline se caminan sin amarrarse y sin backup, así que en esos
+ * dos no tiene sentido ni el cálculo de caída ni el peso de la línea de backup.
+ *
+ * La trickline va tensada durísimo porque es la modalidad de saltos: en reposo
+ * suele estar entre 8 y 11 kN, y durante los saltos los picos sobre anclajes y
+ * herrajes llegan con facilidad a 12–15 kN, con registros de hasta 16 kN en
+ * caídas secas de atletas pesados.
+ */
 export const DISCIPLINE_PRESETS: DisciplinePreset[] = [
-  { id: 'trickline', span: 20,  pretensionKN: 4.0,  anchorHeight: 1.0 },
-  { id: 'midline',   span: 70,  pretensionKN: 3.0,  anchorHeight: 13 },
-  { id: 'highline',  span: 100, pretensionKN: 10.0, anchorHeight: 60 },
-  { id: 'longline',  span: 200, pretensionKN: 14.0, anchorHeight: 8.0 },
+  { id: 'trickline', span: 20,  pretensionKN: 10.0, anchorHeight: 1.2, usesLeash: false, usesBackup: false },
+  { id: 'midline',   span: 70,  pretensionKN: 3.5,  anchorHeight: 13,  usesLeash: true,  usesBackup: true },
+  { id: 'longline',  span: 50,  pretensionKN: 2.3,  anchorHeight: 3.0, usesLeash: false, usesBackup: false },
+  { id: 'highline',  span: 100, pretensionKN: 4.0,  anchorHeight: 60,  usesLeash: true,  usesBackup: true },
 ];
+
+/** Picos medidos sobre los anclajes durante saltos de trickline (kN). */
+export const TRICKLINE_JUMP_PEAK_KN = { typical: [12, 15] as const, extreme: 16 };
 
 export interface WebbingPreset {
   id: string;
@@ -41,15 +65,3 @@ export const WEBBING_PRESETS: WebbingPreset[] = [
   { id: 'dyneema', label: 'Dyneema / híbrida',    gramsPerMeter: 58, elongationPct: 1.2 },
 ];
 
-export interface LeashPreset {
-  id: string;
-  label: string;
-  /** % de elongación a LEASH_REF_TENSION_N. */
-  elongationPct: number;
-}
-
-export const LEASH_PRESETS: LeashPreset[] = [
-  { id: 'dyneema', label: 'Dyneema (estático)', elongationPct: 3 },
-  { id: 'nylon',   label: 'Nylon (dinámico)',   elongationPct: 10 },
-  { id: 'rope',    label: 'Cuerda dinámica',    elongationPct: 20 },
-];

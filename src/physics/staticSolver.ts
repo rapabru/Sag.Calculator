@@ -234,3 +234,39 @@ export function solveStatic(input: RigInput, rig = prepareRig(input)): StaticRes
     overElongated: loaded.strain * 100 > input.elongationLimitPct,
   };
 }
+
+/**
+ * Pretensión mínima para que la cinta no toque el suelo, en newtons.
+ *
+ * El sag baja de forma monótona con la pretensión, así que alcanza con una
+ * bisección sobre el mismo solver estático. Contesta directo la pregunta que
+ * aparece cada vez que un escenario queda rozando el piso: «¿cuánto tengo que
+ * tensar para poder caminarla?».
+ *
+ * Devuelve `null` cuando no hace falta (ya despega a tensión mínima) o cuando
+ * no alcanza ninguna tensión razonable, que es el caso de anclajes demasiado
+ * bajos para ese vano.
+ */
+export function minPretensionForClearance(
+  input: RigInput,
+  /** Altura libre que se quiere conservar bajo la cinta (m). */
+  margin = 0,
+): number | null {
+  const clearanceAt = (pretensionN: number) =>
+    solveStatic({ ...input, pretensionN }).groundClearance - margin;
+
+  const LO = 50;
+  const HI = 60_000;
+  if (clearanceAt(LO) >= 0) return null; // camina incluso floja: no hay mínimo
+  if (clearanceAt(HI) < 0) return null; // ni tensándola al máximo despega
+
+  let lo = LO;
+  let hi = HI;
+  for (let i = 0; i < 48; i++) {
+    const mid = (lo + hi) / 2;
+    if (clearanceAt(mid) < 0) lo = mid;
+    else hi = mid;
+    if (hi - lo < 1) break;
+  }
+  return hi;
+}

@@ -43,3 +43,10 @@ export const IconPlay: React.FC<{ size?: number }> = ({ size = 13 }) => (
     <path d="M6 4l14 8-14 8V4Z" fill="currentColor" />
   </svg>
 );
+
+export const IconHelp: React.FC = () => (
+  <svg {...base} aria-hidden="true">
+    <circle cx="12" cy="12" r="10" />
+    <path d="M9.1 9a3 3 0 1 1 4 2.8c-.7.3-1.1 1-1.1 1.7v.5M12 17h.01" />
+  </svg>
+);

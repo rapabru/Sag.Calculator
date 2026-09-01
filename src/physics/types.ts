@@ -6,6 +6,9 @@ export interface RigInput {
   pretensionN: number;
   /** Masa de la persona (kg). */
   personMassKg: number;
+  /** Estatura de la persona (m). De acá salen la altura del arnés sobre la
+   *  cinta y cuánto cuelga el cuerpo por debajo del arnés. */
+  personHeight: number;
   /** Posición de la persona a lo largo del vano, 0..1. */
   personPos: number;
   /** Altura de los anclajes sobre el suelo (m). */
@@ -23,12 +26,13 @@ export interface RigInput {
   /** Límite de elongación admisible que el usuario declara (%). */
   elongationLimitPct: number;
 
-  /** Largo del leash (m). */
+  /**
+   * Si se camina amarrado. En trickline y longline no se usa leash, así que el
+   * cálculo de caída no aplica.
+   */
+  usesLeash: boolean;
+  /** Largo ÚTIL del leash (m): del anillo al arnés, con los nudos ya hechos. */
   leashLength: number;
-  /** Elongación del leash en % a LEASH_REF_TENSION_N. */
-  leashElongationPct: number;
-  /** Altura del punto de amarre del arnés sobre la cinta, de pie (m). */
-  harnessHeight: number;
 }
 
 /** Estado de la línea para una carga puntual dada. */
@@ -93,10 +97,17 @@ export interface FallResult {
   totalDrop: number;
   /** Tramo de caída libre antes de que el leash tome carga (m). */
   freeFallDistance: number;
+  /** Cuánto sobresale el arnés sobre la cinta estando parado (m). */
+  harnessHeight: number;
+  /** Cuánto cuelga el cuerpo por debajo del arnés estando colgado (m). */
+  feetBelowHarness: number;
+  /** Profundidad del punto más bajo del CUERPO (los pies), bajo los anclajes (m).
+   *  Es lo que toca el suelo, no el punto del arnés. */
+  lowestBodyPoint: number;
+  /** Altura libre desde los pies hasta el suelo (m). Negativa = impacto. */
+  bodyGroundClearance: number;
   /** Fall factor clásico: caída libre / largo del leash. */
   fallFactor: number;
-  /** Estiramiento del leash en el pico (m). */
-  leashExtension: number;
   /** Elongación dinámica de la cinta (fracción). */
   dynamicStrain: number;
   /** true si la elongación dinámica supera el límite declarado. */

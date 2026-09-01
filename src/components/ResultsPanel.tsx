@@ -63,21 +63,22 @@ export const FallResults: React.FC<{ input: RigInput; result: CalcResult }> = ({
 
   return (
     <div className="tiles">
+      {/* Lo que llega al suelo son los pies, no el punto del arnés. */}
       <ResultTile
         hero
         tone="danger"
         label={t('res.lowest')}
-        value={f.personLowestDepth.toFixed(2)}
+        value={f.lowestBodyPoint.toFixed(2)}
         unit="m"
-        sub={t('res.lowest.sub')}
+        sub={t('res.lowest.sub', { harness: f.personLowestDepth.toFixed(2) })}
       />
       <ResultTile
         hero
         tone={f.hitsGround ? 'danger' : 'safe'}
         label={t('res.fallClearance')}
-        value={f.fallGroundClearance.toFixed(2)}
+        value={f.bodyGroundClearance.toFixed(2)}
         unit="m"
-        sub={f.hitsGround ? t('res.fallClearance.impact') : undefined}
+        sub={f.hitsGround ? t('res.fallClearance.impact') : t('res.fallClearance.sub')}
       />
       <ResultTile label={t('res.totalDrop')} value={f.totalDrop.toFixed(2)} unit="m" sub={t('res.totalDrop.sub')} />
       <ResultTile

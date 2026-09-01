@@ -41,12 +41,57 @@ encabezado de `src/physics/fallSolver.ts` y en el aviso de la UI.
 Mantuve exactamente los 10 del proyecto original, hindi incluido. En un momento
 había puesto italiano en su lugar; lo revertí para no perder usuarios.
 
+## 7. El longline quedó justo, pero camina (resuelto)
+
+Con 50 m, 2,3 kN de pretensión y anclajes a 3 m, el SAG da **2,68 m** y quedan
+**32 cm de altura libre** con 80 kg encima. Ya no hay aviso de contacto con el suelo:
+los cuatro escenarios abren limpios.
+
+El margen es fino y depende del peso, que conviene tener presente:
+
+| peso | SAG | libre |
+|---|---|---|
+| 60 kg | 2,27 m | +0,73 m |
+| 80 kg | 2,68 m | +0,32 m |
+| 100 kg | 3,02 m | **−0,02 m** |
+
+O sea que con alguien de 100 kg esa misma cinta roza el piso en el medio. La app lo
+avisa sola al subir el peso.
+
+## 8. Pista de tensión mínima — hecha
+
+Está debajo del control de pretensión: muestra la tensión más baja con la que la cinta
+no toca el suelo y se aplica tocándola. Sale de invertir el mismo solver por bisección
+(`minPretensionForClearance`). Cuando la configuración ya roza el piso, el atajo se
+resalta en rojo.
+
+## 9. Saqué el campo de altura del arnés
+
+Antes era una entrada suelta con 1,0 m fijo. Ahora sale de la estatura (0,58 × altura),
+se muestra como pista debajo del control, y es un control menos en el celular. Si alguna
+vez necesitás forzarlo (arnés de pecho, amarre distinto), hay que volver a exponerlo.
+
+## 10. Saqué la elasticidad del leash, pero el leash sí estira
+
+Lo pediste y lo hice, con una salvedad que conviene tener anotada: una cuerda
+dinámica de 1,5 m estira unos **22 cm a 2,9 kN**, y todas las fuentes de highline
+insisten en que el leash tiene que ser dinámico justamente por eso. Lo que sí es
+cierto es que **el efecto en el resultado es marginal**, porque la cinta hace el 97 %
+del frenado. Modelarlo como rígido sube la fuerza pico un 3 % y baja la profundidad
+unos centímetros, o sea que el resultado queda del lado seguro. Si algún día querés
+recuperarlo, era un solo campo y el modelo lo soportaba.
+
+## 11. La exageración vertical arranca en ×1,5
+
+Ya no es escala real por defecto. El cartel lo dice explícitamente y basta con bajar
+el slider a ×1 para que el dibujo vuelva a ser exacto. La persona no se estira nunca.
+
 ## 6. Qué falta decidir
 
-- **Dónde vive esto.** Está en `~/Desktop/sag calculator` como proyecto nuevo, sin
-  git. El repo viejo (`rapabru/Sag.Calculator`, con deploy en Vercel) quedó intacto.
-  Si querés publicarlo, hay que decidir si es una rama del repo existente, un
-  reemplazo de `main`, o un repo nuevo.
 - **Presets de cinta.** Los valores de `WEBBING_PRESETS` en
   `src/physics/constants.ts` son típicos, no de un modelo concreto. Si tenés las
   fichas de las cintas que usás, poné los datos reales (g/m y % a 10 kN).
+  Quedó para la etapa siguiente.
+- **Configurar Supabase.** El código está listo y es inerte hasta que existan las
+  variables de entorno. Los pasos están en el README; hacen falta un proyecto de
+  Supabase y una credencial OAuth de Google.

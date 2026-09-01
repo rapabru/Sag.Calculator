@@ -232,6 +232,28 @@ body {
 .field-value input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 .field-value input[type='number'] { -moz-appearance: textfield; }
 
+.field-hint {
+  font-size: 10.5px;
+  color: var(--text-faint);
+  margin-top: 1px;
+}
+
+.mini-btn {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--text-dim);
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 3px 7px;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.mini-btn:hover { color: var(--webbing); border-color: var(--webbing); }
+/* Cuando la cinta ya toca el suelo, el atajo a la tensión mínima se destaca. */
+.mini-btn.is-urgent { color: var(--danger); border-color: var(--danger); background: var(--danger-soft); }
+
 .field-unit {
   color: var(--text-faint);
   font-size: 11px;
@@ -571,3 +593,209 @@ footer.credits a { color: var(--text-dim); text-decoration: none; border-bottom:
 footer.credits a:hover { color: var(--webbing); border-color: var(--webbing); }
 
 [dir='rtl'] .field-value input { text-align: left; }
+
+
+/* ---------- exportar ---------- */
+
+.export-wrap { position: relative; }
+
+.export-pop {
+  position: absolute;
+  z-index: 20;
+  min-width: 268px;
+  padding: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 9px;
+  box-shadow: var(--shadow);
+}
+
+.export-group { margin-bottom: 10px; }
+.export-label {
+  display: block;
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  font-weight: 650;
+  margin-bottom: 5px;
+}
+.export-pop--up { bottom: calc(100% + 8px); left: 0; }
+.export-pop--down { top: calc(100% + 8px); right: 0; }
+
+.export-seg { display: flex; gap: 6px; }
+.export-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.export-note {
+  margin: 9px 0 0;
+  font-size: 10.5px;
+  color: var(--text-faint);
+  line-height: 1.45;
+}
+
+/* ---------- impresión / guardar como PDF ----------
+   El navegador ofrece «Guardar como PDF» en su propio diálogo, tanto en
+   escritorio como en el compartir de iOS y Android. Alcanza con dejar la página
+   presentable: no hace falta cargar una librería de PDF. */
+
+@media print {
+  @page { margin: 12mm; }
+
+  :root {
+    --bg: #fff;
+    --surface: #fff;
+    --surface-2: #fff;
+    --surface-3: #eee;
+    --border: #ccc;
+    --border-strong: #999;
+    --text: #000;
+    --text-dim: #333;
+    --text-faint: #666;
+    --ground: #ddd;
+  }
+
+  body { background: #fff; }
+  .app { max-width: none; padding: 0; }
+
+  .no-print,
+  .topbar-tools,
+  .chart-toolbar,
+  details.notes,
+  input[type='range'] { display: none !important; }
+
+  /* Una sola columna: los parámetros como lista compacta debajo del gráfico. */
+  .layout { display: block; }
+  .panel {
+    box-shadow: none;
+    border-color: #ccc;
+    break-inside: avoid;
+    margin-bottom: 8px;
+  }
+  .tiles { border: 1px solid #ccc; }
+  .tile { break-inside: avoid; }
+  .field { margin-bottom: 4px; }
+  .field-value input {
+    border: none;
+    background: none;
+    padding: 0;
+    font-weight: 700;
+  }
+
+  /* En modo compacto sólo van el gráfico y los resultados. */
+  body.print-compact .panel-params { display: none !important; }
+  body.print-compact .banner.info { display: none !important; }
+}
+
+
+.field-note {
+  margin: 2px 0 0;
+  font-size: 10.5px;
+  line-height: 1.45;
+  color: var(--text-faint);
+}
+
+/* ---------- presets guardados ---------- */
+
+.chip-saved { display: inline-flex; align-items: stretch; }
+.chip-saved .chip { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+
+.chip-x {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-left: none;
+  border-radius: 0 999px 999px 0;
+  color: var(--text-faint);
+  padding: 5px 9px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  line-height: 1.1;
+}
+.chip-x:hover { color: var(--danger); border-color: var(--danger); }
+
+/* ---------- recorrido guiado ---------- */
+
+.guide-root { position: fixed; inset: 0; z-index: 100; }
+
+/* Capa que recibe el toque fuera de la tarjeta para cerrar. */
+.guide-catcher { position: absolute; inset: 0; }
+
+/* El foco: un recuadro con una sombra enorme alrededor que oscurece el resto. */
+.guide-spot {
+  position: absolute;
+  border-radius: 10px;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.68);
+  border: 2px solid var(--webbing);
+  pointer-events: none;
+  transition: top 0.22s ease, left 0.22s ease, width 0.22s ease, height 0.22s ease;
+}
+
+.guide-catcher--dim { background: rgba(0, 0, 0, 0.68); }
+
+.guide-card {
+  position: absolute;
+  width: min(330px, calc(100vw - 24px));
+  padding: 15px 16px 13px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 11px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+.guide-card h3 { margin: 0 0 6px; font-size: 14.5px; color: var(--text); }
+.guide-card p { margin: 0; font-size: 12.5px; line-height: 1.55; color: var(--text-dim); }
+
+.guide-step {
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--webbing);
+  margin-bottom: 5px;
+}
+
+.guide-actions { display: flex; align-items: center; gap: 6px; margin-top: 13px; }
+
+@media print {
+  .guide-root { display: none !important; }
+  body.print-nochart .chart-wrap { display: none !important; }
+}
+
+
+/* ---------- historial ---------- */
+
+.history-list { list-style: none; margin: 0; padding: 0; }
+
+.history-list li {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid var(--border);
+}
+.history-list li:last-child { border-bottom: none; }
+.history-list li.is-danger .history-out { color: var(--danger); }
+
+.history-row {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 62px 1fr auto;
+  gap: 10px;
+  align-items: baseline;
+  background: none;
+  border: none;
+  padding: 8px 4px;
+  text-align: left;
+  cursor: pointer;
+  color: var(--text-dim);
+  font-family: inherit;
+  font-size: 11.5px;
+  min-width: 0;
+}
+.history-row:hover { color: var(--text); background: var(--surface-2); }
+
+.history-when { color: var(--text-faint); font-size: 10.5px; }
+.history-rig { color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.history-out { color: var(--webbing); white-space: nowrap; font-size: 10.5px; }
+
+.history-list .chip-x { border: none; border-radius: 0; background: none; }
+
+@media (max-width: 520px) {
+  .history-row { grid-template-columns: 1fr auto; }
+  .history-when { display: none; }
+}
