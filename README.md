@@ -39,7 +39,7 @@ lee como «V» o como «recta» es la proporción sag/largo:
 | escenario | SAG | sag/largo | θ |
 |---|---|---|---|
 | trickline 20 m @ 10 kN | 0,39 m | 1,9 % | 2,2° |
-| longline 50 m @ 1,8 kN | 2,89 m | 5,8 % | 6,7° |
+| longline 50 m @ 2,3 kN | 2,68 m | 5,4 % | 6,2° |
 | midline 70 m @ 3,5 kN | 3,19 m | 4,6 % | 5,5° |
 | highline 100 m @ 4 kN | 4,30 m | 4,3 % | 5,3° |
 

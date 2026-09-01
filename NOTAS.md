@@ -41,22 +41,22 @@ encabezado de `src/physics/fallSolver.ts` y en el aviso de la UI.
 Mantuve exactamente los 10 del proyecto original, hindi incluido. En un momento
 había puesto italiano en su lugar; lo revertí para no perder usuarios.
 
-## 7. El longline de 50 m a 1,8 kN toca el suelo por 39 cm
+## 7. El longline quedó justo, pero camina (resuelto)
 
-Con los valores que diste —50 m, 1,8 kN de pretensión, anclajes a 2,5 m— y 80 kg
-encima, el solver da **2,89 m de SAG**: el medio de la cinta queda **39 cm por debajo
-del piso**. La tensión sube sola de 1,8 a 3,3 kN al pisar, y aun así no alcanza.
+Con 50 m, 2,3 kN de pretensión y anclajes a 3 m, el SAG da **2,68 m** y quedan
+**32 cm de altura libre** con 80 kg encima. Ya no hay aviso de contacto con el suelo:
+los cuatro escenarios abren limpios.
 
-| tensión | SAG | libre |
+El margen es fino y depende del peso, que conviene tener presente:
+
+| peso | SAG | libre |
 |---|---|---|
-| 1,8 kN | 2,89 m | −0,39 m |
-| 2,5 kN | 2,60 m | −0,10 m |
-| 3,0 kN | 2,40 m | +0,10 m |
+| 60 kg | 2,27 m | +0,73 m |
+| 80 kg | 2,68 m | +0,32 m |
+| 100 kg | 3,02 m | **−0,02 m** |
 
-O sea que hacen falta unos **3 kN** para despegar del piso con anclajes a 2,5 m. El
-preset quedó con tus 1,8 kN y la app lo avisa en rojo, que es información verdadera:
-en una cinta de plaza floja de 50 m efectivamente se roza el piso en el medio. Si la
-tuya se camina entera, o está más tensa que 1,8 kN o los anclajes están más altos.
+O sea que con alguien de 100 kg esa misma cinta roza el piso en el medio. La app lo
+avisa sola al subir el peso.
 
 ## 8. Pista de tensión mínima — no la hice
 
