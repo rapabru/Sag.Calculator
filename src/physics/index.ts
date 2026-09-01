@@ -25,19 +25,19 @@ export function calculate(input: RigInput): CalcResult {
 
 /** Valores por defecto: el escenario "midline" del proyecto original. */
 export const DEFAULT_INPUT: RigInput = {
-  span: 70,
-  pretensionN: 3500,
+  span: 74,
+  pretensionN: 5000,
   personMassKg: 80,
-  personHeight: 1.67,
+  personHeight: 1.7,
   personPos: 0.5,
-  anchorHeight: 13,
+  anchorHeight: 14,
   mainWeightGm: 65,
   // El backup va con holgura, más largo que la principal: 20 % por defecto.
-  backupLength: 70 * 1.2,
+  backupLength: 74 * 1.2,
   backupWeightGm: 55,
   webbingElongationPct: 4,
   elongationLimitPct: 8,
   usesLeash: true,
   // Largo útil, del anillo al arnés y con los nudos ya hechos.
-  leashLength: 1.5,
+  leashLength: 1.0,
 };

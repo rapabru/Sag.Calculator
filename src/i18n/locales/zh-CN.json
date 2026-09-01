@@ -155,5 +155,8 @@
   "auth.signIn": "用 Google 登录",
   "auth.signOut": "退出登录",
   "guide.s6.title": "历史记录",
-  "guide.s6.body": "你尝试过的每套配置都会被记录，不重复保存没有变化的那些。点一条即可回到当时的设置。用 Google 登录后，历史记录会跨设备同步。"
+  "guide.s6.body": "你尝试过的每套配置都会被记录，不重复保存没有变化的那些。点一条即可回到当时的设置。用 Google 登录后，历史记录会跨设备同步。",
+  "font.decrease": "缩小文字",
+  "font.increase": "放大文字",
+  "chart.trueScaleBtn": "真实比例"
 }
