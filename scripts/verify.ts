@@ -1,4 +1,4 @@
-import { calculate, solveStatic, DEFAULT_INPUT, DISCIPLINE_PRESETS, WAIST_RATIO, G } from '../src/physics/index';
+import { calculate, solveStatic, minPretensionForClearance, DEFAULT_INPUT, DISCIPLINE_PRESETS, WAIST_RATIO, G } from '../src/physics/index';
 import type { RigInput } from '../src/physics/types';
 
 const f = (n: number, d = 2) => n.toFixed(d);
@@ -130,6 +130,7 @@ console.log(`${pass.length} OK, ${fail.length} fallas (fisica)`);
 // Geometria del grafico: la propiedad 1:1 y el encuadre
 // ---------------------------------------------------------------------------
 import { computeChartGeometry } from '../src/components/chartGeometry';
+import { sameInput } from '../src/history/storage';
 
 const pass2: string[] = [];
 const fail2: string[] = [];
@@ -331,6 +332,40 @@ console.log('\n=== 19. El encuadre llega a los pies y a la cabeza ===');
   check2('la cabeza de la persona parada entra', g.py(-DEFAULT_INPUT.personHeight + r.static.loaded.sagAtLoad) >= 0,
     `y=${f(g.py(-DEFAULT_INPUT.personHeight + r.static.loaded.sagAtLoad), 1)} px`);
   check2('la escala sigue siendo 1:1', Math.abs((g.py(4) - g.py(3)) - (g.px(4) - g.px(3))) < 1e-9, 'exacta');
+}
+
+console.log('\n=== 20. Tension minima para no tocar el suelo ===');
+{
+  const casos: Array<[number, number, number]> = [[50, 1.8, 2.5], [60, 2, 2.5], [100, 4, 3]];
+  for (const [span, kN, h] of casos) {
+    const base = rig({ span, pretensionN: kN * 1000, anchorHeight: h, usesLeash: false, backupLength: 0 });
+    const min = minPretensionForClearance(base);
+    const antes = calculate(base).static.groundClearance;
+    console.log(`  ${span} m @ ${kN} kN, anclaje ${h} m -> libre ${f(antes, 2)} m · minima ${min === null ? '—' : f(min / 1000, 2) + ' kN'}`);
+    check2(`hay minima cuando toca el suelo (${span} m)`, min !== null, min === null ? 'null' : f(min / 1000, 2));
+    if (min !== null) {
+      const despues = calculate({ ...base, pretensionN: min }).static.groundClearance;
+      check2(`aplicarla despega la cinta (${span} m)`, despues >= -1e-6, `libre ${f(despues, 4)} m`);
+      // Justo por debajo de la minima tiene que seguir tocando: es el umbral exacto.
+      const justoAbajo = calculate({ ...base, pretensionN: min * 0.97 }).static.groundClearance;
+      check2(`la minima es ajustada (${span} m)`, justoAbajo < 0, `a 97 % libre ${f(justoAbajo, 3)} m`);
+    }
+  }
+  const holgado = rig({ span: 100, pretensionN: 4000, anchorHeight: 60 });
+  check2('sin necesidad devuelve null', minPretensionForClearance(holgado) === null, 'null');
+}
+
+console.log('\n=== 21. Historial: solo entradas con cambios ===');
+{
+  const a = rig();
+  const b = rig();
+  const c = rig({ personMassKg: 81 });
+  check2('dos configuraciones iguales no son un cambio', sameInput(a, b), 'iguales');
+  check2('un kilo de diferencia si lo es', !sameInput(a, c), 'distintas');
+  // Ir y volver al mismo valor no deja rastro.
+  const ida = rig({ span: 90 });
+  const vuelta = rig({ span: DEFAULT_INPUT.span });
+  check2('ida y vuelta al mismo valor no cuenta como cambio', sameInput(a, vuelta) && !sameInput(a, ida), 'ok');
 }
 
 console.log('\n' + '='.repeat(60));

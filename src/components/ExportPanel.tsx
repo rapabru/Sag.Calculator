@@ -9,11 +9,13 @@ interface Props {
   result: CalcResult;
   /** Marca el documento para que la hoja de impresión sepa qué mostrar. */
   onModeChange: (opts: { detailed: boolean; includeChart: boolean }) => void;
+  /** 'up' para la barra del gráfico, 'down' para la barra superior. */
+  placement?: 'up' | 'down';
 }
 
 type Status = 'idle' | 'working' | 'done' | 'error';
 
-export const ExportPanel: React.FC<Props> = ({ getChart, input, result, onModeChange }) => {
+export const ExportPanel: React.FC<Props> = ({ getChart, input, result, onModeChange, placement = 'up' }) => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [detailed, setDetailed] = useState(true);
@@ -101,12 +103,12 @@ export const ExportPanel: React.FC<Props> = ({ getChart, input, result, onModeCh
 
   return (
     <div className="export-wrap no-print">
-      <button className="btn" onClick={() => setOpen((v) => !v)} aria-expanded={open}>
+      <button className="btn no-print" onClick={() => setOpen((v) => !v)} aria-expanded={open}>
         {t('export.button')}
       </button>
 
       {open && (
-        <div className="export-pop" role="dialog" aria-label={t('export.button')}>
+        <div className={`export-pop export-pop--${placement}`} role="dialog" aria-label={t('export.button')}>
           <div className="export-group">
             <span className="export-label">{t('export.detail')}</span>
             <div className="export-seg" role="radiogroup" aria-label={t('export.detail')}>

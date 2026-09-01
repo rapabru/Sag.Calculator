@@ -4,7 +4,7 @@ import type { CalcResult, RigInput } from './types';
 
 export * from './types';
 export * from './constants';
-export { prepareRig, solveStatic } from './staticSolver';
+export { prepareRig, solveStatic, minPretensionForClearance } from './staticSolver';
 export { solveFall } from './fallSolver';
 
 export function calculate(input: RigInput): CalcResult {

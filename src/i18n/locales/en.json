@@ -144,5 +144,16 @@
   "guide.s5.body": "Export to JPG, PNG or PDF, with or without the full data, with or without the chart. On a phone you can share it straight away.",
   "field.usesLeash": "Walked on a leash",
   "field.noLeash": "With no leash there is no fall to work out. Tricklines and longlines are walked untethered: you step off or jump, you do not end up hanging.",
-  "banner.tricklineJumps": "<b>Trickline: the jumping discipline.</b> Rigged under very high tension — 8 to 11 kN at rest. During jumps, peaks on anchors and hardware easily reach {low}–{high} kN, with readings up to {extreme} kN on hard landings by heavier athletes. Those peaks are not in this calculation, which is static."
+  "banner.tricklineJumps": "<b>Trickline: the jumping discipline.</b> Rigged under very high tension — 8 to 11 kN at rest. During jumps, peaks on anchors and hardware easily reach {low}–{high} kN, with readings up to {extreme} kN on hard landings by heavier athletes. Those peaks are not in this calculation, which is static.",
+  "field.pretension.min": "min. {kn} kN",
+  "field.pretension.minTitle": "Minimum tension to keep the webbing off the ground. Tap to apply it.",
+  "history.title": "History",
+  "history.clear": "clear",
+  "history.delete": "Remove from history",
+  "history.empty": "Nothing yet. An entry is saved whenever you change the setup and the result settles.",
+  "history.sagShort": "SAG",
+  "auth.signIn": "Sign in with Google",
+  "auth.signOut": "Sign out",
+  "guide.s6.title": "History",
+  "guide.s6.body": "Every setup you try is recorded, skipping the ones that do not change anything. Tap one to go back to it. Sign in with Google and the history follows you across devices."
 }

@@ -19,7 +19,19 @@ import {
   type SavedWebbing,
 } from './presets/storage';
 import { GuideTour, hasSeenGuide } from './components/GuideTour';
-import { TRICKLINE_JUMP_PEAK_KN } from './physics';
+import { TRICKLINE_JUMP_PEAK_KN, minPretensionForClearance } from './physics';
+import { useSession } from './auth/useSession';
+import { AccountButton } from './components/AccountButton';
+import { HistoryPanel } from './components/HistoryPanel';
+import {
+  clearHistory,
+  deleteEntry,
+  loadHistory,
+  recordEntry,
+  sameInput,
+  syncFromRemote,
+  type HistoryEntry,
+} from './history/storage';
 import { useTranslation } from './i18n/useTranslation';
 import { ParamSlider } from './components/ParamSlider';
 import { SagChart } from './components/SagChart';
@@ -47,6 +59,10 @@ const App: React.FC = () => {
   const [savedRigs, setSavedRigs] = useState<SavedRig[]>(() => loadRigs());
   const [savedWebbings, setSavedWebbings] = useState<SavedWebbing[]>(() => loadWebbings());
   const [guideOpen, setGuideOpen] = useState(() => !hasSeenGuide());
+  const [history, setHistory] = useState<HistoryEntry[]>(() => loadHistory());
+  const auth = useSession();
+  /** Estado con el que se abrió la app: sirve para no registrar sesiones sin tocar nada. */
+  const initialInputRef = useRef<RigInput>(DEFAULT_INPUT);
 
   const rafRef = useRef<number | null>(null);
   const timerRef = useRef<number | null>(null);
@@ -67,6 +83,25 @@ const App: React.FC = () => {
   // Recálculo en vivo: el solver completo tarda menos de 1 ms, así que no hace
   // falta ningún botón «calcular» ni debounce.
   const result = useMemo(() => calculate(input), [input]);
+
+  /**
+   * El historial se escribe tras una pausa y sólo si la configuración cambió:
+   * arrastrar un slider no debe dejar cien entradas, y abrir la app sin tocar
+   * nada no debe dejar ninguna.
+   */
+  useEffect(() => {
+    if (sameInput(input, initialInputRef.current)) return;
+    const id = window.setTimeout(() => setHistory(recordEntry(input, result)), 1500);
+    return () => window.clearTimeout(id);
+  }, [input, result]);
+
+  // Al entrar con cuenta, se trae lo guardado y se mezcla con lo local.
+  useEffect(() => {
+    if (auth.session) void syncFromRemote().then(setHistory);
+  }, [auth.session]);
+
+  /** Pretensión mínima para que la cinta no roce el suelo. */
+  const minTension = useMemo(() => minPretensionForClearance(input), [input]);
 
   const stopAnimation = useCallback(() => {
     if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
@@ -198,7 +233,18 @@ const App: React.FC = () => {
           <p>{t('app.subtitle')}</p>
         </div>
         <div className="topbar-spacer" />
-        <div className="topbar-tools">
+        <div className="topbar-tools" data-tour="export">
+          <ExportPanel
+            getChart={() => chartBoxRef.current?.querySelector('svg') ?? null}
+            input={input}
+            result={result}
+            placement="down"
+            onModeChange={({ detailed, includeChart }) => {
+              document.body.classList.toggle('print-compact', !detailed);
+              document.body.classList.toggle('print-nochart', !includeChart);
+            }}
+          />
+          <AccountButton auth={auth} />
           <LanguageSelector />
           <button
             className="icon-btn no-print"
@@ -289,6 +335,21 @@ const App: React.FC = () => {
               <ParamSlider
                 label={t('field.pretension')} symbol="T₀" unit="kN"
                 value={input.pretensionN / 1000} min={0.2} max={25} step={0.1} decimals={2}
+                action={
+                  minTension !== null && Math.abs(minTension - input.pretensionN) > 20 ? (
+                    <button
+                      type="button"
+                      className={`mini-btn no-print${result.static.groundClearance <= 0 ? ' is-urgent' : ''}`}
+                      title={t('field.pretension.minTitle')}
+                      onClick={() => {
+                        set('pretensionN')(Math.ceil(minTension / 100) * 100);
+                        playIfChanged();
+                      }}
+                    >
+                      {t('field.pretension.min', { kn: (minTension / 1000).toFixed(2) })}
+                    </button>
+                  ) : undefined
+                }
                 onChange={(v) => set('pretensionN')(v * 1000)} onCommit={playIfChanged}
               />
               <ParamSlider
@@ -538,17 +599,6 @@ const App: React.FC = () => {
                       </button>
                     </>
                   )}
-                  <span data-tour="export">
-                    <ExportPanel
-                      getChart={() => chartBoxRef.current?.querySelector('svg') ?? null}
-                      input={input}
-                      result={result}
-                      onModeChange={({ detailed, includeChart }) => {
-                        document.body.classList.toggle('print-compact', !detailed);
-                        document.body.classList.toggle('print-nochart', !includeChart);
-                      }}
-                    />
-                  </span>
                   <div className="zoom">
                     <span style={{ whiteSpace: 'nowrap' }}>{t('chart.zoom')}</span>
                     <input
@@ -608,6 +658,18 @@ const App: React.FC = () => {
               </div>
             </section>
           )}
+
+          <HistoryPanel
+            entries={history}
+            onRestore={(saved) => {
+              setInput(saved);
+              setBackupAuto(false);
+              lastPlayedRef.current = null;
+              pendingPresetRef.current = true;
+            }}
+            onDelete={(id) => setHistory(deleteEntry(id))}
+            onClear={() => setHistory(clearHistory())}
+          />
 
           <PhysicsNotes />
         </div>

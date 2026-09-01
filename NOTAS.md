@@ -58,12 +58,12 @@ El margen es fino y depende del peso, que conviene tener presente:
 O sea que con alguien de 100 kg esa misma cinta roza el piso en el medio. La app lo
 avisa sola al subir el peso.
 
-## 8. Pista de tensión mínima — no la hice
+## 8. Pista de tensión mínima — hecha
 
-Sale casi gratis invirtiendo el solver que ya existe: bisección sobre la pretensión que
-deja la altura libre en cero, y mostrar «necesitás al menos X kN para no tocar el suelo».
-Contestaría sola la nota anterior y también tu comentario de que en highline la tensión
-depende de la distancia. La dejé afuera para no ampliar el alcance por mi cuenta.
+Está debajo del control de pretensión: muestra la tensión más baja con la que la cinta
+no toca el suelo y se aplica tocándola. Sale de invertir el mismo solver por bisección
+(`minPretensionForClearance`). Cuando la configuración ya roza el piso, el atajo se
+resalta en rojo.
 
 ## 9. Saqué el campo de altura del arnés
 
@@ -88,10 +88,10 @@ el slider a ×1 para que el dibujo vuelva a ser exacto. La persona no se estira 
 
 ## 6. Qué falta decidir
 
-- **Dónde vive esto.** Está en `~/Desktop/sag calculator` como proyecto nuevo, sin
-  git. El repo viejo (`rapabru/Sag.Calculator`, con deploy en Vercel) quedó intacto.
-  Si querés publicarlo, hay que decidir si es una rama del repo existente, un
-  reemplazo de `main`, o un repo nuevo.
 - **Presets de cinta.** Los valores de `WEBBING_PRESETS` en
   `src/physics/constants.ts` son típicos, no de un modelo concreto. Si tenés las
   fichas de las cintas que usás, poné los datos reales (g/m y % a 10 kN).
+  Quedó para la etapa siguiente.
+- **Configurar Supabase.** El código está listo y es inerte hasta que existan las
+  variables de entorno. Los pasos están en el README; hacen falta un proyecto de
+  Supabase y una credencial OAuth de Google.

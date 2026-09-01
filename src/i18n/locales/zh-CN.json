@@ -144,5 +144,16 @@
   "guide.s5.body": "导出为 JPG、PNG 或 PDF，可含或不含完整数据，可含或不含图表。手机上可直接分享。",
   "field.usesLeash": "系挂绳行走",
   "field.noLeash": "没有挂绳就没有坠落可算。技巧线和长线都是不系绳行走的：你会走下来或跳下来，而不会悬挂着。",
-  "banner.tricklineJumps": "<b>技巧线：跳跃项目。</b>架设张力非常高——静止状态 8 至 11 kN。跳跃时锚点与金属件上的峰值轻易达到 {low}–{high} kN，体重较大的运动员硬着陆时曾记录到 {extreme} kN。本计算是静态的，不含这些峰值。"
+  "banner.tricklineJumps": "<b>技巧线：跳跃项目。</b>架设张力非常高——静止状态 8 至 11 kN。跳跃时锚点与金属件上的峰值轻易达到 {low}–{high} kN，体重较大的运动员硬着陆时曾记录到 {extreme} kN。本计算是静态的，不含这些峰值。",
+  "field.pretension.min": "最低 {kn} kN",
+  "field.pretension.minTitle": "让扁带不触地所需的最低张力。点击即可套用。",
+  "history.title": "历史记录",
+  "history.clear": "清空",
+  "history.delete": "从历史中移除",
+  "history.empty": "暂时还没有。每当你更改配置且结果稳定下来，就会保存一条记录。",
+  "history.sagShort": "SAG",
+  "auth.signIn": "用 Google 登录",
+  "auth.signOut": "退出登录",
+  "guide.s6.title": "历史记录",
+  "guide.s6.body": "你尝试过的每套配置都会被记录，不重复保存没有变化的那些。点一条即可回到当时的设置。用 Google 登录后，历史记录会跨设备同步。"
 }

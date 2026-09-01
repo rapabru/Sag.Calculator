@@ -144,5 +144,16 @@
   "guide.s5.body": "Exportá a JPG, PNG o PDF, con o sin los datos completos, con o sin el gráfico. Desde el celular podés compartirlo directo.",
   "field.usesLeash": "Se camina amarrado (leash)",
   "field.noLeash": "Sin leash no hay caída que calcular. En trickline y longline se camina suelto: te bajás caminando o saltás, no quedás colgado.",
-  "banner.tricklineJumps": "<b>Trickline: la modalidad de saltos.</b> Va montada bajo tensiones muy altas — entre 8 y 11 kN en reposo. Durante los saltos los picos sobre anclajes y herrajes llegan con facilidad a {low}–{high} kN, con registros de hasta {extreme} kN en caídas secas de atletas pesados. Esos picos no están en este cálculo, que es estático."
+  "banner.tricklineJumps": "<b>Trickline: la modalidad de saltos.</b> Va montada bajo tensiones muy altas — entre 8 y 11 kN en reposo. Durante los saltos los picos sobre anclajes y herrajes llegan con facilidad a {low}–{high} kN, con registros de hasta {extreme} kN en caídas secas de atletas pesados. Esos picos no están en este cálculo, que es estático.",
+  "field.pretension.min": "mín. {kn} kN",
+  "field.pretension.minTitle": "Tensión mínima para que la cinta no toque el suelo. Tocá para aplicarla.",
+  "history.title": "Historial",
+  "history.clear": "vaciar",
+  "history.delete": "Borrar del historial",
+  "history.empty": "Todavía no hay nada. Se guarda una entrada cada vez que cambiás la configuración y el resultado se asienta.",
+  "history.sagShort": "SAG",
+  "auth.signIn": "Entrar con Google",
+  "auth.signOut": "Salir",
+  "guide.s6.title": "Historial",
+  "guide.s6.body": "Cada configuración que probás queda anotada, sin repetir las que no cambian. Tocá una para volver a ella. Si entrás con tu cuenta de Google, el historial te sigue entre dispositivos."
 }

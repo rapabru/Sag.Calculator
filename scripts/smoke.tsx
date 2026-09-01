@@ -54,6 +54,9 @@ check('el SAG estático llega a la pantalla', html.includes(r.static.loaded.sagM
 check('el punto más bajo de la caída llega a la pantalla', html.includes(r.fall.lowestBodyPoint.toFixed(2)), r.fall.lowestBodyPoint.toFixed(2));
 check('las etiquetas de escenario traen el vano del dato', html.includes('Longline') && html.includes('50') && !html.includes('Longline 200'));
 check('hay interruptor de leash', html.includes('Se camina amarrado'));
+check('panel de historial presente', html.includes('Historial'));
+check('el botón de exportar está en la barra superior', html.indexOf('Exportar') < html.indexOf('Perfil de la cinta'));
+check('sin login visible sin credenciales de Supabase', !html.includes('Entrar con Google'));
 check('la fuerza pico llega a la pantalla', html.includes((r.fall.peakForceN / 1000).toFixed(2)), (r.fall.peakForceN / 1000).toFixed(2));
 check('se dibuja el perfil de la cinta (path SVG)', (html.match(/<path/g) ?? []).length >= 3, `${(html.match(/<path/g) ?? []).length} paths`);
 check('el gráfico tiene viewBox', /viewBox="0 0 1000 \d/.test(html));
@@ -85,7 +88,9 @@ check('el arnés derivado aparece', html.includes('0.97') || html.includes('0,97
     check('la guía renderiza', guide.length > 200, `${guide.length} bytes`);
     // React separa los nodos de texto con comentarios en SSR: "1<!-- --> / <!-- -->5".
     const plano = guide.replace(/<!--[\s\S]*?-->/g, '');
-    check('la guía arranca en el paso 1', plano.includes('1 / 5'), plano.match(/\d+ \/ \d+/)?.[0] ?? 'no encontrado');
+    // Sin fijar el total: agregar un paso a la guía no debe romper el test.
+    const paso = plano.match(/(\d+) \/ (\d+)/);
+    check('la guía arranca en el paso 1', paso?.[1] === '1' && Number(paso[2]) >= 5, paso?.[0] ?? 'no encontrado');
     check('la guía tiene botón de saltear', guide.includes('Saltear'));
     check('la guía explica la escala', /escala/i.test(guide) || guide.includes('SAG'));
     check('sin claves de traducción sin resolver en la guía', !/guide\.[a-z0-9.]+/i.test(guide));

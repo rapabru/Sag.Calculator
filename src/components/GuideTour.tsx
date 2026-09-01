@@ -24,6 +24,7 @@ const STEPS: Step[] = [
   { target: 'presets', titleKey: 'guide.s3.title', bodyKey: 'guide.s3.body' },
   { target: 'fall', titleKey: 'guide.s4.title', bodyKey: 'guide.s4.body' },
   { target: 'export', titleKey: 'guide.s5.title', bodyKey: 'guide.s5.body' },
+  { target: 'history', titleKey: 'guide.s6.title', bodyKey: 'guide.s6.body' },
 ];
 
 export function hasSeenGuide(): boolean {

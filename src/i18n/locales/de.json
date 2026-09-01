@@ -144,5 +144,16 @@
   "guide.s5.body": "Export als JPG, PNG oder PDF, mit oder ohne die vollständigen Daten, mit oder ohne Diagramm. Am Handy direkt teilbar.",
   "field.usesLeash": "Mit Leash gegangen",
   "field.noLeash": "Ohne Leash gibt es keinen Sturz zu berechnen. Trickline und Longline geht man ungesichert: man steigt ab oder springt, man hängt nicht.",
-  "banner.tricklineJumps": "<b>Trickline: die Sprungdisziplin.</b> Wird sehr hart gespannt — 8 bis 11 kN in Ruhe. Bei Sprüngen erreichen die Spitzen an Ankern und Hardware leicht {low}–{high} kN, mit Messungen bis {extreme} kN bei harten Landungen schwerer Athleten. Diese Spitzen stecken nicht in dieser Rechnung, die statisch ist."
+  "banner.tricklineJumps": "<b>Trickline: die Sprungdisziplin.</b> Wird sehr hart gespannt — 8 bis 11 kN in Ruhe. Bei Sprüngen erreichen die Spitzen an Ankern und Hardware leicht {low}–{high} kN, mit Messungen bis {extreme} kN bei harten Landungen schwerer Athleten. Diese Spitzen stecken nicht in dieser Rechnung, die statisch ist.",
+  "field.pretension.min": "min. {kn} kN",
+  "field.pretension.minTitle": "Mindestspannung, damit das Band den Boden nicht berührt. Zum Übernehmen tippen.",
+  "history.title": "Verlauf",
+  "history.clear": "leeren",
+  "history.delete": "Aus dem Verlauf entfernen",
+  "history.empty": "Noch nichts. Ein Eintrag entsteht, sobald du das Setup änderst und sich das Ergebnis setzt.",
+  "history.sagShort": "SAG",
+  "auth.signIn": "Mit Google anmelden",
+  "auth.signOut": "Abmelden",
+  "guide.s6.title": "Verlauf",
+  "guide.s6.body": "Jedes ausprobierte Setup wird notiert, ohne die zu wiederholen, die nichts ändern. Tippe eines an, um dorthin zurückzukehren. Mit Google-Anmeldung folgt dir der Verlauf über Geräte hinweg."
 }

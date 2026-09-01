@@ -109,6 +109,11 @@ son lo que llega al suelo.
 **Terminología:** se dice CINTA y se dice SAG, en los diez idiomas. Hay un chequeo
 automático que falla si alguna etiqueta de resultado vuelve a la palabra local.
 
+**Tensión mínima:** debajo del control de pretensión aparece la tensión más baja con
+la que la cinta no toca el suelo, calculada invirtiendo el mismo solver por bisección.
+Se toca y se aplica. Cuando la configuración actual ya roza el piso, el atajo se
+resalta en rojo.
+
 **Presets propios:** se puede guardar la configuración completa y la cinta actual con
 un nombre, y volver a ellas con un toque. Viven en `localStorage`; el formato lleva
 `id` y `savedAt` para poder sincronizarlos cuando entre el login con cuenta.
@@ -117,14 +122,63 @@ un nombre, y volver a ellas con un toque. Viven en `localStorage`; el formato ll
 escenarios, el panel de caída y la exportación. Aparece la primera vez, se cierra
 tocando afuera, y se vuelve a abrir desde el botón «?» de la barra.
 
-**Exportar:** JPG, PNG y PDF, con o sin los datos completos, con o sin el gráfico, y
-compartir directo en el celular. Sin dependencias nuevas: el SVG se rasteriza en un
+**Exportar:** el botón vive en la barra superior, siempre a la vista. JPG, PNG y PDF,
+con o sin los datos completos, con o sin el gráfico, y compartir directo en el celular. Sin dependencias nuevas: el SVG se rasteriza en un
 canvas y el PDF sale del diálogo de impresión del navegador.
 
 **El gráfico arranca con el eje vertical exagerado ×1,5**, porque a escala exacta el
 sag suele ser tan chico frente al vano que cuesta leerlo. El cartel dice «no es
 escala real» hasta que lo bajás a ×1. La figura de la persona nunca se estira con la
 exageración: sólo se estiran los ejes.
+
+## Cuenta e historial
+
+Cada vez que cambiás la configuración y el resultado se asienta, queda una entrada en
+el **historial**. Sólo se guardan las que cambian algo: mover un slider de ida y
+vuelta hasta el mismo valor no deja rastro. Tocando una entrada volvés a esa
+configuración.
+
+El historial vive en `localStorage` y funciona sin conexión ni cuenta. Si además
+configurás Supabase, aparece un botón de **entrar con Google** y el historial se
+sincroniza entre dispositivos.
+
+### Configurar Supabase (opcional, unos minutos)
+
+1. Creá un proyecto en [supabase.com](https://supabase.com).
+2. **Authentication → Providers → Google**: activalo y pegá el Client ID y Secret de
+   una credencial OAuth de Google Cloud. En Google Cloud, la URI de redirección
+   autorizada es la que Supabase te muestra ahí mismo
+   (`https://<tu-proyecto>.supabase.co/auth/v1/callback`).
+3. **Authentication → URL Configuration**: agregá tu dominio de Vercel y
+   `http://localhost:5173` a las Redirect URLs.
+4. **SQL Editor**: creá la tabla y sus políticas.
+
+   ```sql
+   create table public.sag_history (
+     id        text primary key,
+     user_id   uuid not null references auth.users (id) on delete cascade,
+     saved_at  timestamptz not null default now(),
+     input     jsonb not null,
+     summary   jsonb not null
+   );
+
+   create index sag_history_user_saved on public.sag_history (user_id, saved_at desc);
+
+   alter table public.sag_history enable row level security;
+
+   -- Cada quien ve y escribe solamente sus propias filas.
+   create policy "own rows" on public.sag_history
+     for all
+     using (auth.uid() = user_id)
+     with check (auth.uid() = user_id);
+   ```
+
+5. Copiá `.env.example` a `.env.local` y completá `VITE_SUPABASE_URL` y
+   `VITE_SUPABASE_ANON_KEY` (Project Settings → API). En Vercel, cargalas como
+   variables de entorno del proyecto.
+
+La librería de Supabase se importa de forma dinámica y sólo cuando hay
+credenciales, así que quien no usa la cuenta no descarga esos 57 kB.
 
 ## Créditos
 

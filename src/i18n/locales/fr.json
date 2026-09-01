@@ -144,5 +144,16 @@
   "guide.s5.body": "Exportez en JPG, PNG ou PDF, avec ou sans les données complètes, avec ou sans le graphique. Sur téléphone vous pouvez le partager directement.",
   "field.usesLeash": "Marché avec longe",
   "field.noLeash": "Sans longe il n'y a pas de chute à calculer. Les tricklines et longlines se marchent sans être attaché : on descend ou on saute, on ne reste pas suspendu.",
-  "banner.tricklineJumps": "<b>Trickline : la discipline des sauts.</b> Montée sous très forte tension — 8 à 11 kN au repos. Pendant les sauts, les pics sur les ancrages et la quincaillerie atteignent facilement {low}–{high} kN, avec des relevés jusqu'à {extreme} kN lors de réceptions sèches d'athlètes lourds. Ces pics ne sont pas dans ce calcul, qui est statique."
+  "banner.tricklineJumps": "<b>Trickline : la discipline des sauts.</b> Montée sous très forte tension — 8 à 11 kN au repos. Pendant les sauts, les pics sur les ancrages et la quincaillerie atteignent facilement {low}–{high} kN, avec des relevés jusqu'à {extreme} kN lors de réceptions sèches d'athlètes lourds. Ces pics ne sont pas dans ce calcul, qui est statique.",
+  "field.pretension.min": "min. {kn} kN",
+  "field.pretension.minTitle": "Tension minimale pour que la sangle ne touche pas le sol. Touchez pour l'appliquer.",
+  "history.title": "Historique",
+  "history.clear": "vider",
+  "history.delete": "Retirer de l'historique",
+  "history.empty": "Rien pour l'instant. Une entrée est enregistrée dès que vous changez la configuration et que le résultat se stabilise.",
+  "history.sagShort": "SAG",
+  "auth.signIn": "Se connecter avec Google",
+  "auth.signOut": "Se déconnecter",
+  "guide.s6.title": "Historique",
+  "guide.s6.body": "Chaque configuration essayée est notée, sans répéter celles qui ne changent rien. Touchez-en une pour y revenir. Connectez-vous avec Google et l'historique vous suit d'un appareil à l'autre."
 }

@@ -251,6 +251,8 @@ body {
   white-space: nowrap;
 }
 .mini-btn:hover { color: var(--webbing); border-color: var(--webbing); }
+/* Cuando la cinta ya toca el suelo, el atajo a la tensión mínima se destaca. */
+.mini-btn.is-urgent { color: var(--danger); border-color: var(--danger); background: var(--danger-soft); }
 
 .field-unit {
   color: var(--text-faint);
@@ -599,8 +601,6 @@ footer.credits a:hover { color: var(--webbing); border-color: var(--webbing); }
 
 .export-pop {
   position: absolute;
-  bottom: calc(100% + 8px);
-  left: 0;
   z-index: 20;
   min-width: 268px;
   padding: 12px;
@@ -620,6 +620,9 @@ footer.credits a:hover { color: var(--webbing); border-color: var(--webbing); }
   font-weight: 650;
   margin-bottom: 5px;
 }
+.export-pop--up { bottom: calc(100% + 8px); left: 0; }
+.export-pop--down { top: calc(100% + 8px); right: 0; }
+
 .export-seg { display: flex; gap: 6px; }
 .export-actions { display: flex; flex-wrap: wrap; gap: 6px; }
 .export-note {
@@ -753,4 +756,46 @@ footer.credits a:hover { color: var(--webbing); border-color: var(--webbing); }
 @media print {
   .guide-root { display: none !important; }
   body.print-nochart .chart-wrap { display: none !important; }
+}
+
+
+/* ---------- historial ---------- */
+
+.history-list { list-style: none; margin: 0; padding: 0; }
+
+.history-list li {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid var(--border);
+}
+.history-list li:last-child { border-bottom: none; }
+.history-list li.is-danger .history-out { color: var(--danger); }
+
+.history-row {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 62px 1fr auto;
+  gap: 10px;
+  align-items: baseline;
+  background: none;
+  border: none;
+  padding: 8px 4px;
+  text-align: left;
+  cursor: pointer;
+  color: var(--text-dim);
+  font-family: inherit;
+  font-size: 11.5px;
+  min-width: 0;
+}
+.history-row:hover { color: var(--text); background: var(--surface-2); }
+
+.history-when { color: var(--text-faint); font-size: 10.5px; }
+.history-rig { color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.history-out { color: var(--webbing); white-space: nowrap; font-size: 10.5px; }
+
+.history-list .chip-x { border: none; border-radius: 0; background: none; }
+
+@media (max-width: 520px) {
+  .history-row { grid-template-columns: 1fr auto; }
+  .history-when { display: none; }
 }
