@@ -31,7 +31,7 @@ export interface DisciplinePreset {
 export const DISCIPLINE_PRESETS: DisciplinePreset[] = [
   { id: 'trickline', span: 20,  pretensionKN: 4.0, anchorHeight: 1.2 },
   { id: 'midline',   span: 70,  pretensionKN: 3.5, anchorHeight: 13 },
-  { id: 'longline',  span: 60,  pretensionKN: 2.0, anchorHeight: 2.5 },
+  { id: 'longline',  span: 60,  pretensionKN: 5.0, anchorHeight: 2.5 },
   { id: 'highline',  span: 100, pretensionKN: 4.0, anchorHeight: 60 },
 ];
 
