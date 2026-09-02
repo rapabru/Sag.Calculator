@@ -155,6 +155,39 @@ console.log('\n=== 10. Escala 1:1 del grafico ===');
   }
 }
 
+console.log('\n=== 10b. El viewBox se ajusta al ancho real del contenedor (celular) ===');
+{
+  // Antes, el viewBox medía siempre 1000 unidades sin importar el ancho real
+  // del contenedor: en un celular de ~340 px de ancho, el <svg> entero se
+  // renderizaba comprimido a un tercio de su tamaño. El piso MIN_PERSON_PX
+  // (14, en SagChart.tsx) está pensado como 14 px REALES, pero como estaba
+  // definido en unidades de viewBox, esa compresión externa se lo comía
+  // igual: 14 unidades de un viewBox de 1000 renderizado en 340 px reales
+  // terminaban siendo ~4,8 px de verdad. Ahora el componente mide el
+  // contenedor real y lo pasa como vbW, así que 1 unidad de viewBox equivale
+  // a ~1 px real sin importar la pantalla, y el piso de 14 por fin es 14 px
+  // reales.
+  const MIN_PERSON_PX = 20; // debe coincidir con SagChart.tsx
+  const scenario = { span: 74, staticDepth: 2.71, fallDepth: 10.48, groundDepth: 14, topExtent: 1.9, exaggeration: 1 };
+  const desktop = computeChartGeometry({ ...scenario, vbW: 1000 });
+  const phone = computeChartGeometry({ ...scenario, vbW: 340 });
+  const personHeight = 1.7;
+  const clampedOnDesktop = Math.max(personHeight * desktop.scale, MIN_PERSON_PX);
+  const clampedOnPhone = Math.max(personHeight * phone.scale, MIN_PERSON_PX);
+  // Antes del fix: el piso se aplicaba en unidades de viewBox y LUEGO todo el
+  // <svg> (ya clampeado) se comprimía otra vez al renderizarse en 340 px reales.
+  const oldBrokenPx = clampedOnDesktop * (340 / 1000);
+  console.log(`  persona en pantalla: desktop ${clampedOnDesktop.toFixed(1)} px | celular (con el fix) ${clampedOnPhone.toFixed(1)} px | celular (bug viejo) ${oldBrokenPx.toFixed(1)} px`);
+  check2('en el celular el piso de la persona es de verdad ~20 px', clampedOnPhone >= MIN_PERSON_PX - 0.5, `${clampedOnPhone.toFixed(1)} px`);
+  check2('mejora claramente sobre el bug viejo', clampedOnPhone > oldBrokenPx * 2, `${clampedOnPhone.toFixed(1)} px vs ${oldBrokenPx.toFixed(1)} px (roto)`);
+  check2(
+    'la escala 1:1 se mantiene aunque el viewBox sea angosto',
+    Math.abs((phone.px(11) - phone.px(10)) - (phone.py(11) - phone.py(10))) < 1e-9,
+    'exacta',
+  );
+  check2('el alto del grafico no colapsa en un celular angosto', phone.vbH > 200, `${phone.vbH.toFixed(0)} px`);
+}
+
 console.log('\n=== 11. El dibujo refleja la proporcion real ===');
 {
   const trick = solveStatic(rig({ span: 20, pretensionN: 1500, anchorHeight: 1 }));
