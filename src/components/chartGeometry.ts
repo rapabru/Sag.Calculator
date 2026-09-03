@@ -32,6 +32,15 @@ export interface GeometryParams {
    */
   topExtent?: number;
   exaggeration: number;
+  /**
+   * Ancho real del viewBox en px CSS. Por defecto es VB_W (1000), pero el
+   * componente le pasa el ancho medido del contenedor: así una unidad de
+   * viewBox mide siempre ~1 px real, sin importar el ancho de pantalla. Sin
+   * esto, en un celular angosto el viewBox de 1000 unidades se comprime a un
+   * tercio de su tamaño y todo — texto, la persona, los trazos — encoge con
+   * él, quedando ilegible.
+   */
+  vbW?: number;
 }
 
 export interface ChartGeometry {
@@ -47,6 +56,8 @@ export interface ChartGeometry {
   groundDepth: number;
   /** Profundidad del borde inferior del encuadre (m). */
   bottom: number;
+  /** Ancho real del viewBox usado (ver GeometryParams.vbW). */
+  vbW: number;
   vbH: number;
   innerH: number;
 }
@@ -54,6 +65,8 @@ export interface ChartGeometry {
 export function computeChartGeometry(p: GeometryParams): ChartGeometry {
   const span = Math.max(p.span, 0.01);
   const exaggeration = Math.max(p.exaggeration, 1e-6);
+  const vbW = Math.max(p.vbW ?? VB_W, PAD_L + PAD_R + 60);
+  const innerW = vbW - PAD_L - PAD_R;
 
   const xPad = span * 0.045;
   const xMin = -xPad;
@@ -70,14 +83,14 @@ export function computeChartGeometry(p: GeometryParams): ChartGeometry {
   const cyTop = -headroom * exaggeration;
   const cyRange = Math.max(bottom * exaggeration - cyTop, 1e-6);
 
-  let scale = INNER_W / xRange;
+  let scale = innerW / xRange;
   let contentH = cyRange * scale;
   if (contentH > MAX_INNER_H) {
     scale = MAX_INNER_H / cyRange;
     contentH = MAX_INNER_H;
   }
   const innerH = Math.max(contentH, MIN_INNER_H);
-  const offX = PAD_L + (INNER_W - xRange * scale) / 2;
+  const offX = PAD_L + (innerW - xRange * scale) / 2;
   const offY = PAD_T + (innerH - contentH) / 2;
 
   return {
@@ -88,6 +101,7 @@ export function computeChartGeometry(p: GeometryParams): ChartGeometry {
     showGround,
     groundDepth: p.groundDepth,
     bottom,
+    vbW,
     vbH: PAD_T + innerH + PAD_B,
     innerH,
   };

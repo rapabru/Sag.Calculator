@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { CalcResult, RigInput } from '../physics';
 import { useTranslation } from '../i18n/useTranslation';
 import { PAD_B, PAD_L, PAD_R, PAD_T, VB_W, computeChartGeometry } from './chartGeometry';
@@ -20,7 +20,7 @@ import { PersonFigure } from './PersonFigure';
  */
 
 /** Debajo de esto la figura no se leería, así que se deja de respetar la escala. */
-const MIN_PERSON_PX = 14;
+const MIN_PERSON_PX = 20;
 
 interface Props {
   input: RigInput;
@@ -82,6 +82,26 @@ export const SagChart: React.FC<Props> = ({
   const svgRef = useRef<SVGSVGElement>(null);
   const dragging = useRef(false);
 
+  // El viewBox mide, en px CSS, lo mismo que el contenedor real. Así una
+  // unidad de viewBox equivale a ~1 px de pantalla sin importar el ancho:
+  // en un celular angosto, sin esto, el viewBox fijo de 1000 unidades se
+  // comprime a un tercio y todo el dibujo —texto, la persona, los trazos—
+  // encoge con él. VB_W (1000) queda como valor inicial hasta medir, así que
+  // en SSR (sin layout real) el viewBox sigue siendo "0 0 1000 …".
+  const [measuredW, setMeasuredW] = useState(VB_W);
+  useLayoutEffect(() => {
+    const el = svgRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    const measure = () => {
+      const w = el.getBoundingClientRect().width;
+      if (w > 0) setMeasuredW(w);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
   const stat = result.static;
   const fall = result.fall;
   const span = Math.max(input.span, 0.01);
@@ -100,6 +120,7 @@ export const SagChart: React.FC<Props> = ({
         // cabeza queda por encima de la línea de anclajes.
         topExtent: Math.max(0, input.personHeight * 1.05 - stat.loaded.sagAtLoad),
         exaggeration,
+        vbW: measuredW,
       }),
     [
       span,
@@ -110,6 +131,7 @@ export const SagChart: React.FC<Props> = ({
       input.anchorHeight,
       input.personHeight,
       exaggeration,
+      measuredW,
     ],
   );
 
@@ -153,7 +175,7 @@ export const SagChart: React.FC<Props> = ({
     (e: React.PointerEvent<SVGSVGElement>) => {
       if (!svgRef.current) return;
       const rect = svgRef.current.getBoundingClientRect();
-      const vbX = ((e.clientX - rect.left) / rect.width) * VB_W;
+      const vbX = ((e.clientX - rect.left) / rect.width) * geom.vbW;
       const pos = geom.mFromPx(vbX) / span;
       onPersonPosChange(Math.min(Math.max(pos, 0.02), 0.98));
     },
@@ -175,7 +197,7 @@ export const SagChart: React.FC<Props> = ({
   return (
     <svg
       ref={svgRef}
-      viewBox={`0 0 ${VB_W} ${geom.vbH}`}
+      viewBox={`0 0 ${geom.vbW} ${geom.vbH}`}
       role="img"
       aria-label={t('chart.aria')}
       style={{ cursor: 'ew-resize' }}
@@ -197,12 +219,12 @@ export const SagChart: React.FC<Props> = ({
           <rect
             x={0}
             y={groundY}
-            width={VB_W}
+            width={geom.vbW}
             height={Math.max(geom.vbH - PAD_B - groundY, 0)}
             fill="var(--ground)"
             opacity={0.55}
           />
-          <line x1={0} y1={groundY} x2={VB_W} y2={groundY} stroke="var(--ground)" strokeWidth={2} />
+          <line x1={0} y1={groundY} x2={geom.vbW} y2={groundY} stroke="var(--ground)" strokeWidth={2} />
           <text x={6} y={groundY - 5} fontSize={10} fill="var(--text-faint)">
             {t('chart.ground')}
           </text>
@@ -219,7 +241,7 @@ export const SagChart: React.FC<Props> = ({
           <line
             x1={PAD_L - 6}
             y1={py(d)}
-            x2={VB_W - PAD_R}
+            x2={geom.vbW - PAD_R}
             y2={py(d)}
             stroke="var(--border)"
             strokeWidth={0.7}
@@ -380,7 +402,7 @@ export const SagChart: React.FC<Props> = ({
       </text>
 
       {personClamped && (
-        <text x={VB_W - PAD_R} y={PAD_T - 10} fontSize={9} textAnchor="end" fill="var(--text-faint)">
+        <text x={geom.vbW - PAD_R} y={PAD_T - 10} fontSize={9} textAnchor="end" fill="var(--text-faint)">
           {t('chart.personClamped')}
         </text>
       )}
