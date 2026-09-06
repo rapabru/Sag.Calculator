@@ -42,12 +42,16 @@ export interface DisciplinePreset {
  * suele estar entre 8 y 11 kN, y durante los saltos los picos sobre anclajes y
  * herrajes llegan con facilidad a 12–15 kN, con registros de hasta 16 kN en
  * caídas secas de atletas pesados.
+ *
+ * El leash de highline se deja explícitamente largo: Balance Community
+ * recomienda 12 pies (3,66 m) nudo a nudo para esa disciplina, bastante más
+ * que el 1 m de un leash de midline.
  */
 export const DISCIPLINE_PRESETS: DisciplinePreset[] = [
   { id: 'trickline', span: 20,  pretensionKN: 10.0, anchorHeight: 1.2, usesLeash: false, usesBackup: false },
   { id: 'midline',   span: 74,  pretensionKN: 5.0,  anchorHeight: 14,  usesLeash: true,  usesBackup: true, personHeight: 1.7, leashLength: 1.0 },
   { id: 'longline',  span: 50,  pretensionKN: 2.3,  anchorHeight: 3.0, usesLeash: false, usesBackup: false },
-  { id: 'highline',  span: 100, pretensionKN: 4.0,  anchorHeight: 60,  usesLeash: true,  usesBackup: true },
+  { id: 'highline',  span: 100, pretensionKN: 4.0,  anchorHeight: 60,  usesLeash: true,  usesBackup: true, leashLength: 3.66 },
 ];
 
 /** Picos medidos sobre los anclajes durante saltos de trickline (kN). */

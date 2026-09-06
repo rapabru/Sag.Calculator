@@ -95,7 +95,7 @@ export const FallResults: React.FC<{ input: RigInput; result: CalcResult }> = ({
         sub={t('res.peakForce.sub', { g: f.peakForceBodyWeights.toFixed(1) })}
       />
       <ResultTile
-        tone={f.peakAnchorTensionN > 25000 ? 'danger' : 'plain'}
+        tone={result.warnings.includes('highAnchorLoad') ? 'danger' : 'plain'}
         label={t('res.peakAnchor')}
         value={kN(f.peakAnchorTensionN)}
         unit="kN"
