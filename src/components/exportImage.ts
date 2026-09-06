@@ -74,7 +74,12 @@ export function buildExportSvg(chart: SVGSVGElement | null, o: ExportOptions): s
   const colors = palette();
   const withChart = o.includeChart && !!chart;
   const vb = (chart?.getAttribute('viewBox') ?? '0 0 1000 400').split(/\s+/).map(Number);
-  const chartH = withChart ? vb[3] : 0;
+  // El viewBox del gráfico en vivo mide lo mismo que su contenedor real (ver
+  // chartGeometry.ts): casi nunca son exactos W px. Sin este factor, el
+  // contenido —pensado para su propio ancho de viewBox— queda pegado a la
+  // izquierda del lienzo de exportación con el resto en blanco.
+  const chartScale = withChart && vb[2] > 0 ? W / vb[2] : 1;
+  const chartH = withChart ? vb[3] * chartScale : 0;
 
   const headerH = 54;
   const rows = o.detailed ? detailRows(o) : [];
@@ -111,7 +116,7 @@ export function buildExportSvg(chart: SVGSVGElement | null, o: ExportOptions): s
 <text x="54" y="45" font-size="10.5" fill="${colors['text-dim']}">${esc(o.title)}</text>
 <text x="${W - 54}" y="30" font-size="10.5" text-anchor="end" fill="${colors['text-faint']}">${esc(date)}</text>
 <line x1="0" y1="${headerH - 8}" x2="${W}" y2="${headerH - 8}" stroke="${colors.border}" stroke-width="1"/>
-${withChart ? `<g transform="translate(0 ${headerH})">${inner}</g>` : ''}
+${withChart ? `<g transform="translate(0 ${headerH}) scale(${chartScale})">${inner}</g>` : ''}
 ${body}
 <text x="${W - 54}" y="${H - 10}" font-size="9" text-anchor="end" fill="${colors['text-faint']}">sag calculator</text>
 </svg>`;

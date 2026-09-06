@@ -292,6 +292,9 @@ console.log('\n=== 14. Los cuatro escenarios dan resultados realistas ===');
     const r = calculate(rig({
       span: p.span, pretensionN: p.pretensionKN * 1000, anchorHeight: p.anchorHeight,
       usesLeash: p.usesLeash, backupLength: p.usesBackup ? p.span * 1.2 : 0,
+      // Igual que applyPreset en App.tsx: sólo pisa lo que el preset define.
+      ...(p.personHeight !== undefined ? { personHeight: p.personHeight } : {}),
+      ...(p.leashLength !== undefined ? { leashLength: p.leashLength } : {}),
     }));
     const ok =
       r.static.loaded.sagMax > 0 &&
@@ -312,6 +315,8 @@ console.log('\n=== 15. Leash por disciplina ===');
     const r = calculate(rig({
       span: p.span, pretensionN: p.pretensionKN * 1000, anchorHeight: p.anchorHeight,
       usesLeash: p.usesLeash, backupLength: p.usesBackup ? p.span * 1.2 : 0,
+      ...(p.personHeight !== undefined ? { personHeight: p.personHeight } : {}),
+      ...(p.leashLength !== undefined ? { leashLength: p.leashLength } : {}),
     }));
     console.log(`  ${p.id.padEnd(10)} leash ${p.usesLeash ? 'si' : 'no '} · backup ${p.usesBackup ? 'si' : 'no '} -> ${r.warnings.join(', ') || '(limpio)'}`);
     if (!p.usesLeash) {
