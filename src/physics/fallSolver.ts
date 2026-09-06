@@ -106,6 +106,18 @@ export function solveFall(input: RigInput, rig: SolvedRig = prepareRig(input)): 
     if (crossing < 0) fMax *= 4;
   }
 
+  // U(F) crece más rápido que la energía disponible a medida que F sube (la
+  // cinta se pone cada vez más vertical bajo la carga puntual, así que dz/dF
+  // no se apaga: U es ~cuadrática en F contra un término del lado derecho que
+  // es ~lineal), así que el cruce existe siempre para cualquier entrada
+  // física real — los 29.160 casos del barrido de scripts/verify.ts nunca
+  // llegan a necesitar el último intento. Si esto dispara es que algo quedó
+  // degenerado (EA≈0, entradas muy fuera de cualquier rango razonable): se
+  // devuelve igual el mejor valor visto, pero avisado en vez de silencioso.
+  if (crossing < 0) {
+    console.warn('solveFall: no se encontró equilibrio de energía en el rango de fuerza buscado; el resultado puede no ser válido.');
+  }
+
   // Interpolación lineal del cruce entre la energía absorbida y la disponible.
   let peakForceN = Fs[Fs.length - 1];
   if (crossing > 0) {
