@@ -158,5 +158,22 @@
   "guide.s6.body": "試した設定はすべて記録されます。何も変わらないものは重複しません。タップすればその設定に戻れます。Google でログインすると履歴が端末をまたいで引き継がれます。",
   "font.decrease": "文字を縮小",
   "font.increase": "文字を拡大",
-  "chart.trueScaleBtn": "実寸スケール"
+  "chart.trueScaleBtn": "実寸スケール",
+  "field.backupPreset": "バックアップの素材",
+  "field.backupElongation": "バックアップの伸び率",
+  "group.backupFall": "バックアップへの墜落",
+  "field.backupFall.explain": "メインが切れた場合、両方のウェビングに通したリーシュのリングが、バックアップが荷重を受けるまで落下します。リングが実際に両方に通してあることが前提です。",
+  "field.backupFallStart": "破断時の姿勢",
+  "field.backupFallStart.standing": "立位",
+  "field.backupFallStart.sitting": "座位",
+  "field.backupFallStart.bouncing": "バウンス中",
+  "field.backupFallStart.hint": "立位と座位は同じ結果になります。姿勢にかかわらずウェビングにかかる体重は同じだからです。バウンス中は計算が実際に変わります。バウンスの最下点では実際の荷重が体重の何倍にもなるためです。",
+  "results.backupFall": "バックアップへの墜落 — メインが切れた場合",
+  "banner.backupModel": "リーシュ墜落と同じ準静的エネルギーモデルです。バックアップには事前張力がまったく無いと仮定します。自重でたるんだ状態で、上で入力した長さがそのまま利用可能なたるみ全体になります。デフォルトの20%はメインの重量配分のための値であり、この計算のためのものではありません。実際に手でバックアップを張っている場合（通常はそうします）、そのたるみの大部分は張ることで吸収され、実際の自由落下は計算値よりずっと短くなります。現実的な数値にするには、実際に張った後に残るたるみの分までバックアップの長さを下げてください。",
+  "banner.backupFallImpact": "<b>メインが切れると、体が地面に届きます。</b>この数値では、バックアップが完全に墜落を止める前に、足が地面より {depth} m 下まで達します。",
+  "banner.backupOverElongation": "<b>バックアップの伸びが申告した限度を超えています。</b>墜落を止める際に {strain} % 伸び、限度は {limit} % です。",
+  "banner.highBackupAnchorLoad": "<b>バックアップ経由でアンカーへの荷重が高くなっています。</b>この墜落のピークは {load} kN に達します。バックアップのアンカーがそれに耐える設計か確認してください。",
+  "res.backup.freeFall": "バックアップまでの自由落下",
+  "res.backup.freeFall.sub": "静止時のバックアップは {rest} m 垂れ下がる",
+  "res.backup.lowest": "最下点（足）"
 }

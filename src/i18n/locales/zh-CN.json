@@ -158,5 +158,22 @@
   "guide.s6.body": "你尝试过的每套配置都会被记录，不重复保存没有变化的那些。点一条即可回到当时的设置。用 Google 登录后，历史记录会跨设备同步。",
   "font.decrease": "缩小文字",
   "font.increase": "放大文字",
-  "chart.trueScaleBtn": "真实比例"
+  "chart.trueScaleBtn": "真实比例",
+  "field.backupPreset": "备份材质",
+  "field.backupElongation": "备份延展率",
+  "group.backupFall": "坠落至备份",
+  "field.backupFall.explain": "如果主扁带断裂，穿过两条扁带的挽索圆环会一直下坠，直到备份承重为止。这需要圆环确实同时穿在两条扁带上。",
+  "field.backupFallStart": "断裂瞬间的姿势",
+  "field.backupFallStart.standing": "站立",
+  "field.backupFallStart.sitting": "坐姿",
+  "field.backupFallStart.bouncing": "弹跳中",
+  "field.backupFallStart.hint": "站立和坐姿结果相同：不管姿势如何，扁带承受的都是同样的体重。弹跳则真的会改变计算，因为弹跳最低点的实际负荷是体重的好几倍。",
+  "results.backupFall": "坠落至备份 — 若主扁带断裂",
+  "banner.backupModel": "与挽索坠落相同的准静态能量模型。假设备份完全没有预先张紧：仅靠自身重量松垂着，上面填的长度就是全部可用的余量。默认的 20% 是为重量分配设计的，并非针对这项计算——如果实际用手把备份拉紧（通常都会这样做），大部分余量会被收紧吸收，真实的自由坠落距离会比计算值短得多。想得到更贴近实际的数字，请把备份长度调低到手动拉紧后真正剩下的余量。",
+  "banner.backupFallImpact": "<b>若主扁带断裂，身体会触地。</b>按当前数值，双脚会落到地面以下 {depth} 米处，备份才完全止住坠落。",
+  "banner.backupOverElongation": "<b>备份的伸长超过了设定限值。</b>止坠时它伸长了 {strain} %，而限值是 {limit} %。",
+  "banner.highBackupAnchorLoad": "<b>经由备份传到锚点的负荷偏高。</b>此次坠落的峰值达到 {load} kN，请确认备份锚点能承受这个数值。",
+  "res.backup.freeFall": "至备份的自由坠落",
+  "res.backup.freeFall.sub": "静止时备份垂至 {rest} 米",
+  "res.backup.lowest": "最低点（双脚）"
 }

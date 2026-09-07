@@ -11,6 +11,18 @@ export const WEBBING_REF_TENSION_N = 10_000;
  */
 export const WAIST_RATIO = 0.58;
 
+/**
+ * Cuánto más que el peso corporal carga la cinta principal en el fondo de un
+ * rebote, para el escenario de caída a la backup con `backupFallStart:
+ * 'bouncing'`. Es una estimación razonable (no hay una medición externa citada
+ * acá, a diferencia del resto del modelo) de cuánto se carga una cinta al
+ * rebotar con energía en trickline. En el fondo exacto de un rebote la
+ * velocidad vertical es cero por definición, así que "la principal se corta
+ * ahí" entra sin más en el mismo balance de energía cuasi-estático que el
+ * resto del modelo, sin necesitar un término de velocidad residual.
+ */
+export const BACKUP_BOUNCE_LOAD_FACTOR = 3.0;
+
 export interface DisciplinePreset {
   id: string;
   span: number;          // m

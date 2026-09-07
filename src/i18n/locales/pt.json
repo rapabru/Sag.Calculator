@@ -158,5 +158,22 @@
   "guide.s6.body": "Cada configuração testada fica anotada, sem repetir as que não mudam nada. Toque em uma para voltar a ela. Entrando com o Google, o histórico te acompanha entre dispositivos.",
   "font.decrease": "Diminuir texto",
   "font.increase": "Aumentar texto",
-  "chart.trueScaleBtn": "Escala real"
+  "chart.trueScaleBtn": "Escala real",
+  "field.backupPreset": "Tipo do backup",
+  "field.backupElongation": "Elongação do backup",
+  "group.backupFall": "Queda para o backup",
+  "field.backupFall.explain": "Se a principal se romper, o anel do leash — passado pelas duas fitas — cai até que o backup assuma a carga. Isso exige que o anel esteja realmente passado pelas duas.",
+  "field.backupFallStart": "Postura no momento da falha",
+  "field.backupFallStart.standing": "De pé",
+  "field.backupFallStart.sitting": "Sentado",
+  "field.backupFallStart.bouncing": "Saltitando",
+  "field.backupFallStart.hint": "De pé e sentado dão o mesmo resultado: a fita carrega o mesmo peso de qualquer jeito, independente da postura. Saltitando o cálculo muda de verdade, porque no ponto mais baixo de um salto a carga real é várias vezes o peso corporal.",
+  "results.backupFall": "Queda para o backup — se a principal se romper",
+  "banner.backupModel": "Modelo de energia quase-estático, igual à queda com leash. Assume que o backup NÃO está pré-tensionado: fica frouxo sob o próprio peso, com o comprimento acima como toda a folga disponível. O padrão de 20 % é pensado para a distribuição de peso, não para este cálculo — se na prática você tensiona o backup à mão (o normal), boa parte dessa folga é absorvida e a queda livre real é bem menor que a calculada. Para um número realista, diminua o comprimento do backup até a folga que realmente sobra depois de tensionado.",
+  "banner.backupFallImpact": "<b>Se a principal se romper, o corpo chega ao chão.</b> Com esses valores os pés terminam {depth} m abaixo do chão antes que o backup freie totalmente a queda.",
+  "banner.backupOverElongation": "<b>O backup estica além do limite declarado.</b> Ao frear a queda ele estica {strain} % contra um limite de {limit} %.",
+  "banner.highBackupAnchorLoad": "<b>Carga alta nas ancoragens, via o backup.</b> O pico dessa queda chega a {load} kN. Confira se a ancoragem do backup está dimensionada para isso.",
+  "res.backup.freeFall": "Queda livre até o backup",
+  "res.backup.freeFall.sub": "o backup em repouso pende a {rest} m",
+  "res.backup.lowest": "Ponto mais baixo (os pés)"
 }

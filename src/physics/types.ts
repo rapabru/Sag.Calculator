@@ -20,6 +20,8 @@ export interface RigInput {
   backupLength: number;
   /** Peso lineal del backup (g/m). */
   backupWeightGm: number;
+  /** Elongación de la cinta de backup en % a WEBBING_REF_TENSION_N. */
+  backupElongationPct: number;
 
   /** Elongación de la cinta en % a WEBBING_REF_TENSION_N. */
   webbingElongationPct: number;
@@ -33,6 +35,15 @@ export interface RigInput {
   usesLeash: boolean;
   /** Largo ÚTIL del leash (m): del anillo al arnés, con los nudos ya hechos. */
   leashLength: number;
+
+  /**
+   * Postura al momento en que la principal se corta (sólo para la caída a la
+   * backup). "standing" y "sitting" dan a propósito el mismo resultado: un
+   * modelo de carga puntual no distingue de dónde sale el peso, sólo cuánto
+   * es. Lo único que cambia la física es si la carga era estática o venía de
+   * un rebote.
+   */
+  backupFallStart: 'standing' | 'sitting' | 'bouncing';
 }
 
 /** Estado de la línea para una carga puntual dada. */
@@ -118,8 +129,50 @@ export interface FallResult {
   trajectory: number[];
 }
 
+/**
+ * Caída cuando la cinta PRINCIPAL se corta y el anillo del leash —pasado por
+ * las dos cintas— termina de frenar contra la de BACKUP. Sólo tiene sentido
+ * cuando hay leash y hay backup rigueados (ver `usesLeash`/`backupLength`);
+ * se calcula siempre igual que `fall`, y la UI decide cuándo mostrarlo.
+ */
+export interface BackupFallResult {
+  /** Profundidad de la principal en el instante en que se corta (m). */
+  mainDepthAtFailure: number;
+  /** Profundidad de reposo de la backup, sin carga, en la posición de la persona (m). */
+  backupRestDepth: number;
+  /** Caída libre: desnivel entre la principal (al fallar) y la backup en reposo (m). */
+  freeFallDistance: number;
+  /** Fuerza pico que absorbe la backup (N). */
+  peakForceN: number;
+  /** Fuerza pico en múltiplos del peso corporal de la persona. */
+  peakForceBodyWeights: number;
+  /** Tensión horizontal pico de la backup (N). */
+  peakBackupTensionN: number;
+  /** Tensión pico en el anclaje, vía la backup (N). */
+  peakAnchorTensionN: number;
+  /** Sag máximo de la backup durante la caída (m). */
+  dynamicSag: number;
+  /** Profundidad del punto más bajo alcanzado por el arnés, bajo los anclajes (m). */
+  personLowestDepth: number;
+  /** Profundidad del punto más bajo del CUERPO (los pies), bajo los anclajes (m). */
+  lowestBodyPoint: number;
+  /** Altura libre desde los pies hasta el suelo (m). Negativa = impacto. */
+  bodyGroundClearance: number;
+  /** true si la persona llega al suelo. */
+  hitsGround: boolean;
+  /** Elongación dinámica de la backup (fracción). */
+  dynamicStrain: number;
+  /** true si la elongación dinámica supera el límite declarado. */
+  overElongated: boolean;
+  /** Estado de la backup en el instante de fuerza máxima. */
+  peakLineState: LineState;
+  /** Trayectoria para animar: profundidad del arnés en función del avance 0..1. */
+  trajectory: number[];
+}
+
 export interface CalcResult {
   static: StaticResult;
   fall: FallResult;
+  backupFall: BackupFallResult;
   warnings: string[];
 }

@@ -77,6 +77,10 @@ check('botón de guardar configuración', html.includes('Guardar configuración 
 check('botón de guardar cinta', html.includes('Guardar esta cinta'));
 check('opción de exportar sin gráfico presente en el DOM tras abrir', html.includes('Exportar'));
 check('el arnés derivado aparece', html.includes('0.97') || html.includes('0,97'));
+check('panel de caída a la backup presente (midline la habilita por defecto)', html.includes('Caída a la backup'));
+check('selector de postura al fallar presente', html.includes('Parado') && html.includes('Sentado') && html.includes('Rebotando'));
+check('aviso de impacto en la backup dispara con el escenario por defecto', html.includes('la principal se corta, el cuerpo llega al suelo'));
+check('selector de material de backup presente', html.includes('Tipo de backup'));
 
 // --- la guia no aparece en el render normal (localStorage la marca como vista),
 // --- asi que se renderiza aparte para comprobar que no explota.

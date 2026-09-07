@@ -250,6 +250,9 @@ console.log('\n=== 13. Barrido de edge cases (todo el rango de los sliders) ==='
                     ['drop', r.fall.totalDrop],
                     ['dynSag', r.fall.dynamicSag],
                     ['pies', r.fall.lowestBodyPoint],
+                    ['backupFreeFall', r.backupFall.freeFallDistance],
+                    ['backupPeakForce', r.backupFall.peakForceN],
+                    ['backupPies', r.backupFall.lowestBodyPoint],
                   ];
                   for (const [label, v] of nums) {
                     if (!Number.isFinite(v)) { bad++; problems.push(`${label} no finito en span=${span} T=${pretensionN} m=${personMassKg} e=${webbingElongationPct}`); break; }
@@ -271,6 +274,15 @@ console.log('\n=== 13. Barrido de edge cases (todo el rango de los sliders) ==='
                   }
                   if (r.fall.dynamicSag < r.static.loaded.sagAtLoad - 1e-6) {
                     bad++; problems.push(`sag dinamico menor al estatico en span=${span} T=${pretensionN} m=${personMassKg}`);
+                  }
+                  if (r.backupFall.freeFallDistance < 0) {
+                    bad++; problems.push(`caida libre a la backup negativa en span=${span} h=${anchorHeight}`);
+                  }
+                  if (usesLeash && r.backupFall.peakForceN <= 0) {
+                    bad++; problems.push(`sin fuerza pico en la backup con leash activo, span=${span} h=${anchorHeight}`);
+                  }
+                  if (!usesLeash && r.backupFall.peakForceN !== 0) {
+                    bad++; problems.push(`la backup no deberia aplicar sin leash, span=${span} h=${anchorHeight}`);
                   }
                   const g = computeChartGeometry({ span, staticDepth: r.static.loaded.sagMax, fallDepth: r.fall.lowestBodyPoint, groundDepth: anchorHeight, topExtent: personHeight, exaggeration: 1 });
                   if (!Number.isFinite(g.scale) || g.scale <= 0 || !Number.isFinite(g.vbH) || g.vbH <= 0) {
@@ -404,6 +416,65 @@ console.log('\n=== 21. Historial: solo entradas con cambios ===');
   const ida = rig({ span: 90 });
   const vuelta = rig({ span: DEFAULT_INPUT.span });
   check2('ida y vuelta al mismo valor no cuenta como cambio', sameInput(a, vuelta) && !sameInput(a, ida), 'ok');
+}
+
+console.log('\n=== 22. Caida a la backup: postura al fallar ===');
+{
+  const stand = calculate(rig({ backupFallStart: 'standing' }));
+  const sit = calculate(rig({ backupFallStart: 'sitting' }));
+  const bounce = calculate(rig({ backupFallStart: 'bouncing' }));
+  console.log(`  parado    -> caida libre ${f(stand.backupFall.freeFallDistance, 2)} m, Fpico ${f(stand.backupFall.peakForceN / 1000, 2)} kN`);
+  console.log(`  sentado   -> caida libre ${f(sit.backupFall.freeFallDistance, 2)} m, Fpico ${f(sit.backupFall.peakForceN / 1000, 2)} kN`);
+  console.log(`  rebotando -> caida libre ${f(bounce.backupFall.freeFallDistance, 2)} m, Fpico ${f(bounce.backupFall.peakForceN / 1000, 2)} kN`);
+  // Decision de diseno: un modelo de carga puntual no distingue de donde
+  // sale el peso, solo cuanto es -- parado y sentado tienen que dar
+  // exactamente el mismo numero.
+  check2('parado y sentado dan el mismo resultado', stand.backupFall.peakForceN === sit.backupFall.peakForceN, `${f(stand.backupFall.peakForceN, 2)} vs ${f(sit.backupFall.peakForceN, 2)}`);
+  check2('rebotando arranca mas profundo: menos caida libre', bounce.backupFall.freeFallDistance < stand.backupFall.freeFallDistance, `${f(bounce.backupFall.freeFallDistance, 2)} < ${f(stand.backupFall.freeFallDistance, 2)}`);
+}
+
+console.log('\n=== 23. Caida a la backup: monotonia con el largo y el material ===');
+{
+  const corta = calculate(rig({ backupLength: DEFAULT_INPUT.span * 1.05 }));
+  const larga = calculate(rig({ backupLength: DEFAULT_INPUT.span * 1.5 }));
+  console.log(`  backup +5 %  -> caida libre ${f(corta.backupFall.freeFallDistance, 2)} m`);
+  console.log(`  backup +50 % -> caida libre ${f(larga.backupFall.freeFallDistance, 2)} m`);
+  check2('backup mas larga (mas floja) cae mas libre', larga.backupFall.freeFallDistance > corta.backupFall.freeFallDistance, `${f(larga.backupFall.freeFallDistance, 2)} > ${f(corta.backupFall.freeFallDistance, 2)}`);
+
+  const rigida = calculate(rig({ backupElongationPct: 1.2 }));
+  const elastica = calculate(rig({ backupElongationPct: 8 }));
+  console.log(`  backup rigida (1,2 %) -> Fpico ${f(rigida.backupFall.peakForceN / 1000, 2)} kN`);
+  console.log(`  backup elastica (8 %) -> Fpico ${f(elastica.backupFall.peakForceN / 1000, 2)} kN`);
+  check2('backup mas rigida absorbe con mas fuerza pico', rigida.backupFall.peakForceN > elastica.backupFall.peakForceN, `${f(rigida.backupFall.peakForceN / 1000, 2)} > ${f(elastica.backupFall.peakForceN / 1000, 2)} kN`);
+}
+
+console.log('\n=== 24. Caida a la backup: solo aplica con leash y backup rigueados ===');
+{
+  const sinLeash = calculate(rig({ usesLeash: false }));
+  const sinBackup = calculate(rig({ backupLength: 0 }));
+  check2('sin leash no aplica (resultado neutro)', sinLeash.backupFall.peakForceN === 0 && sinLeash.backupFall.trajectory.length === 0, 'neutro');
+  check2('sin backup no aplica (resultado neutro)', sinBackup.backupFall.peakForceN === 0, 'neutro');
+  check2('sin leash no avisa de impacto en la backup', !sinLeash.warnings.includes('backupFallGroundImpact'), sinLeash.warnings.join(',') || '(limpio)');
+}
+
+console.log('\n=== 25. Caida a la backup: escenario midline por defecto ===');
+{
+  // HALLAZGO, no bug: con el 20 % de holgura por defecto (backupLength =
+  // span*1,2) y SIN pretensarla a mano, la tension de reposo de la backup
+  // sale de resolver que tension hace que ESE largo de mas cuelgue bajo su
+  // propio peso -- y para una cinta liviana con tanto exceso de largo, esa
+  // tension de equilibrio es muy baja y el sag de reposo resultante, grande:
+  // mas que la altura de anclaje del midline. El aviso que dispara
+  // (backupFallGroundImpact) es real: asi como esta configurada, sin
+  // tensarla mas a mano, esta backup no cumple funcion de backup.
+  const r = calculate(rig());
+  const b = r.backupFall;
+  console.log(`  backup en reposo cuelga a ${f(b.backupRestDepth, 2)} m (anclaje a ${DEFAULT_INPUT.anchorHeight} m)`);
+  console.log(`  caida libre hasta la backup: ${f(b.freeFallDistance, 2)} m`);
+  console.log(`  Fpico en la backup: ${f(b.peakForceN / 1000, 2)} kN (${f(b.peakForceBodyWeights, 1)}x peso)`);
+  console.log(`  pies llegan a ${f(b.lowestBodyPoint, 2)} m, libre al suelo ${f(b.bodyGroundClearance, 2)} m`);
+  check2('numeros finitos y no negativos', Number.isFinite(b.peakForceN) && b.peakForceN >= 0 && Number.isFinite(b.lowestBodyPoint), 'ok');
+  check2('la caida libre es positiva (la backup en reposo esta mas floja que la principal)', b.freeFallDistance > 0, `${f(b.freeFallDistance, 2)} m`);
 }
 
 console.log('\n' + '='.repeat(60));

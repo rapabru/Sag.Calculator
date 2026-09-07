@@ -158,5 +158,22 @@
   "guide.s6.body": "Cada configuración que probás queda anotada, sin repetir las que no cambian. Tocá una para volver a ella. Si entrás con tu cuenta de Google, el historial te sigue entre dispositivos.",
   "font.decrease": "Achicar texto",
   "font.increase": "Agrandar texto",
-  "chart.trueScaleBtn": "Escala real"
+  "chart.trueScaleBtn": "Escala real",
+  "field.backupPreset": "Tipo de backup",
+  "field.backupElongation": "Elongación del backup",
+  "group.backupFall": "Caída a la backup",
+  "field.backupFall.explain": "Si la principal se corta, el anillo del leash —pasado por las dos cintas— cae hasta que la backup toma carga. Requiere que el anillo esté realmente pasado por ambas.",
+  "field.backupFallStart": "Postura al momento de la falla",
+  "field.backupFallStart.standing": "Parado",
+  "field.backupFallStart.sitting": "Sentado",
+  "field.backupFallStart.bouncing": "Rebotando",
+  "field.backupFallStart.hint": "Parado y sentado dan el mismo resultado: la cinta se carga igual con el mismo peso, sin importar la postura. Rebotando sí cambia el cálculo, porque en el fondo de un rebote la carga real es varias veces el peso corporal.",
+  "results.backupFall": "Caída a la backup — si la principal se corta",
+  "banner.backupModel": "Modelo cuasi-estático de energía, igual que la caída con leash. Asume que la backup NO está pretensada: cuelga floja bajo su propio peso, con el largo de arriba como todo el exceso disponible. El 20 % por defecto está pensado para el reparto de peso, no para este cálculo — si en la práctica tensás la backup a mano (lo habitual), gran parte de ese exceso queda absorbido en el tensado y la caída libre real es mucho menor que la calculada. Para un número realista, bajá el largo de la backup hasta la holgura que de verdad queda después de tensarla.",
+  "banner.backupFallImpact": "<b>Si la principal se corta, el cuerpo llega al suelo.</b> Con estos valores los pies terminan {depth} m por debajo del suelo antes de que la backup frene del todo.",
+  "banner.backupOverElongation": "<b>La backup se estira por encima del límite declarado.</b> Al frenar la caída se estira {strain} % contra un límite de {limit} %.",
+  "banner.highBackupAnchorLoad": "<b>Carga alta en los anclajes, vía la backup.</b> El pico de esta caída llega a {load} kN. Revisá que el anclaje de backup esté dimensionado para eso.",
+  "res.backup.freeFall": "Caída libre a la backup",
+  "res.backup.freeFall.sub": "la backup en reposo cuelga a {rest} m",
+  "res.backup.lowest": "Punto más bajo (los pies)"
 }
