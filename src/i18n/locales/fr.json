@@ -158,5 +158,22 @@
   "guide.s6.body": "Chaque configuration essayée est notée, sans répéter celles qui ne changent rien. Touchez-en une pour y revenir. Connectez-vous avec Google et l'historique vous suit d'un appareil à l'autre.",
   "font.decrease": "Réduire le texte",
   "font.increase": "Agrandir le texte",
-  "chart.trueScaleBtn": "Échelle réelle"
+  "chart.trueScaleBtn": "Échelle réelle",
+  "field.backupPreset": "Type de backup",
+  "field.backupElongation": "Élongation du backup",
+  "group.backupFall": "Chute sur le backup",
+  "field.backupFall.explain": "Si la principale casse, l'anneau du leash — passé dans les deux sangles — tombe jusqu'à ce que le backup prenne la charge. Cela suppose que l'anneau soit vraiment passé dans les deux.",
+  "field.backupFallStart": "Posture au moment de la rupture",
+  "field.backupFallStart.standing": "Debout",
+  "field.backupFallStart.sitting": "Assis",
+  "field.backupFallStart.bouncing": "En rebond",
+  "field.backupFallStart.hint": "Debout et assis donnent le même résultat : la sangle porte le même poids dans les deux cas, quelle que soit la posture. En rebond, le calcul change vraiment, car au point bas d'un rebond la charge réelle vaut plusieurs fois le poids du corps.",
+  "results.backupFall": "Chute sur le backup — si la principale casse",
+  "banner.backupModel": "Modèle énergétique quasi-statique, comme la chute avec leash. Le backup n'a pas de tension propre — il n'a pas de tendeur, c'est justement pour ça qu'il est monté plus long que la principale —, donc sa tension au repos se déduit de la longueur déclarée et de son propre poids. Les 20 % de mou par défaut sont pensés pour la répartition du poids, pas pour ce calcul, et peuvent donner un mou au repos énorme pour une sangle légère. Ajustez la longueur du backup à ce que vous montez réellement, pour un chiffre réaliste.",
+  "banner.backupFallImpact": "<b>Si la principale casse, le corps touche le sol.</b> Avec ces valeurs, les pieds finissent {depth} m sous le sol avant que le backup n'arrête complètement la chute.",
+  "banner.backupOverElongation": "<b>Le backup s'étire au-delà de la limite déclarée.</b> En arrêtant la chute, il s'étire de {strain} % contre une limite de {limit} %.",
+  "banner.highBackupAnchorLoad": "<b>Charge élevée sur les ancrages, via le backup.</b> Le pic de cette chute atteint {load} kN. Vérifiez que l'ancrage du backup est dimensionné pour ça.",
+  "res.backup.freeFall": "Chute libre jusqu'au backup",
+  "res.backup.freeFall.sub": "le backup au repos pend à {rest} m",
+  "res.backup.lowest": "Point le plus bas (les pieds)"
 }

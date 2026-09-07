@@ -1,5 +1,6 @@
 import { G, WAIST_RATIO } from './constants';
 import { prepareRig, type SolvedRig } from './staticSolver';
+import { solveEnergyFall } from './energyFall';
 import type { FallResult, RigInput } from './types';
 
 /**
@@ -31,7 +32,8 @@ import type { FallResult, RigInput } from './types';
  *      donde S(F) sale del mismo solver estático — la cinta se hunde mucho más
  *      que en estático porque F es varias veces el peso corporal.
  *
- *   4. Conservación de energía entre el arranque y el punto más bajo:
+ *   4. Conservación de energía entre el arranque y el punto más bajo (ver
+ *      energyFall.ts, compartido con el modelo de caída a la backup):
  *        m·g·(h_ff + z(F*) − z(0)) = U(F*),   U(F) = ∫₀^F F′ dz
  *      Raíz única: el lado izquierdo crece ~linealmente con F y U ~cuadrática.
  *
@@ -57,8 +59,6 @@ import type { FallResult, RigInput } from './types';
  * 2 m, y este modelo cae dentro de ese rango.
  */
 
-const GRID = 400;
-
 export function solveFall(input: RigInput, rig: SolvedRig = prepareRig(input)): FallResult {
   const m = Math.max(input.personMassKg, 0.1);
   const W = m * G;
@@ -80,46 +80,10 @@ export function solveFall(input: RigInput, rig: SolvedRig = prepareRig(input)): 
   // El leash se toma como inextensible: toda la absorción la hace la cinta.
   const depthFor = (F: number) => rig.sagAtLoadFor(F) + leashLength;
 
-  const zAtRest = depthFor(0);
-
-  // Barrido en F: profundidad, energía absorbida y balance energético.
-  let fMax = Math.max(30 * W, 20_000);
-  let Fs: number[] = [];
-  let zs: number[] = [];
-  let Us: number[] = [];
-  let crossing = -1;
-
-  for (let attempt = 0; attempt < 8 && crossing < 0; attempt++) {
-    Fs = [];
-    zs = [];
-    Us = [];
-    let U = 0;
-    for (let i = 0; i <= GRID; i++) {
-      const F = (i / GRID) * fMax;
-      const z = depthFor(F);
-      if (i > 0) U += 0.5 * (F + Fs[i - 1]) * (z - zs[i - 1]);
-      Fs.push(F);
-      zs.push(z);
-      Us.push(U);
-      if (crossing < 0 && i > 0 && U - m * G * (freeFall + z - zAtRest) >= 0) crossing = i;
-    }
-    if (crossing < 0) fMax *= 4;
-  }
-
-  // Interpolación lineal del cruce entre la energía absorbida y la disponible.
-  let peakForceN = Fs[Fs.length - 1];
-  if (crossing > 0) {
-    const balance = (i: number) => Us[i] - m * G * (freeFall + zs[i] - zAtRest);
-    const b0 = balance(crossing - 1);
-    const b1 = balance(crossing);
-    const frac = b1 !== b0 ? -b0 / (b1 - b0) : 0;
-    peakForceN = Fs[crossing - 1] + frac * (Fs[crossing] - Fs[crossing - 1]);
-  }
+  const { peakForceN, personLowestDepth, trajectory } = solveEnergyFall({ m, z0, freeFall, depthFor });
 
   const peakLineState = rig.stateFor(peakForceN);
   const dynamicSag = peakLineState.sagAtLoad;
-  const descentAfterEngage = dynamicSag + leashLength - zAtRest;
-  const personLowestDepth = S1 + leashLength + descentAfterEngage;
   const lowestBodyPoint = personLowestDepth + feetBelowHarness;
 
   return {
@@ -143,78 +107,6 @@ export function solveFall(input: RigInput, rig: SolvedRig = prepareRig(input)): 
     dynamicStrain: peakLineState.strain,
     overElongated: peakLineState.strain * 100 > input.elongationLimitPct,
     peakLineState,
-    trajectory: buildTrajectory({
-      m,
-      z0,
-      freeFall,
-      zAtRest,
-      peakForceN,
-      personLowestDepth,
-      Fs,
-      zs,
-      Us,
-    }),
+    trajectory,
   };
-}
-
-interface TrajectoryArgs {
-  m: number;
-  z0: number;
-  freeFall: number;
-  zAtRest: number;
-  peakForceN: number;
-  personLowestDepth: number;
-  Fs: number[];
-  zs: number[];
-  Us: number[];
-}
-
-const FRAMES = 72;
-
-/**
- * Trayectoria real en el tiempo, para animar la caída: caída libre parabólica y
- * después frenado, con v(F)² = 2·(energía disponible − energía absorbida)/m.
- */
-function buildTrajectory(a: TrajectoryArgs): number[] {
-  const engageDepth = a.z0 + a.freeFall;
-  const tFree = Math.sqrt((2 * a.freeFall) / G);
-
-  // Tiempo acumulado durante el frenado, integrando dt = dz / v.
-  const brakeT: number[] = [0];
-  const brakeZ: number[] = [engageDepth];
-  for (let i = 1; i < a.Fs.length && a.Fs[i] <= a.peakForceN; i++) {
-    const avail = a.m * G * (a.freeFall + a.zs[i] - a.zAtRest);
-    const v2 = (2 * (avail - a.Us[i])) / a.m;
-    const vPrev2 = (2 * (a.m * G * (a.freeFall + a.zs[i - 1] - a.zAtRest) - a.Us[i - 1])) / a.m;
-    const v = Math.sqrt(Math.max(v2, 0));
-    const vPrev = Math.sqrt(Math.max(vPrev2, 0));
-    const vAvg = (v + vPrev) / 2;
-    const dz = a.zs[i] - a.zs[i - 1];
-    if (vAvg > 1e-6 && dz > 0) {
-      brakeT.push(brakeT[brakeT.length - 1] + dz / vAvg);
-      brakeZ.push(a.z0 + a.freeFall + (a.zs[i] - a.zAtRest));
-    }
-  }
-  const tBrake = brakeT[brakeT.length - 1] ?? 0;
-  const total = tFree + tBrake;
-
-  const out: number[] = [];
-  for (let f = 0; f <= FRAMES; f++) {
-    const t = (f / FRAMES) * total;
-    if (t <= tFree) {
-      out.push(a.z0 + 0.5 * G * t * t);
-    } else {
-      const tb = t - tFree;
-      let k = 1;
-      while (k < brakeT.length && brakeT[k] < tb) k++;
-      if (k >= brakeT.length) out.push(a.personLowestDepth);
-      else {
-        const span = brakeT[k] - brakeT[k - 1];
-        const frac = span > 0 ? (tb - brakeT[k - 1]) / span : 0;
-        out.push(brakeZ[k - 1] + frac * (brakeZ[k] - brakeZ[k - 1]));
-      }
-    }
-  }
-  out[out.length - 1] = a.personLowestDepth;
-  return out;
 }

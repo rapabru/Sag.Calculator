@@ -158,5 +158,22 @@
   "guide.s6.body": "Jedes ausprobierte Setup wird notiert, ohne die zu wiederholen, die nichts ändern. Tippe eines an, um dorthin zurückzukehren. Mit Google-Anmeldung folgt dir der Verlauf über Geräte hinweg.",
   "font.decrease": "Text verkleinern",
   "font.increase": "Text vergrößern",
-  "chart.trueScaleBtn": "Reale Skala"
+  "chart.trueScaleBtn": "Reale Skala",
+  "field.backupPreset": "Backup-Bandtyp",
+  "field.backupElongation": "Backup-Dehnung",
+  "group.backupFall": "Sturz ins Backup",
+  "field.backupFall.explain": "Reißt das Hauptband, fällt der Leash-Ring — durch beide Bänder gefädelt — bis das Backup Last übernimmt. Setzt voraus, dass der Ring wirklich durch beide gefädelt ist.",
+  "field.backupFallStart": "Haltung beim Versagen",
+  "field.backupFallStart.standing": "Stehend",
+  "field.backupFallStart.sitting": "Sitzend",
+  "field.backupFallStart.bouncing": "Beim Wippen",
+  "field.backupFallStart.hint": "Stehend und sitzend ergeben dasselbe Ergebnis: Das Band trägt so oder so dasselbe Gewicht, unabhängig von der Haltung. Beim Wippen ändert sich die Rechnung wirklich, weil am tiefsten Punkt eines Wipp-Sprungs die reale Last ein Vielfaches des Körpergewichts beträgt.",
+  "results.backupFall": "Sturz ins Backup — falls das Hauptband reißt",
+  "banner.backupModel": "Quasistatisches Energiemodell, wie beim Leash-Sturz. Das Backup hat keine eigene Spannung — es hat keinen Spanner, genau deshalb wird es länger als das Hauptband verlegt —, seine Ruhespannung ergibt sich also aus der angegebenen Länge und seinem eigenen Gewicht. Die 20 % Standard-Schlappseil sind für die Gewichtsverteilung gedacht, nicht für diese Berechnung, und können bei einem leichten Band einen enormen Ruhedurchhang ergeben. Stelle die Backup-Länge auf das ein, was du tatsächlich verlegst, für eine realistische Zahl.",
+  "banner.backupFallImpact": "<b>Reißt das Hauptband, erreicht der Körper den Boden.</b> Mit diesen Werten enden die Füße {depth} m unter dem Boden, bevor das Backup den Sturz vollständig abfängt.",
+  "banner.backupOverElongation": "<b>Das Backup dehnt sich über die angegebene Grenze hinaus.</b> Beim Abfangen des Sturzes dehnt es sich um {strain} % gegenüber einer Grenze von {limit} %.",
+  "banner.highBackupAnchorLoad": "<b>Hohe Ankerlast, über das Backup.</b> Der Spitzenwert dieses Sturzes erreicht {load} kN. Prüfe, ob der Backup-Anker dafür ausgelegt ist.",
+  "res.backup.freeFall": "Freier Fall bis zum Backup",
+  "res.backup.freeFall.sub": "das ruhende Backup hängt bei {rest} m",
+  "res.backup.lowest": "Tiefster Punkt (die Füße)"
 }

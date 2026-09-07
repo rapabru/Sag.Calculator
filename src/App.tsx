@@ -5,6 +5,7 @@ import {
   G,
   WAIST_RATIO,
   WEBBING_PRESETS,
+  backupFallApplies,
   calculate,
   type RigInput,
 } from './physics';
@@ -35,7 +36,7 @@ import {
 import { useTranslation } from './i18n/useTranslation';
 import { ParamSlider } from './components/ParamSlider';
 import { SagChart } from './components/SagChart';
-import { FallResults, StaticResults } from './components/ResultsPanel';
+import { BackupFallResults, FallResults, StaticResults } from './components/ResultsPanel';
 import { PhysicsNotes } from './components/PhysicsNotes';
 import { LanguageSelector } from './components/LanguageSelector';
 import { ThemeToggle } from './components/ThemeToggle';
@@ -192,6 +193,7 @@ const App: React.FC = () => {
     const list: Array<{ tone: 'danger' | 'warn' | 'info'; text: string }> = [];
     const f = result.fall;
     const s = result.static;
+    const b = result.backupFall;
     if (result.warnings.includes('fallGroundImpact'))
       list.push({
         tone: 'danger',
@@ -213,6 +215,24 @@ const App: React.FC = () => {
       });
     if (result.warnings.includes('backupShorterThanMain'))
       list.push({ tone: 'warn', text: t('banner.backupShorter') });
+    if (result.warnings.includes('backupFallGroundImpact'))
+      list.push({
+        tone: 'danger',
+        text: t('banner.backupFallImpact', { depth: Math.abs(b.bodyGroundClearance).toFixed(2) }),
+      });
+    if (result.warnings.includes('backupOverElongation'))
+      list.push({
+        tone: 'warn',
+        text: t('banner.backupOverElongation', {
+          strain: (b.dynamicStrain * 100).toFixed(2),
+          limit: input.elongationLimitPct,
+        }),
+      });
+    if (result.warnings.includes('highBackupAnchorLoad'))
+      list.push({
+        tone: 'warn',
+        text: t('banner.highBackupAnchorLoad', { load: (b.peakAnchorTensionN / 1000).toFixed(1) }),
+      });
     if (activePreset?.id === 'trickline')
       list.push({
         tone: 'info',
@@ -524,6 +544,38 @@ const App: React.FC = () => {
                 value={input.backupWeightGm} min={0} max={200} step={1} decimals={1}
                 onChange={set('backupWeightGm')} onCommit={playIfChanged}
               />
+              <div className="field">
+                <div className="field-top">
+                  <span className="field-label">{t('field.backupPreset')}</span>
+                </div>
+                <select
+                  style={{ width: '100%' }}
+                  value={
+                    WEBBING_PRESETS.find(
+                      (w) => w.gramsPerMeter === input.backupWeightGm && w.elongationPct === input.backupElongationPct,
+                    )?.id ?? ''
+                  }
+                  onChange={(e) => {
+                    const w = WEBBING_PRESETS.find((p) => p.id === e.target.value);
+                    if (w) {
+                      setInput((prev) => ({ ...prev, backupWeightGm: w.gramsPerMeter, backupElongationPct: w.elongationPct }));
+                      playIfChanged();
+                    }
+                  }}
+                >
+                  <option value="">—</option>
+                  {WEBBING_PRESETS.map((w) => (
+                    <option key={w.id} value={w.id}>
+                      {w.label} · {w.gramsPerMeter} g/m · {w.elongationPct} %
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <ParamSlider
+                label={t('field.backupElongation')} unit="%"
+                value={input.backupElongationPct} min={0.5} max={20} step={0.1} decimals={2}
+                onChange={set('backupElongationPct')} onCommit={playIfChanged}
+              />
             </div>
           </section>
 
@@ -559,6 +611,36 @@ const App: React.FC = () => {
               )}
             </div>
           </section>
+
+          {backupFallApplies(input) && (
+            <section className="panel" data-tour="backupFall">
+              <div className="panel-head">
+                <h2>{t('group.backupFall')}</h2>
+              </div>
+              <div className="panel-body">
+                <p className="field-note" style={{ marginTop: 0 }}>{t('field.backupFall.explain')}</p>
+                <div className="field-top" style={{ marginTop: 10, marginBottom: 5 }}>
+                  <span className="field-label">{t('field.backupFallStart')}</span>
+                </div>
+                <div className="chips">
+                  {(['standing', 'sitting', 'bouncing'] as const).map((pose) => (
+                    <button
+                      key={pose}
+                      className="chip"
+                      aria-pressed={input.backupFallStart === pose}
+                      onClick={() => {
+                        set('backupFallStart')(pose);
+                        playIfChanged();
+                      }}
+                    >
+                      {t(`field.backupFallStart.${pose}`)}
+                    </button>
+                  ))}
+                </div>
+                <p className="field-note">{t('field.backupFallStart.hint')}</p>
+              </div>
+            </section>
+          )}
         </div>
 
         {/* ---------------- gráfico y resultados ---------------- */}
@@ -665,6 +747,21 @@ const App: React.FC = () => {
                 <div className="banner info" style={{ marginTop: 12, marginBottom: 0 }}>
                   <IconInfo />
                   <span>{t('banner.model')}</span>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {backupFallApplies(input) && (
+            <section className="panel">
+              <div className="panel-head">
+                <h2>{t('results.backupFall')}</h2>
+              </div>
+              <div className="panel-body tight">
+                <BackupFallResults input={input} result={result} />
+                <div className="banner info" style={{ marginTop: 12, marginBottom: 0 }}>
+                  <IconInfo />
+                  <span>{t('banner.backupModel')}</span>
                 </div>
               </div>
             </section>

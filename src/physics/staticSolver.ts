@@ -42,7 +42,7 @@ function arcOfSegment(uStart: number, uEnd: number, dx: number, B: number): numb
   return Math.abs(phi(uStart) - phi(uEnd)) / B;
 }
 
-interface Loading {
+export interface Loading {
   span: number;
   /** carga distribuida (N/m) */
   w: number;
@@ -96,6 +96,51 @@ function solveTension(ld: Loading, unstretched: number, EA: number, pretensionN:
 
   let lo = Math.max(pretensionN, 1);
   let hi = Math.max(lo * 2, ld.P);
+  let guard = 0;
+  while (residual(hi) > 0 && guard++ < 200) {
+    lo = hi;
+    hi *= 2;
+    if (hi > 1e12) break;
+  }
+  if (residual(lo) < 0) return lo;
+
+  for (let i = 0; i < 60; i++) {
+    const mid = (lo + hi) / 2;
+    if (residual(mid) > 0) lo = mid;
+    else hi = mid;
+    if (hi - lo < 1e-7 * hi) break;
+  }
+  return (lo + hi) / 2;
+}
+
+/**
+ * Sólo la profundidad de la cinta bajo una carga puntual, sin muestrear el
+ * perfil — la variante rápida de `lineStateFor`. Cualquier barrido de miles
+ * de llamadas (la búsqueda de fuerza pico de una caída) usa esto en vez de
+ * `lineStateFor(...).sagAtLoad`, que reconstruye el perfil entero cada vez.
+ */
+export function sagAtLoadFast(ld: Loading, unstretched: number, EA: number, pretensionN: number): number {
+  const H = solveTension(ld, unstretched, EA, pretensionN);
+  return depthAt(Math.min(Math.max(ld.a, 0), ld.span), H, ld);
+}
+
+/**
+ * Tensión H de una cinta cuyo largo SIN ESTIRAR ya se conoce (al revés de
+ * `prepareRig`, donde se conoce la tensión y de ahí se deduce el largo).
+ * Hace falta para la backup: no se tensa a mano, no tiene tensor — tiene
+ * tensión ~0 precisamente PORQUE es más larga que la principal. Su largo
+ * físico es un dato (lo que se cortó), y lo que no se sabe es con qué
+ * tensión ese largo cuelga entre los anclajes bajo su propio peso.
+ * `solveTension` no sirve para esto porque, con carga puntual nula, devuelve
+ * la pretensión tal cual en vez de resolver nada (ahí es correcto: para la
+ * principal esa tensión sí es un dato real, la que se riggeó con un tensor).
+ */
+export function restTensionForLength(ld: Loading, unstretched: number, EA: number): number {
+  const bare: Loading = { ...ld, P: 0 };
+  const residual = (H: number) => arcLength(H, bare) - unstretched * (1 + H / EA);
+
+  let lo = 1;
+  let hi = 2;
   let guard = 0;
   while (residual(hi) > 0 && guard++ < 200) {
     lo = hi;
@@ -212,11 +257,7 @@ export function prepareRig(input: RigInput): SolvedRig {
     pretensionN,
     span: L,
     stateFor: (P: number) => lineStateFor(loading(P), unstretched, EA, pretensionN),
-    sagAtLoadFor: (P: number) => {
-      const ld = loading(P);
-      const H = solveTension(ld, unstretched, EA, pretensionN);
-      return depthAt(a, H, ld);
-    },
+    sagAtLoadFor: (P: number) => sagAtLoadFast(loading(P), unstretched, EA, pretensionN),
   };
 }
 

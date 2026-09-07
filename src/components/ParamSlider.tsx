@@ -75,11 +75,16 @@ export const ParamSlider: React.FC<Props> = ({
   const handleText = useCallback(
     (raw: string) => {
       if (!TYPING_RE.test(raw)) return;
+      // El texto se muestra tal cual se escribe —incluido fuera de rango,
+      // mientras se termina de escribir—, pero lo que se le avisa al padre ya
+      // va recortado: así el gráfico y el historial nunca ven, ni por un
+      // instante, un span negativo o una masa absurda. El recorte final del
+      // texto en pantalla llega solo, al confirmar (ver `commit`).
       setText(raw);
       const n = parseNumber(raw);
-      if (n !== null) onChange(n);
+      if (n !== null) onChange(Math.min(Math.max(n, min), max));
     },
-    [onChange],
+    [onChange, min, max],
   );
 
   const commit = useCallback(() => {

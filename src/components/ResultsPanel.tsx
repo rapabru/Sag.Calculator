@@ -116,3 +116,55 @@ export const FallResults: React.FC<{ input: RigInput; result: CalcResult }> = ({
     </div>
   );
 };
+
+export const BackupFallResults: React.FC<{ input: RigInput; result: CalcResult }> = ({ input, result }) => {
+  const { t } = useTranslation();
+  const b = result.backupFall;
+
+  return (
+    <div className="tiles">
+      <ResultTile
+        hero
+        tone="danger"
+        label={t('res.backup.freeFall')}
+        value={b.freeFallDistance.toFixed(2)}
+        unit="m"
+        sub={t('res.backup.freeFall.sub', { rest: b.backupRestDepth.toFixed(2) })}
+      />
+      <ResultTile
+        hero
+        tone={b.hitsGround ? 'danger' : 'safe'}
+        label={t('res.fallClearance')}
+        value={b.bodyGroundClearance.toFixed(2)}
+        unit="m"
+        sub={b.hitsGround ? t('res.fallClearance.impact') : t('res.fallClearance.sub')}
+      />
+      <ResultTile label={t('res.backup.lowest')} value={b.lowestBodyPoint.toFixed(2)} unit="m" />
+      <ResultTile
+        label={t('res.dynamicSag')}
+        value={b.dynamicSag.toFixed(2)}
+        unit="m"
+      />
+      <ResultTile
+        tone="webbing"
+        label={t('res.peakForce')}
+        value={kN(b.peakForceN)}
+        unit="kN"
+        sub={t('res.peakForce.sub', { g: b.peakForceBodyWeights.toFixed(1) })}
+      />
+      <ResultTile
+        tone={result.warnings.includes('highBackupAnchorLoad') ? 'danger' : 'plain'}
+        label={t('res.peakAnchor')}
+        value={kN(b.peakAnchorTensionN)}
+        unit="kN"
+      />
+      <ResultTile
+        tone={b.overElongated ? 'danger' : 'plain'}
+        label={t('res.strain')}
+        value={(b.dynamicStrain * 100).toFixed(2)}
+        unit="%"
+        sub={t('res.strain.limit', { limit: input.elongationLimitPct })}
+      />
+    </div>
+  );
+};

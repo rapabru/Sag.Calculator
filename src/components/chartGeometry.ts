@@ -17,6 +17,20 @@ export const INNER_W = VB_W - PAD_L - PAD_R;
 export const MAX_INNER_H = 545;
 export const MIN_INNER_H = 190;
 
+/**
+ * Corte para decidir si el suelo entra en el cuadro. La escala final es un
+ * solo número compartido por los dos ejes (ver el comentario de arriba de
+ * todo), así que la fracción del cuadro que ocupa la cinta depende sólo de la
+ * razón profundidad/fondo — nunca del ancho de pantalla ni de los píxeles.
+ * GROUND_RATIO fija esa razón mínima (1/1.9 ≈ 53 % del fondo tiene que ser
+ * "cinta" para que meter el suelo en el cuadro valga la pena); GROUND_MARGIN_M
+ * evita que la regla se vuelva demasiado estricta cuando la cinta ya es casi
+ * plana (sag cerca del piso de 0,05 m): ahí no hay curva que "aplastar", así
+ * que mostrar el suelo real es más informativo que esconderlo.
+ */
+const GROUND_RATIO = 1.9;
+const GROUND_MARGIN_M = 1.5;
+
 export interface GeometryParams {
   span: number;
   /** Profundidad del sag estático más profundo (m). */
@@ -76,7 +90,7 @@ export function computeChartGeometry(p: GeometryParams): ChartGeometry {
   // Si el suelo queda muchísimo más abajo que todo lo demás (una highline con
   // 60 m de vacío bajo 3 m de sag), encuadrarlo aplastaría la línea hasta
   // hacerla ilegible. En ese caso se marca aparte, fuera del encuadre.
-  const showGround = p.groundDepth <= deepest * 1.9 + 1.5;
+  const showGround = p.groundDepth <= deepest * GROUND_RATIO + GROUND_MARGIN_M;
   const bottom = (showGround ? Math.max(p.groundDepth, deepest) : deepest) * 1.06 + deepest * 0.04;
   const headroom = Math.max(p.topExtent ?? 0, bottom * 0.08, 0.12);
 
