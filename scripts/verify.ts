@@ -460,13 +460,14 @@ console.log('\n=== 24. Caida a la backup: solo aplica con leash y backup riguead
 console.log('\n=== 25. Caida a la backup: escenario midline por defecto ===');
 {
   // HALLAZGO, no bug: con el 20 % de holgura por defecto (backupLength =
-  // span*1,2) y SIN pretensarla a mano, la tension de reposo de la backup
-  // sale de resolver que tension hace que ESE largo de mas cuelgue bajo su
-  // propio peso -- y para una cinta liviana con tanto exceso de largo, esa
-  // tension de equilibrio es muy baja y el sag de reposo resultante, grande:
-  // mas que la altura de anclaje del midline. El aviso que dispara
-  // (backupFallGroundImpact) es real: asi como esta configurada, sin
-  // tensarla mas a mano, esta backup no cumple funcion de backup.
+  // span*1,2), la backup no tiene tension propia -- no lleva tensor, y es
+  // justamente POR ESO que se riguea mas larga que la principal. Su tension
+  // de reposo se deduce de ese largo y su propio peso, y para una cinta
+  // liviana con tanto exceso, esa tension de equilibrio es baja y el sag de
+  // reposo, grande: mas que la altura de anclaje del midline. El aviso que
+  // dispara (backupFallGroundImpact) es real: con esta holgura, esta backup
+  // no cumple funcion de backup a menos que se acorte a lo que de verdad se
+  // riguea (ver banner.backupModel en la UI).
   const r = calculate(rig());
   const b = r.backupFall;
   console.log(`  backup en reposo cuelga a ${f(b.backupRestDepth, 2)} m (anclaje a ${DEFAULT_INPUT.anchorHeight} m)`);

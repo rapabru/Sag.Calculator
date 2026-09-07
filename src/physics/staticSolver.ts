@@ -127,12 +127,13 @@ export function sagAtLoadFast(ld: Loading, unstretched: number, EA: number, pret
 /**
  * Tensión H de una cinta cuyo largo SIN ESTIRAR ya se conoce (al revés de
  * `prepareRig`, donde se conoce la tensión y de ahí se deduce el largo).
- * Hace falta para una cinta que se riguea floja y sin pretensión declarada
- * —la backup—: su largo físico es un dato (lo que se cortó), y lo que no se
- * sabe es con qué tensión ese largo cuelga entre los anclajes bajo su propio
- * peso. `solveTension` no sirve para esto porque, con carga puntual nula,
- * devuelve la pretensión tal cual en vez de resolver nada (ahí es correcto:
- * para la principal esa tensión sí es un dato real, la que se riggeó).
+ * Hace falta para la backup: no se tensa a mano, no tiene tensor — tiene
+ * tensión ~0 precisamente PORQUE es más larga que la principal. Su largo
+ * físico es un dato (lo que se cortó), y lo que no se sabe es con qué
+ * tensión ese largo cuelga entre los anclajes bajo su propio peso.
+ * `solveTension` no sirve para esto porque, con carga puntual nula, devuelve
+ * la pretensión tal cual en vez de resolver nada (ahí es correcto: para la
+ * principal esa tensión sí es un dato real, la que se riggeó con un tensor).
  */
 export function restTensionForLength(ld: Loading, unstretched: number, EA: number): number {
   const bare: Loading = { ...ld, P: 0 };

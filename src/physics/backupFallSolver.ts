@@ -41,15 +41,26 @@ import type { BackupFallResult, RigInput } from './types';
  *      `mainDepthAtFailure` sea más profundo, y por lo tanto la caída libre
  *      hasta la backup, más corta.
  *
- * La backup NO se supone pretensada (se riguea floja a propósito), así que su
- * largo rigueado (`backupLength`) se toma DIRECTAMENTE como su largo sin
- * estirar — a diferencia de la principal, donde `unstretched` hay que
- * deducirlo por bisección porque el dato que se pide es tensión de rigging,
- * no largo físico.
+ * La backup no tiene tensión propia — no lleva tensor, y no se tensa a mano
+ * más allá de lo justo para riguearla — precisamente PORQUE es más larga que
+ * la principal: ese exceso de largo es lo que hace que, colgando de su
+ * propio peso nomás, quede floja. La tensión real aparece recién cuando el
+ * peso de la persona la carga durante la caída, y ahí es donde importa su
+ * propia elasticidad (su `backupElongationPct`): mientras más se estira por
+ * unidad de fuerza, más energía absorbe y más despacio frena.
+ *
+ * Por eso el largo rigueado (`backupLength`) se toma DIRECTAMENTE como su
+ * largo sin estirar, y la tensión de reposo se DEDUCE de él (no al revés,
+ * como en la principal): dado ese largo y ese peso propio, hay una única
+ * tensión con la que puede estar colgando en equilibrio bajo los anclajes.
+ * Para una cinta liviana con mucho exceso de largo, esa tensión de
+ * equilibrio es baja y el sag de reposo, grande — a veces mayor que la
+ * altura de anclaje. No es un error: es lo que de verdad le pasa a una
+ * backup así, sin nadie tensándola.
  */
 
 /** Construye el `SolvedRig` de la backup: mismo tipo que la principal, pero
- *  con su propio largo/material y sin pretensión intencional. */
+ *  con su propio largo y material, y sin pretensión propia. */
 export function prepareBackupRig(input: RigInput): SolvedRig {
   const L = Math.max(input.span, 0.01);
   const a = Math.min(Math.max(input.personPos, 0), 1) * L;
@@ -59,11 +70,6 @@ export function prepareBackupRig(input: RigInput): SolvedRig {
   const EA = WEBBING_REF_TENSION_N / elong;
   const w = (input.backupWeightGm / 1000) * G;
   const loading = (P: number): Loading => ({ span: L, w, P, a });
-
-  // La backup no trae una pretensión declarada (se riguea floja, a propósito,
-  // para no compartir carga con la principal en uso normal): la tensión de
-  // reposo sale de resolver qué H hace que backupLength cuelgue entre los
-  // anclajes bajo su propio peso, no de asumir un valor fijo.
   const pretensionN = restTensionForLength(loading(0), unstretched, EA);
 
   return {
@@ -117,9 +123,10 @@ export function solveBackupFall(
   backupRigArg?: SolvedRig,
 ): BackupFallResult {
   // Un parámetro opcional en vez de un default: `prepareBackupRig` hace su
-  // propia bisección (restTensionForLength), y con un valor por defecto se
-  // evaluaría igual aunque no aplique — un default de JS se calcula siempre
-  // al llamar, así el cuerpo de la función nunca llegue a usarlo.
+  // propia bisección (restTensionForLength), y un default de JS se evalúa
+  // siempre al llamar aunque el cuerpo de la función nunca llegue a usarlo
+  // (por el return temprano de arriba) — así que construirlo ahí arriba lo
+  // haría incluso cuando no aplica.
   if (!backupFallApplies(input)) return neutralBackupFall();
   const backupRig = backupRigArg ?? prepareBackupRig(input);
 
