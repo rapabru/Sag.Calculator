@@ -478,6 +478,63 @@ console.log('\n=== 25. Caida a la backup: escenario midline por defecto ===');
   check2('la caida libre es positiva (la backup en reposo esta mas floja que la principal)', b.freeFallDistance > 0, `${f(b.freeFallDistance, 2)} m`);
 }
 
+console.log('\n=== 26. Anclaje en arbol: el vano flexible de verdad cambia el resultado ===');
+{
+  // Este bloque es exactamente el que hubiera atrapado el bug real que hubo
+  // acá: prepareTreeRig sobreescribía `loading` pero heredaba `stateFor` de
+  // baseRig sin redefinirlo, así que el vano encogido por flexión nunca
+  // llegaba a lineStateFor. El resultado con treeAnchor=true daba IGUAL que
+  // con anclaje rígido -- "SAG extra" siempre 0 -- pese a mostrar una
+  // flexión de tronco distinta de cero. Los checks de abajo comparan sag y
+  // tensión reales contra el rígido, no sólo el número de flexión mostrado.
+  const rigido = calculate(rig({ treeAnchor: false }));
+  const blando = calculate(
+    rig({ treeAnchor: true, treeSlingHeightM: 5, treeDiameterCm: 15, treeModulusGPa: 5 }),
+  );
+  const casiRigido = calculate(
+    rig({ treeAnchor: true, treeSlingHeightM: 0.3, treeDiameterCm: 100, treeModulusGPa: 12 }),
+  );
+  console.log(`  rigido      -> sag ${f(rigido.static.loaded.sagMax, 3)} m, anclaje ${f(rigido.static.loaded.anchorTensionN / 1000, 2)} kN`);
+  console.log(`  arbol blando -> sag ${f(blando.static.loaded.sagMax, 3)} m, extra ${f(blando.static.treeExtraSagM, 3)} m, flexion ${f(blando.static.treeDeflectionM * 100, 1)} cm`);
+  console.log(`  arbol rigido -> sag ${f(casiRigido.static.loaded.sagMax, 3)} m, extra ${f(casiRigido.static.treeExtraSagM, 3)} m`);
+
+  check2(
+    'un arbol blando da mas sag estatico que un anclaje rigido',
+    blando.static.loaded.sagMax > rigido.static.loaded.sagMax,
+    `${f(blando.static.loaded.sagMax, 3)} > ${f(rigido.static.loaded.sagMax, 3)}`,
+  );
+  check2(
+    'el SAG extra reportado no es cero cuando el arbol es blando',
+    blando.static.treeExtraSagM > 0.01,
+    `${f(blando.static.treeExtraSagM, 3)} m`,
+  );
+  check2(
+    'monotonia: arbol mas blando sagea mas que uno casi rigido',
+    blando.static.loaded.sagMax > casiRigido.static.loaded.sagMax,
+    `${f(blando.static.loaded.sagMax, 3)} > ${f(casiRigido.static.loaded.sagMax, 3)}`,
+  );
+  check2(
+    'piso de seguridad: nunca menos sag que el anclaje rigido',
+    casiRigido.static.loaded.sagMax >= rigido.static.loaded.sagMax,
+    `${f(casiRigido.static.loaded.sagMax, 3)} >= ${f(rigido.static.loaded.sagMax, 3)}`,
+  );
+  check2(
+    'piso de seguridad: la tension de anclaje nunca baja del rigido',
+    blando.static.loaded.anchorTensionN >= rigido.static.loaded.anchorTensionN,
+    `${f(blando.static.loaded.anchorTensionN / 1000, 2)} >= ${f(rigido.static.loaded.anchorTensionN / 1000, 2)} kN`,
+  );
+  check2(
+    'la caida con leash tambien refleja el arbol (no solo el estatico)',
+    blando.fall.treeExtraSagAtPeakM > 0.01,
+    `${f(blando.fall.treeExtraSagAtPeakM, 3)} m`,
+  );
+  check2(
+    'la caida a la backup comparte el mismo arbol',
+    blando.backupFall.treeExtraSagAtPeakM > 0,
+    `${f(blando.backupFall.treeExtraSagAtPeakM, 3)} m`,
+  );
+}
+
 console.log('\n' + '='.repeat(60));
 pass2.forEach((p) => console.log(p));
 fail2.forEach((p) => console.log(p));

@@ -1,5 +1,5 @@
-import { tensionAtLoadFast } from './staticSolver';
-import type { SolvedRig } from './staticSolver';
+import { lineStateFor, sagAtLoadFast, tensionAtLoadFast } from './staticSolver';
+import type { Loading, SolvedRig } from './staticSolver';
 import type { RigInput, LineState, StaticResult, FallResult, BackupFallResult } from './types';
 
 const MAX_SPAN_SHRINK_FRACTION = 0.4;
@@ -32,29 +32,33 @@ export function treeStiffnessNPerM(modulusGPa: number, diameterCm: number, sling
  * Para cada carga P, calcula la tensión al vano rígido, estima la flexión
  * con delta = anchorTensionN / k, y resuelve una vez más con span efectivo
  * = span − 2·delta (limitado a evitar degeneración).
+ *
+ * Crucial: `stateFor` y `sagAtLoadFor` tienen que reconstruirse a partir de
+ * este `loading` nuevo, no heredarse de `baseRig` — si se hereda `stateFor`
+ * tal cual (p.ej. con `{ ...baseRig, loading: nuevo }`), su closure sigue
+ * apuntando al `loading` ORIGINAL de `baseRig` y el vano encogido nunca llega
+ * a `lineStateFor`. Eso deja el resultado idéntico al anclaje rígido pese a
+ * tener treeAnchor activado — bug real que hubo en la primera versión.
  */
 export function prepareTreeRig(input: RigInput, baseRig: SolvedRig): SolvedRig {
   if (!input.treeAnchor) return baseRig;
 
   const kTree = treeStiffnessNPerM(input.treeModulusGPa, input.treeDiameterCm, input.treeSlingHeightM);
+  const maxShrink = baseRig.span * MAX_SPAN_SHRINK_FRACTION;
+
+  const loading = (P: number): Loading => {
+    const rigid = baseRig.loading(P);
+    const { anchorTensionN } = tensionAtLoadFast(rigid, baseRig.unstretched, baseRig.EA, baseRig.pretensionN);
+    const shrunk = Math.min(anchorTensionN / kTree, maxShrink);
+    const span = Math.max(baseRig.span - 2 * shrunk, 0.01);
+    return { ...rigid, span };
+  };
 
   return {
     ...baseRig,
-    loading: (P: number) => {
-      const rigid = baseRig.loading(P);
-      const { anchorTensionN } = tensionAtLoadFast(rigid, baseRig.unstretched, baseRig.EA, baseRig.pretensionN);
-      const delta = anchorTensionN / kTree;
-      const maxShrink = baseRig.span * MAX_SPAN_SHRINK_FRACTION;
-      const shrunk = Math.min(delta, maxShrink);
-      const span = Math.max(baseRig.span - 2 * shrunk, 0.01);
-      return { ...rigid, span };
-    },
-    sagAtLoadFor: (P: number) => {
-      const rigid = baseRig.loading(P);
-      const { anchorTensionN } = tensionAtLoadFast(rigid, baseRig.unstretched, baseRig.EA, baseRig.pretensionN);
-      const delta = anchorTensionN / kTree;
-      return baseRig.stateFor(P).sagAtLoad + delta;
-    },
+    loading,
+    stateFor: (P: number) => lineStateFor(loading(P), baseRig.unstretched, baseRig.EA, baseRig.pretensionN),
+    sagAtLoadFor: (P: number) => sagAtLoadFast(loading(P), baseRig.unstretched, baseRig.EA, baseRig.pretensionN),
   };
 }
 
