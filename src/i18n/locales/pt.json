@@ -175,5 +175,15 @@
   "banner.highBackupAnchorLoad": "<b>Carga alta nas ancoragens, via o backup.</b> O pico dessa queda chega a {load} kN. Confira se a ancoragem do backup está dimensionada para isso.",
   "res.backup.freeFall": "Queda livre até o backup",
   "res.backup.freeFall.sub": "o backup em repouso pende a {rest} m",
-  "res.backup.lowest": "Ponto mais baixo (os pés)"
+  "res.backup.lowest": "Ponto mais baixo (os pés)",
+  "group.treeAnchor": "Âncora em árvore",
+  "field.treeAnchor": "Ancorada em uma árvore",
+  "field.treeSlingHeight": "Altura da eslinga na árvore",
+  "field.treeSlingHeight.hint": "do chão até o ponto de fixação",
+  "field.treeDiameter": "Diâmetro do tronco",
+  "field.treeModulusPreset": "Rigidez da madeira",
+  "res.treeExtraSag": "SAG extra (árvore)",
+  "res.treeExtraSag.sub": "deflexão {deflection} cm",
+  "banner.treeModel": "Uma árvore é modelada como uma viga em balanço que flexiona sob tensão de âncora. O SAG e a altura livre refletem a deflexão; a força de pico e a tensão de âncora nunca caem abaixo de uma âncora rígida. Esta é uma estimativa conservadora: a realidade é geralmente melhor, mas varia com espécie, umidade e condição da árvore.",
+  "banner.treeAnchorLargeDeflection": "<b>Deflexão excessiva da árvore.</b> Com esses valores, o tronco se flexiona {deflection} cm. É demais para rigging seguro. Procure uma árvore mais grossa ou mais rígida, ou reduza a tensão."
 }

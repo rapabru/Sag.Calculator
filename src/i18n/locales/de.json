@@ -175,5 +175,15 @@
   "banner.highBackupAnchorLoad": "<b>Hohe Ankerlast, über das Backup.</b> Der Spitzenwert dieses Sturzes erreicht {load} kN. Prüfe, ob der Backup-Anker dafür ausgelegt ist.",
   "res.backup.freeFall": "Freier Fall bis zum Backup",
   "res.backup.freeFall.sub": "das ruhende Backup hängt bei {rest} m",
-  "res.backup.lowest": "Tiefster Punkt (die Füße)"
+  "res.backup.lowest": "Tiefster Punkt (die Füße)",
+  "group.treeAnchor": "Baum-Anker",
+  "field.treeAnchor": "An einem Baum verankert",
+  "field.treeSlingHeight": "Seilhöhe am Baum",
+  "field.treeSlingHeight.hint": "vom Boden bis zur Befestigungsstelle",
+  "field.treeDiameter": "Baumstammduchmesser",
+  "field.treeModulusPreset": "Holzsteifigkeit",
+  "res.treeExtraSag": "Extra-SAG (Baum)",
+  "res.treeExtraSag.sub": "Durchbiegung {deflection} cm",
+  "banner.treeModel": "Ein Baum wird als Auslegerträger modelliert, der sich unter Ankerkraft verformt. SAG und Bodenfreiheit spiegeln die Verformung wider; Spitzenlast und Ankerkraft sinken nie unter einen starren Anker. Dies ist eine konservative Schätzung: Die Realität ist normalerweise besser, variiert aber je nach Baumart, Holzfeuchte und Baumzustand.",
+  "banner.treeAnchorLargeDeflection": "<b>Excessive Baumverformung.</b> Mit diesen Werten biegt sich der Stamm um {deflection} cm. Das ist zu viel für sicheres Rigging. Suchen Sie einen dickeren oder steiferen Baum oder reduzieren Sie die Spannung."
 }

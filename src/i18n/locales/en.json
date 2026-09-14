@@ -175,5 +175,15 @@
   "banner.highBackupAnchorLoad": "<b>High anchor load, via the backup.</b> This fall's peak reaches {load} kN. Check that the backup anchor is rated for that.",
   "res.backup.freeFall": "Free fall to the backup",
   "res.backup.freeFall.sub": "the resting backup hangs at {rest} m",
-  "res.backup.lowest": "Lowest point (the feet)"
+  "res.backup.lowest": "Lowest point (the feet)",
+  "group.treeAnchor": "Tree anchor",
+  "field.treeAnchor": "Anchored to a tree",
+  "field.treeSlingHeight": "Sling height on the tree",
+  "field.treeSlingHeight.hint": "from the ground up to where it's tied",
+  "field.treeDiameter": "Trunk diameter",
+  "field.treeModulusPreset": "Wood stiffness",
+  "res.treeExtraSag": "Extra sag (tree)",
+  "res.treeExtraSag.sub": "deflection {deflection} cm",
+  "banner.treeModel": "A tree is modeled as a cantilever beam that flexes under anchor tension. The sag and ground clearance reflect the deflection; peak force and anchor tension never drop below a rigid anchor. This is a conservative estimate: reality is usually better, but varies with species, moisture, and tree condition.",
+  "banner.treeAnchorLargeDeflection": "<b>Excessive tree deflection.</b> With these values the trunk bends {deflection} cm. That's too much to rig safely. Look for a thicker or stiffer tree, or reduce tension."
 }

@@ -125,6 +125,26 @@ export function sagAtLoadFast(ld: Loading, unstretched: number, EA: number, pret
 }
 
 /**
+ * H y anchorTensionN para una carga puntual, sin muestrear el perfil — como
+ * sagAtLoadFast pero devolviendo también la tensión (la corrección de árbol
+ * la necesita para estimar cuánto flexiona el tronco).
+ */
+export function tensionAtLoadFast(
+  ld: Loading,
+  unstretched: number,
+  EA: number,
+  pretensionN: number,
+): { H: number; anchorTensionN: number } {
+  const H = solveTension(ld, unstretched, EA, pretensionN);
+  const { span: L } = ld;
+  const worstSlope = Math.max(Math.abs(slopeLeft(0, H, ld)), Math.abs(slopeRight(L, H, ld)));
+  return {
+    H,
+    anchorTensionN: H * Math.sqrt(1 + worstSlope * worstSlope),
+  };
+}
+
+/**
  * Tensión H de una cinta cuyo largo SIN ESTIRAR ya se conoce (al revés de
  * `prepareRig`, donde se conoce la tensión y de ahí se deduce el largo).
  * Hace falta para la backup: no se tensa a mano, no tiene tensor — tiene
@@ -273,6 +293,8 @@ export function solveStatic(input: RigInput, rig = prepareRig(input)): StaticRes
     unstretchedLength: rig.unstretched,
     webbingEA: rig.EA,
     overElongated: loaded.strain * 100 > input.elongationLimitPct,
+    treeDeflectionM: 0,
+    treeExtraSagM: 0,
   };
 }
 

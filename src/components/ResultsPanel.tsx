@@ -53,6 +53,14 @@ export const StaticResults: React.FC<{ input: RigInput; result: CalcResult }> = 
         unit="%"
         sub={t('res.strain.limit', { limit: input.elongationLimitPct })}
       />
+      {input.treeAnchor && (
+        <ResultTile
+          label={t('res.treeExtraSag')}
+          value={s.treeExtraSagM.toFixed(2)}
+          unit="m"
+          sub={t('res.treeExtraSag.sub', { deflection: (s.treeDeflectionM * 100).toFixed(0) })}
+        />
+      )}
     </div>
   );
 };
@@ -113,6 +121,14 @@ export const FallResults: React.FC<{ input: RigInput; result: CalcResult }> = ({
         unit="%"
         sub={t('res.strain.limit', { limit: input.elongationLimitPct })}
       />
+      {input.treeAnchor && (
+        <ResultTile
+          label={t('res.treeExtraSag')}
+          value={f.treeExtraSagAtPeakM.toFixed(2)}
+          unit="m"
+          sub={t('res.treeExtraSag.sub', { deflection: (f.treeDeflectionAtPeakM * 100).toFixed(0) })}
+        />
+      )}
     </div>
   );
 };
@@ -165,6 +181,14 @@ export const BackupFallResults: React.FC<{ input: RigInput; result: CalcResult }
         unit="%"
         sub={t('res.strain.limit', { limit: input.elongationLimitPct })}
       />
+      {input.treeAnchor && (
+        <ResultTile
+          label={t('res.treeExtraSag')}
+          value={b.treeExtraSagAtPeakM.toFixed(2)}
+          unit="m"
+          sub={t('res.treeExtraSag.sub', { deflection: (b.treeDeflectionAtPeakM * 100).toFixed(0) })}
+        />
+      )}
     </div>
   );
 };
