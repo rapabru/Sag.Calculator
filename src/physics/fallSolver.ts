@@ -108,5 +108,8 @@ export function solveFall(input: RigInput, rig: SolvedRig = prepareRig(input)): 
     overElongated: peakLineState.strain * 100 > input.elongationLimitPct,
     peakLineState,
     trajectory,
+    treeDeflectionAtPeakM: 0,
+    treeExtraSagAtPeakM: 0,
+    treeSoftenedPeakAnchorTensionN: 0,
   };
 }

@@ -175,5 +175,15 @@
   "banner.highBackupAnchorLoad": "<b>Carga alta en los anclajes, vía la backup.</b> El pico de esta caída llega a {load} kN. Revisá que el anclaje de backup esté dimensionado para eso.",
   "res.backup.freeFall": "Caída libre a la backup",
   "res.backup.freeFall.sub": "la backup en reposo cuelga a {rest} m",
-  "res.backup.lowest": "Punto más bajo (los pies)"
+  "res.backup.lowest": "Punto más bajo (los pies)",
+  "group.treeAnchor": "Anclaje en árbol",
+  "field.treeAnchor": "Anclado a un árbol",
+  "field.treeSlingHeight": "Altura de la eslinga en el tronco",
+  "field.treeSlingHeight.hint": "desde el suelo hasta donde se amarra en el árbol",
+  "field.treeDiameter": "Diámetro del tronco",
+  "field.treeModulusPreset": "Rigidez de la madera",
+  "res.treeExtraSag": "SAG extra (árbol)",
+  "res.treeExtraSag.sub": "flexión {deflection} cm",
+  "banner.treeModel": "Un árbol se modela como viga en voladizo que flexiona bajo la tensión del anclaje. El SAG y la altura libre reflejan la deflexión; la fuerza pico y la tensión nunca bajan respecto de un anclaje rígido. Es una estimación conservadora: la realidad suele ser un poco mejor, pero varía con la especie, humedad y el estado del árbol.",
+  "banner.treeAnchorLargeDeflection": "<b>Deflexión excesiva en el árbol.</b> Con estos valores el tronco se flexiona {deflection} cm. Es mucho para riguear con seguridad. Buscá un árbol más grueso o más rígido, o reducí la tensión."
 }

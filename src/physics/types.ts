@@ -44,6 +44,16 @@ export interface RigInput {
    * un rebote.
    */
   backupFallStart: 'standing' | 'sitting' | 'bouncing';
+
+  /** Si se ancla en un árbol flexible en vez de un anclaje rígido. */
+  treeAnchor: boolean;
+  /** Altura de la eslinga en el tronco (m). Sufijo M/Cm/GPa por excepción: miden
+   *  cosas distintas, una sobre el vacío, otra sobre el tronco. */
+  treeSlingHeightM: number;
+  /** Diámetro del tronco en la base (cm). */
+  treeDiameterCm: number;
+  /** Módulo elástico de la madera (GPa). */
+  treeModulusGPa: number;
 }
 
 /** Estado de la línea para una carga puntual dada. */
@@ -83,6 +93,11 @@ export interface StaticResult {
   webbingEA: number;
   /** true si la elongación supera el límite declarado. */
   overElongated: boolean;
+
+  /** Cuánto flexiona un tronco bajo la carga de pie (m). 0 si treeAnchor=false. */
+  treeDeflectionM: number;
+  /** Cuánto SAG de más hay por el árbol, vs. anclaje rígido (m). */
+  treeExtraSagM: number;
 }
 
 export interface FallResult {
@@ -127,6 +142,13 @@ export interface FallResult {
   peakLineState: LineState;
   /** Trayectoria para animar: profundidad de la persona en función del avance 0..1. */
   trajectory: number[];
+
+  /** Cuánto flexiona un tronco al fuerza pico (m). 0 si treeAnchor=false. */
+  treeDeflectionAtPeakM: number;
+  /** Cuánto SAG de más hay en la fuerza pico por el árbol (m). */
+  treeExtraSagAtPeakM: number;
+  /** Tensión pico en el anclaje suavizada por la flexión del árbol (informativo, N). */
+  treeSoftenedPeakAnchorTensionN: number;
 }
 
 /**
@@ -168,6 +190,13 @@ export interface BackupFallResult {
   peakLineState: LineState;
   /** Trayectoria para animar: profundidad del arnés en función del avance 0..1. */
   trajectory: number[];
+
+  /** Cuánto flexiona un tronco al fuerza pico en backup (m). 0 si treeAnchor=false. */
+  treeDeflectionAtPeakM: number;
+  /** Cuánto SAG de más hay en la fuerza pico por el árbol (m). */
+  treeExtraSagAtPeakM: number;
+  /** Tensión pico en el anclaje suavizada por la flexión del árbol (informativo, N). */
+  treeSoftenedPeakAnchorTensionN: number;
 }
 
 export interface CalcResult {

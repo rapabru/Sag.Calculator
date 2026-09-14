@@ -5,6 +5,7 @@ import {
   G,
   WAIST_RATIO,
   WEBBING_PRESETS,
+  TREE_PRESETS,
   backupFallApplies,
   calculate,
   type RigInput,
@@ -242,6 +243,13 @@ const App: React.FC = () => {
           extreme: TRICKLINE_JUMP_PEAK_KN.extreme,
         }),
       });
+    if (result.warnings.includes('treeAnchorLargeDeflection'))
+      list.push({
+        tone: 'warn',
+        text: t('banner.treeAnchorLargeDeflection', {
+          deflection: (Math.max(result.static.treeDeflectionM, result.fall.treeDeflectionAtPeakM, result.backupFall.treeDeflectionAtPeakM) * 100).toFixed(0),
+        }),
+      });
     return list;
   }, [result, t, input.elongationLimitPct, activePreset]);
 
@@ -410,6 +418,66 @@ const App: React.FC = () => {
                 }
                 onChange={(v) => set('personPos')(v / 100)} onCommit={playIfChanged}
               />
+            </div>
+          </section>
+
+          <section className="panel" data-tour="treeAnchor">
+            <div className="panel-head">
+              <h2>{t('group.treeAnchor')}</h2>
+            </div>
+            <div className="panel-body">
+              <label className="toggle-row">
+                <input
+                  type="checkbox"
+                  checked={input.treeAnchor}
+                  onChange={(e) => {
+                    set('treeAnchor')(e.target.checked);
+                    playIfChanged();
+                  }}
+                />
+                {t('field.treeAnchor')}
+              </label>
+              {input.treeAnchor && (
+                <>
+                  <ParamSlider
+                    label={t('field.treeSlingHeight')} unit="m"
+                    value={input.treeSlingHeightM} min={0.3} max={8} step={0.1} decimals={2}
+                    hint={t('field.treeSlingHeight.hint')}
+                    onChange={set('treeSlingHeightM')} onCommit={playIfChanged}
+                  />
+                  <ParamSlider
+                    label={t('field.treeDiameter')} unit="cm"
+                    value={input.treeDiameterCm} min={10} max={100} step={1} decimals={0}
+                    onChange={set('treeDiameterCm')} onCommit={playIfChanged}
+                  />
+                  <div className="field">
+                    <div className="field-top">
+                      <span className="field-label">{t('field.treeModulusPreset')}</span>
+                    </div>
+                    <select
+                      value={TREE_PRESETS.find((p) => p.modulusGPa === input.treeModulusGPa)?.id ?? ''}
+                      onChange={(e) => {
+                        const p = TREE_PRESETS.find((x) => x.id === e.target.value);
+                        if (p) {
+                          setInput((prev) => ({ ...prev, treeModulusGPa: p.modulusGPa }));
+                          playIfChanged();
+                        }
+                      }}
+                    >
+                      <option value="">—</option>
+                      {TREE_PRESETS.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="banner info" style={{ marginTop: 10 }}>
+                    <IconInfo />
+                    <span>{t('banner.treeModel')}</span>
+                  </div>
+                </>
+              )}
             </div>
           </section>
 

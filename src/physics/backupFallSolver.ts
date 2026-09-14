@@ -114,6 +114,9 @@ function neutralBackupFall(): BackupFallResult {
     overElongated: false,
     peakLineState: EMPTY_LINE_STATE,
     trajectory: [],
+    treeDeflectionAtPeakM: 0,
+    treeExtraSagAtPeakM: 0,
+    treeSoftenedPeakAnchorTensionN: 0,
   };
 }
 
@@ -166,5 +169,8 @@ export function solveBackupFall(
     overElongated: peakLineState.strain * 100 > input.elongationLimitPct,
     peakLineState,
     trajectory,
+    treeDeflectionAtPeakM: 0,
+    treeExtraSagAtPeakM: 0,
+    treeSoftenedPeakAnchorTensionN: 0,
   };
 }

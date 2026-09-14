@@ -84,3 +84,31 @@ export const WEBBING_PRESETS: WebbingPreset[] = [
   { id: 'dyneema', label: 'Dyneema / híbrida',    gramsPerMeter: 58, elongationPct: 1.2 },
 ];
 
+export interface TreePreset {
+  id: string;
+  label: string;
+  modulusGPa: number;
+}
+
+/**
+ * El módulo elástico de madera VIVA es genuinamente incierto (especie, humedad,
+ * estado del árbol) — no hay tabla confiable, a diferencia de madera seca
+ * estructural. Estos tres valores son un rango de ingeniería razonable
+ * (~5-13 GPa), igual de estimados que BACKUP_BOUNCE_LOAD_FACTOR, no un dato de
+ * catálogo. El default ('medium') está deliberadamente hacia el extremo más
+ * blando del rango: como esta corrección sólo puede SUMAR sag (nunca bajar la
+ * fuerza mostrada, ver treeAnchorSolver.ts), un valor por defecto más blando es
+ * el lado conservador para el número que importa acá.
+ */
+export const TREE_PRESETS: TreePreset[] = [
+  { id: 'soft',   label: 'Blando (madera joven / verde)', modulusGPa: 5 },
+  { id: 'medium', label: 'Medio (típico, por defecto)',    modulusGPa: 8 },
+  { id: 'hard',   label: 'Duro (madera densa / seca)',     modulusGPa: 12 },
+];
+
+/** Umbral de flexión (un tronco) a partir del cual se avisa que el anclaje es
+ *  inusualmente blando. Criterio propio, no una norma citada — calibrado entre
+ *  un árbol flexible pero rigueable (~12 cm en un escenario típico) y uno ya
+ *  degenerado (~70+ cm). */
+export const TREE_DEFLECTION_WARN_M = 0.20;
+

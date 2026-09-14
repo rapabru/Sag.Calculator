@@ -175,5 +175,15 @@
   "banner.highBackupAnchorLoad": "<b>Charge élevée sur les ancrages, via le backup.</b> Le pic de cette chute atteint {load} kN. Vérifiez que l'ancrage du backup est dimensionné pour ça.",
   "res.backup.freeFall": "Chute libre jusqu'au backup",
   "res.backup.freeFall.sub": "le backup au repos pend à {rest} m",
-  "res.backup.lowest": "Point le plus bas (les pieds)"
+  "res.backup.lowest": "Point le plus bas (les pieds)",
+  "group.treeAnchor": "Ancrage dans un arbre",
+  "field.treeAnchor": "Ancrée dans un arbre",
+  "field.treeSlingHeight": "Hauteur de l'élingue dans l'arbre",
+  "field.treeSlingHeight.hint": "du sol jusqu'au point d'attache dans l'arbre",
+  "field.treeDiameter": "Diamètre du tronc",
+  "field.treeModulusPreset": "Rigidité du bois",
+  "res.treeExtraSag": "SAG supplémentaire (arbre)",
+  "res.treeExtraSag.sub": "flexion {deflection} cm",
+  "banner.treeModel": "Un arbre est modélisé comme une poutre cantilever qui fléchit sous la tension de l'ancrage. Le SAG et la garde au sol reflètent la déflexion; la force de pic et la tension d'ancrage ne baissent jamais en dessous d'un ancrage rigide. C'est une estimation conservatrice : la réalité est généralement meilleure, mais varie selon l'espèce, l'humidité et l'état de l'arbre.",
+  "banner.treeAnchorLargeDeflection": "<b>Déflexion excessive de l'arbre.</b> Avec ces valeurs, le tronc se courbe {deflection} cm. C'est trop pour rigging en toute sécurité. Cherchez un arbre plus épais ou plus rigide, ou réduisez la tension."
 }
