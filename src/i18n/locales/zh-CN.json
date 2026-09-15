@@ -177,14 +177,14 @@
   "res.backup.freeFall.sub": "静止时备份垂至 {rest} 米",
   "res.backup.lowest": "最低点（双脚）"
 ,
-  "group.treeAnchor": "वृक्ष एंकर",
-  "field.treeAnchor": "एक पेड़ के लिए लंगर डाली गई",
-  "field.treeSlingHeight": "पेड़ में sling की ऊंचाई",
-  "field.treeSlingHeight.hint": "जमीन से बांधने की जगह तक",
-  "field.treeDiameter": "ट्रंक व्यास",
-  "field.treeModulusPreset": "लकड़ी की कठोरता",
-  "res.treeExtraSag": "अतिरिक्त SAG (पेड़)",
-  "res.treeExtraSag.sub": "विक्षेपण {deflection} सेमी",
-  "banner.treeModel": "एक पेड़ को एक कैंटिलीवर बीम के रूप में मॉडल किया जाता है जो एंकर तनाव के तहत झुकता है। SAG और जमीन की निकासी विक्षेपण को प्रतिबिंबित करती है; चोटी बल और एंकर तनाव कभी भी कठोर एंकर के नीचे नहीं जाते हैं। यह एक रूढ़िवादी अनुमान है: वास्तविकता आमतौर पर बेहतर है, लेकिन प्रजातियों, नमी और पेड़ की स्थिति के साथ भिन्न होती है।",
-  "banner.treeAnchorLargeDeflection": "<b>अत्यधिक पेड़ विक्षेपण।</b> इन मानों के साथ, ट्रंक {deflection} सेमी झुकता है। सुरक्षित rigging के लिए यह बहुत अधिक है। एक मोटे या सख्त पेड़ की तलाश करें, या तनाव कम करें।"
+  "group.treeAnchor": "树木锚点",
+  "field.treeAnchor": "固定在树上",
+  "field.treeSlingHeight": "树干上挂点的高度",
+  "field.treeSlingHeight.hint": "从地面到绑扎点",
+  "field.treeDiameter": "树干直径",
+  "field.treeModulusPreset": "木材刚度",
+  "res.treeExtraSag": "额外 SAG（树木）",
+  "res.treeExtraSag.sub": "挠度 {deflection} 厘米",
+  "banner.treeModel": "树木被建模为在锚点张力下弯曲的悬臂梁。垂度和离地高度反映了这种挠度；峰值力和锚点张力都不会低于刚性锚点的数值。这是一个保守估计：实际情况通常更好，但会因树种、含水率和树木状态而异。",
+  "banner.treeAnchorLargeDeflection": "<b>树木挠度过大。</b> 按这些数值，树干会弯曲 {deflection} 厘米，这对安全架设来说太大了。请寻找更粗或更硬的树，或降低张力。"
 }
