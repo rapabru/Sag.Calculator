@@ -1,3 +1,4 @@
+import { DEFAULT_INPUT } from '../physics';
 import type { RigInput } from '../physics';
 
 /**
@@ -51,7 +52,15 @@ function write<T>(key: string, value: T[]): void {
 
 const newId = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
 
-export const loadRigs = (): SavedRig[] => read<SavedRig>(RIGS_KEY);
+/**
+ * Rigs guardados antes de que existiera un campo nuevo en RigInput (p.ej.
+ * treeAnchor) no lo tienen en `input`. Sin este merge, ParamSlider recibe
+ * `value={undefined}` para esos campos y rompe (NaN) en cuanto se abre el
+ * panel correspondiente. DEFAULT_INPUT completa lo que falte sin tocar lo
+ * que sí quedó guardado.
+ */
+export const loadRigs = (): SavedRig[] =>
+  read<SavedRig>(RIGS_KEY).map((r) => ({ ...r, input: { ...DEFAULT_INPUT, ...r.input } }));
 export const loadWebbings = (): SavedWebbing[] => read<SavedWebbing>(WEBBINGS_KEY);
 
 /** Guarda la configuración actual. Si ya hay una con ese nombre, la reemplaza. */

@@ -1,3 +1,4 @@
+import { DEFAULT_INPUT } from '../physics';
 import type { CalcResult, RigInput } from '../physics';
 import { HISTORY_TABLE, getSupabase, isSupabaseConfigured } from '../auth/supabase';
 
@@ -34,12 +35,24 @@ export interface HistoryEntry {
   summary: HistorySummary;
 }
 
+/**
+ * Entradas de antes de que existiera un campo nuevo en RigInput (p.ej.
+ * treeAnchor) no lo tienen en `input`. Sin este merge, ParamSlider recibe
+ * `value={undefined}` para esos campos y su `Math.min(Math.max(undefined, ...))`
+ * da NaN — un slider roto en cuanto se restaura una entrada vieja del
+ * historial. DEFAULT_INPUT llena cualquier campo ausente sin tocar los que sí
+ * están guardados.
+ */
+function withDefaults(entry: HistoryEntry): HistoryEntry {
+  return { ...entry, input: { ...DEFAULT_INPUT, ...entry.input } };
+}
+
 function read(): HistoryEntry[] {
   try {
     const raw = localStorage.getItem(KEY);
     if (!raw) return [];
     const parsed: unknown = JSON.parse(raw);
-    return Array.isArray(parsed) ? (parsed as HistoryEntry[]) : [];
+    return Array.isArray(parsed) ? (parsed as HistoryEntry[]).map(withDefaults) : [];
   } catch {
     return [];
   }
@@ -162,12 +175,14 @@ export async function syncFromRemote(): Promise<HistoryEntry[]> {
       .limit(MAX_ENTRIES);
     if (error || !data) return local;
 
-    const remote: HistoryEntry[] = data.map((row) => ({
-      id: row.id as string,
-      savedAt: new Date(row.saved_at as string).getTime(),
-      input: row.input as RigInput,
-      summary: row.summary as HistorySummary,
-    }));
+    const remote: HistoryEntry[] = data.map((row) =>
+      withDefaults({
+        id: row.id as string,
+        savedAt: new Date(row.saved_at as string).getTime(),
+        input: row.input as RigInput,
+        summary: row.summary as HistorySummary,
+      }),
+    );
 
     const byId = new Map<string, HistoryEntry>();
     for (const e of [...remote, ...local]) byId.set(e.id, e);
