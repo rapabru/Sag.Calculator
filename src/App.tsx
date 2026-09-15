@@ -447,7 +447,7 @@ const App: React.FC = () => {
                   />
                   <ParamSlider
                     label={t('field.treeDiameter')} unit="cm"
-                    value={input.treeDiameterCm} min={10} max={100} step={1} decimals={0}
+                    value={input.treeDiameterCm} min={10} max={200} step={1} decimals={0}
                     onChange={set('treeDiameterCm')} onCommit={playIfChanged}
                   />
                   <div className="field">

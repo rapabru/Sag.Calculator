@@ -1,4 +1,4 @@
-import { calculate, solveStatic, minPretensionForClearance, DEFAULT_INPUT, DISCIPLINE_PRESETS, WAIST_RATIO, G } from '../src/physics/index';
+import { calculate, solveStatic, minPretensionForClearance, DEFAULT_INPUT, DISCIPLINE_PRESETS, TREE_PRESETS, WAIST_RATIO, G } from '../src/physics/index';
 import type { RigInput } from '../src/physics/types';
 
 const f = (n: number, d = 2) => n.toFixed(d);
@@ -533,6 +533,58 @@ console.log('\n=== 26. Anclaje en arbol: el vano flexible de verdad cambia el re
     blando.backupFall.treeExtraSagAtPeakM > 0,
     `${f(blando.backupFall.treeExtraSagAtPeakM, 3)} m`,
   );
+}
+
+console.log('\n=== 27. Anclaje en arbol: barrido de especies y diametro ampliado ===');
+{
+  // Cubre el rango que se amplio (diametro hasta 200 cm) y las 9 especies de
+  // TREE_PRESETS (4 a 13,5 GPa), en los dos extremos de altura de eslinga y en
+  // dos disciplinas con backup (midline y highline), para no dejar sin probar
+  // justo los bordes que mas estiran el modelo: tronco fino + eslinga alta
+  // (mas flexion) y tronco grueso + eslinga baja (casi rigido).
+  let n = 0, bad = 0;
+  const problems: string[] = [];
+  const diametros = [10, 200];
+  const slingHeights = [0.3, 8];
+  const disciplinas = DISCIPLINE_PRESETS.filter((p) => p.usesBackup);
+
+  for (const preset of TREE_PRESETS) {
+    for (const treeDiameterCm of diametros) {
+      for (const treeSlingHeightM of slingHeights) {
+        for (const d of disciplinas) {
+          n++;
+          const input = rig({
+            span: d.span,
+            pretensionN: d.pretensionKN * 1000,
+            anchorHeight: d.anchorHeight,
+            usesLeash: d.usesLeash,
+            leashLength: d.leashLength ?? DEFAULT_INPUT.leashLength,
+            treeAnchor: true,
+            treeSlingHeightM,
+            treeDiameterCm,
+            treeModulusGPa: preset.modulusGPa,
+          });
+          const r = calculate(input);
+          const vals = [
+            r.static.loaded.sagMax, r.static.treeDeflectionM, r.static.treeExtraSagM,
+            r.fall.dynamicSag, r.fall.treeDeflectionAtPeakM,
+            r.backupFall.dynamicSag, r.backupFall.treeDeflectionAtPeakM,
+          ];
+          if (vals.some((v) => !Number.isFinite(v) || v < 0)) {
+            bad++;
+            problems.push(`${preset.id} d=${treeDiameterCm}cm L=${treeSlingHeightM}m ${d.id}: valor invalido`);
+          }
+          if (r.static.loaded.sagMax < 0.99 * solveStatic({ ...input, treeAnchor: false }).loaded.sagMax) {
+            bad++;
+            problems.push(`${preset.id} d=${treeDiameterCm}cm L=${treeSlingHeightM}m ${d.id}: sag por debajo del rigido`);
+          }
+        }
+      }
+    }
+  }
+  console.log(`  ${n} combinaciones (especie x diametro x eslinga x disciplina), ${bad} problemas`);
+  problems.slice(0, 8).forEach((p) => console.log(`    ! ${p}`));
+  check2('barrido ampliado sin resultados invalidos ni por debajo del rigido', bad === 0, `${bad} de ${n}`);
 }
 
 console.log('\n' + '='.repeat(60));

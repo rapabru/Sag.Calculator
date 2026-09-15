@@ -93,17 +93,29 @@ export interface TreePreset {
 /**
  * El módulo elástico de madera VIVA es genuinamente incierto (especie, humedad,
  * estado del árbol) — no hay tabla confiable, a diferencia de madera seca
- * estructural. Estos tres valores son un rango de ingeniería razonable
- * (~5-13 GPa), igual de estimados que BACKUP_BOUNCE_LOAD_FACTOR, no un dato de
- * catálogo. El default ('medium') está deliberadamente hacia el extremo más
- * blando del rango: como esta corrección sólo puede SUMAR sag (nunca bajar la
- * fuerza mostrada, ver treeAnchorSolver.ts), un valor por defecto más blando es
- * el lado conservador para el número que importa acá.
+ * estructural. Estos valores son un rango de ingeniería razonable (~4-14 GPa),
+ * igual de estimados que BACKUP_BOUNCE_LOAD_FACTOR, no un dato de catálogo.
+ * Las especies elegidas son las que de verdad aparecen como anclaje de
+ * midline/highline en parques y montes: sauce y álamo cerca del agua, pino en
+ * bosque, plátano de sombra y eucalipto en plazas y parques urbanos (muy
+ * comunes en Europa y Sudamérica), roble/encina en bosques templados. Quedan
+ * también tres genéricos (blando/medio/duro) para cuando no se identifica la
+ * especie. El default ('medium', 8 GPa) está deliberadamente hacia el extremo
+ * más blando del rango típico: como esta corrección sólo puede SUMAR sag
+ * (nunca bajar la fuerza mostrada, ver treeAnchorSolver.ts), un valor por
+ * defecto más blando es el lado conservador para el número que importa acá.
+ * Ordenados de más blando a más duro.
  */
 export const TREE_PRESETS: TreePreset[] = [
-  { id: 'soft',   label: 'Blando (madera joven / verde)', modulusGPa: 5 },
-  { id: 'medium', label: 'Medio (típico, por defecto)',    modulusGPa: 8 },
-  { id: 'hard',   label: 'Duro (madera densa / seca)',     modulusGPa: 12 },
+  { id: 'sauce',     label: 'Sauce',                                 modulusGPa: 4 },
+  { id: 'soft',      label: 'Blando genérico (madera joven / tierna)', modulusGPa: 5 },
+  { id: 'alamo',     label: 'Álamo / chopo',                         modulusGPa: 6 },
+  { id: 'medium',    label: 'Medio genérico (típico, por defecto)',  modulusGPa: 8 },
+  { id: 'pino',      label: 'Pino',                                  modulusGPa: 8.5 },
+  { id: 'platano',   label: 'Plátano de sombra',                     modulusGPa: 9.5 },
+  { id: 'eucalipto', label: 'Eucalipto',                             modulusGPa: 11.5 },
+  { id: 'hard',      label: 'Duro genérico (madera densa / seca)',   modulusGPa: 12 },
+  { id: 'roble',     label: 'Roble / encina',                        modulusGPa: 13.5 },
 ];
 
 /** Umbral de flexión (un tronco) a partir del cual se avisa que el anclaje es
